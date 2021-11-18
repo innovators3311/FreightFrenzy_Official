@@ -48,7 +48,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
-@TeleOp(name="Please_Stay#2", group="3311")
+@TeleOp(name="Please_Stay_2", group="3311")
 public class Please_Stay_2 extends OpMode
 {
     // Declare OpMode members.
@@ -57,6 +57,8 @@ public class Please_Stay_2 extends OpMode
     public DcMotor rightDriveFront = null;
     public DcMotor leftDriveBack = null;
     public DcMotor rightDriveBack = null;
+
+    public double speedFactor = 1.0;
     /* Setup a variable for each drive wheel to save power level for telemetry */
     public double leftPowerFront    = 1.0;
     public double rightPowerFront   = 1.0;
@@ -90,11 +92,6 @@ public class Please_Stay_2 extends OpMode
         leftDriveBack.setDirection(DcMotor.Direction.FORWARD);
         rightDriveBack.setDirection(DcMotor.Direction.REVERSE);
 
-        // Set all motors to zero power
-        leftDriveFront.setPower(1);
-        rightDriveFront.setPower(1);
-        leftDriveBack.setPower(1);
-        rightDriveBack.setPower(1);
 
         // Run Without Encoders
         leftDriveFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -154,11 +151,15 @@ public class Please_Stay_2 extends OpMode
         turn = gamepad1.left_stick_x;
         strafe = gamepad1.right_stick_x;
 
+        // How should we scale the speed of the robot wheels?speedFactor
+       // speedFactor = gamepad1.right_trigger;
+        speedFactor=-gamepad1.right_trigger+1;
+
         // Calculate the powers for each of the wheels
-        leftPowerFront = (drive + turn + strafe);
-        rightPowerFront = (drive - turn - strafe);
-        leftPowerBack = (drive + turn - strafe);
-        rightPowerBack = (drive - turn + strafe);
+        leftPowerFront = (drive + turn + strafe)*speedFactor;
+        rightPowerFront = (drive - turn - strafe)*speedFactor;
+        leftPowerBack = (drive + turn - strafe)*speedFactor;
+        rightPowerBack = (drive - turn + strafe)*speedFactor;
         // Send calculated power to wheels
 
 
@@ -177,6 +178,16 @@ public class Please_Stay_2 extends OpMode
             telemetry.addData("ChillMode", "deactivated");
 
         }
+
+        if (gamepad1.left_bumper)
+        {
+            leftPowerFront  = leftPowerFront * 0.25;
+            rightPowerFront = rightPowerFront* 0.25;
+            leftPowerBack   = leftPowerBack* 0.25;
+            rightPowerBack  = rightPowerBack* 0.25;
+        }
+
+
         //send power to wheels
         leftDriveFront.setPower (leftPowerFront);
         rightDriveFront.setPower (rightPowerFront);
@@ -187,24 +198,6 @@ public class Please_Stay_2 extends OpMode
 
 
 
-
-        // The code below allows you to strafe while holding down the a button "x".
-        /*if (gamepad1.x)
-        {
-            leftDriveFront.setPower(-rightPowerFront);
-            rightDriveFront.setPower(leftPowerFront);
-            leftDriveBack.setPower(rightPowerBack);
-            rightDriveBack.setPower(-leftPowerFront);
-
-        }
-        else
-        {
-            leftDriveFront.setPower(leftPowerFront);
-            rightDriveFront.setPower(-leftPowerFront);
-            leftDriveBack.setPower(rightPowerFront);
-            rightDriveBack.setPower(-rightPowerFront);
-        }
-        */
 
         // Show the elapsed game time and wheel power.
        telemetry.addData("Status", "Run Time: " + runtime.toString());
