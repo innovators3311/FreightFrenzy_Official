@@ -48,7 +48,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
  * @see Telemetry
  */
 @TeleOp(name = "Concept: Telemetry", group = "Concept")
-@Disabled
+//@Disabled
 public class ConceptTelemetry extends LinearOpMode  {
     /** keeps track of the line of the poem which is to be emitted next */
     int poemLine = 0;
@@ -92,7 +92,7 @@ public class ConceptTelemetry extends LinearOpMode  {
         // We can control the number of lines shown in the log
         telemetry.log().setCapacity(6);
         // The interval between lines of poetry, in seconds
-        double sPoemInterval = 0.6;
+        double sPoemInterval = 1.5;
 
         /**
          * Wait until we've been given the ok to go. For something to do, we emit the
