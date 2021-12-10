@@ -63,9 +63,9 @@ import org.firstinspires.ftc.robotcontroller.external.samples.HardwarePushbot;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
-@Autonomous(name="shutupaidn", group="Pushbot")
+@Autonomous(name="WharehouseAtonomous", group="Pushbot")
 //@Disabled
-public class lowerQuadrentProgram extends LinearOpMode {
+public class WharehouseAtonomous extends LinearOpMode {
 
     /* Declare OpMode members. */
     HardwarePushbot robot   = new HardwarePushbot();   // Use a Pushbot's hardware
@@ -114,9 +114,13 @@ public class lowerQuadrentProgram extends LinearOpMode {
         encoderDrive(DRIVE_SPEED,  96,  96, 5.0);  // S1: Forward 47 Inches with 5 Sec timeout
         sleep(250);
        // encoderDrive(TURN_SPEED, );
-        robot.leftClaw.setPosition(1.0);            // S4: Stop and close the claw.
-        robot.rightClaw.setPosition(0.0);
-        sleep(1000);     // pause for servos to move
+        //arm use
+        sleep(400);     // pause for servos to move
+        encoderDrive(DRIVE_SPEED,  90,  -90, 5.0);
+        sleep(300);
+        encoderDrive(DRIVE_SPEED,  96,  96, 5.0);
+        sleep(250);
+
 
         telemetry.addData("Path", "Complete");
         telemetry.update();
