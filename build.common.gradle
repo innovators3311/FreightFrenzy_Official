@@ -58,6 +58,7 @@ android {
         minSdkVersion 23
         //noinspection ExpiredTargetSdkVersion
         targetSdkVersion 28
+        multiDexEnabled true //added to support roadrunner
 
         /**
          * We keep the versionCode and versionName of robot controller applications in sync with
