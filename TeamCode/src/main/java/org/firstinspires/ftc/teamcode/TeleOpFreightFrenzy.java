@@ -69,6 +69,8 @@ public class TeleOpFreightFrenzy extends OpMode
     public double drive             = 0.0;
     public double turn              = 0.0;
     public double strafe            = 0.0;
+    private int elbowTargetPosition = 0;
+    private int shoulderTargetPosition = 0;
 
     /*
      * Code to run ONCE when the driver hits INIT
@@ -143,6 +145,7 @@ public class TeleOpFreightFrenzy extends OpMode
         }
     }
 
+
     private void handleArm(){
         double frontPower = 0;
         double backPower = 0;
@@ -161,8 +164,12 @@ public class TeleOpFreightFrenzy extends OpMode
         }
         Arm.fa.setPower(frontPower);
         Arm.ba.setPower(backPower);
-        //Arm.fa.setTargetPosition(20000);
-        //Arm.ba.setTargetPosition(30000);
+        shoulderTargetPosition += (int)(gamepad2.right_stick_y * 100);
+        elbowTargetPosition += (int)(gamepad2.left_stick_y * 100);
+        Arm.fa.setTargetPosition(elbowTargetPosition);
+        Arm.ba.setTargetPosition(shoulderTargetPosition);
+        telemetry.addData("shoulderEncoderValue", shoulderTargetPosition);
+        telemetry.addData("elbowEncoderValue", elbowTargetPosition);
     }
 
     // Code to run REPEATEDLY after the driver hits PLAY but before they hit STOP
@@ -193,6 +200,7 @@ public class TeleOpFreightFrenzy extends OpMode
         leftDriveBack.setPower (leftPowerBack);
         rightDriveBack.setPower (rightPowerBack);
 
+/*
 
         if (gamepad1.a)
         {
@@ -207,28 +215,17 @@ public class TeleOpFreightFrenzy extends OpMode
             slowingFactor=1;
         }
 
-        //if (gamepad1.right_bumper)
-       // {
-       //     slowingFactor = 0.25;
-
-
-       //     telemetry.addData("VeryChillMode", "activated");
-       // }
-       // else
-      //  {
-       //     telemetry.addData("VeryChillMode", "deactivated");
-      //  }
         if (gamepad1.left_bumper)
         {
             speedFactor=-gamepad1.left_stick_y;
         }
+*/
 
 
 
 
 
-
-//>:)
+//(:
         leftPowerFront = (drive + turn + strafe)*speedFactor*slowingFactor;
         rightPowerFront = (drive - turn - strafe)*speedFactor*slowingFactor;
         leftPowerBack = (drive + turn - strafe)*speedFactor*slowingFactor;
