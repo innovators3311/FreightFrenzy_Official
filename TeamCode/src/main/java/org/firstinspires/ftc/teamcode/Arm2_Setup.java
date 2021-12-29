@@ -42,8 +42,11 @@ public class Arm2_Setup {
         ba.setPower(0);
 
         //make sure that it will run without encoders so that they will operate correctly
-        fa.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        ba.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        fa.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        ba.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        fa.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        ba.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         //brake the motors
         fa.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);

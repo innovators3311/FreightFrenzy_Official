@@ -51,6 +51,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 @TeleOp(name="TeleOpFreightFrenzy", group="3311")
 public class TeleOpFreightFrenzy extends OpMode
 {
+    //Bring in code to setup arm.
+    Arm2_Setup Arm = new Arm2_Setup();
     // Declare OpMode members.
     private final ElapsedTime runtime = new ElapsedTime();
     public DcMotor leftDriveFront = null;
@@ -74,7 +76,7 @@ public class TeleOpFreightFrenzy extends OpMode
     @Override
     public void init() {
         telemetry.addData("Status", "Initialized");
-
+        Arm.init(hardwareMap);
         // Initialize the hardware variables. Note that the strings used here as parameters
         // to 'get' must correspond to the names assigned during the robot configuration
         // step (using the FTC Robot Controller app on the phone).
@@ -126,16 +128,48 @@ public class TeleOpFreightFrenzy extends OpMode
 
 
     }
-    // *
-    //
-    //
-    //
-    //
-    //
+    private void handleClaw(){
+        if(gamepad2.a){
+            Arm.cl.setPosition(1);
+        }
+        if(gamepad2.b){
+            Arm.cl.setPosition(0);
+        }
+        if(gamepad2.x){
+            Arm.mag.setPosition(1);
+        }
+        if(gamepad2.y){
+            Arm.mag.setPosition(0);
+        }
+    }
+
+    private void handleArm(){
+        double frontPower = 0;
+        double backPower = 0;
+
+        if(gamepad2.left_stick_y > 0.8) {
+            frontPower = 0.4;
+        }
+        if(gamepad2.left_stick_y < -0.8) {
+            frontPower = -0.3;
+        }
+        if(gamepad2.right_stick_y > 0.8) {
+            backPower = -0.4;
+        }
+        if(gamepad2.right_stick_y < -0.8) {
+            backPower = 0.3;
+        }
+        Arm.fa.setPower(frontPower);
+        Arm.ba.setPower(backPower);
+        //Arm.fa.setTargetPosition(20000);
+        //Arm.ba.setTargetPosition(30000);
+    }
+
     // Code to run REPEATEDLY after the driver hits PLAY but before they hit STOP
     @Override
     public void loop() {
-
+        handleArm();
+        handleClaw();
         /*
          Choose to drive using either Tank Mode, or POV Mode
          Comment out the method that's not used.  The default below is POV.
