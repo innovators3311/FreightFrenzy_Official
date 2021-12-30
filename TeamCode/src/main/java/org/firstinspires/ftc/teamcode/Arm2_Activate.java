@@ -1,17 +1,13 @@
 package org.firstinspires.ftc.teamcode;
 
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.gamepad2;
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.hardwareMap;
-
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 @TeleOp(name="Arm2_Activate", group="OpMode")
 public class Arm2_Activate extends OpMode {
         private ElapsedTime runtime = new ElapsedTime();
-        Arm2_Setup Arm = new Arm2_Setup();
+        Arm2_Control Arm = new Arm2_Control();
         //Initialize everything necessary for TeleOp
         public void init () {
 
@@ -60,8 +56,8 @@ public class Arm2_Activate extends OpMode {
             }
 
             //give the power from the variables through the motors
-            Arm.fa.setPower(frontPower);
-            Arm.ba.setPower(backPower);
+            Arm.elbow.setPower(frontPower);
+            Arm.shoulder.setPower(backPower);
 
             //tell the driver how fast the motor is traveling
             telemetry.addData("back arm power", backPower);

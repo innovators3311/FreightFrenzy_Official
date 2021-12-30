@@ -52,7 +52,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 public class TeleOpFreightFrenzy extends OpMode
 {
     //Bring in code to setup arm.
-    Arm2_Setup Arm = new Arm2_Setup();
+    Arm2_Control Arm = new Arm2_Control();
     // Declare OpMode members.
     private final ElapsedTime runtime = new ElapsedTime();
     public DcMotor leftDriveFront = null;
@@ -69,8 +69,6 @@ public class TeleOpFreightFrenzy extends OpMode
     public double drive             = 0.0;
     public double turn              = 0.0;
     public double strafe            = 0.0;
-    private int elbowTargetPosition = 0;
-    private int shoulderTargetPosition = 0;
 
     /*
      * Code to run ONCE when the driver hits INIT
@@ -147,29 +145,29 @@ public class TeleOpFreightFrenzy extends OpMode
 
 
     private void handleArm(){
-        double frontPower = 0;
-        double backPower = 0;
+        Arm.elbowMoveRelative(gamepad2.left_stick_y);
+        Arm.shoulderMoveRelative(gamepad2.right_stick_y);
 
-        if(gamepad2.left_stick_y > 0.8) {
-            frontPower = 0.4;
+        telemetry.addData("shoulderEncoderValue", Arm.shoulder.getCurrentPosition());
+        telemetry.addData("elbowEncoderValue", Arm.elbow.getCurrentPosition());
+
+        // puts the arm back to its beginning position
+        if(gamepad2.dpad_up){
+            Arm.armDriveAbsolute(.25, 0, 0);
         }
-        if(gamepad2.left_stick_y < -0.8) {
-            frontPower = -0.3;
+        // puts the arm to position 1
+        if(gamepad2.dpad_right){
+            Arm.armDriveAbsolute(.25, 160, 110);
         }
-        if(gamepad2.right_stick_y > 0.8) {
-            backPower = -0.4;
+        // puts the arm back to its position 2
+        if(gamepad2.dpad_left){
+            Arm.armDriveAbsolute(.25, 80, 110);
         }
-        if(gamepad2.right_stick_y < -0.8) {
-            backPower = 0.3;
+        // puts the arm back to its position 3
+        if(gamepad2.dpad_down){
+            Arm.armDriveAbsolute(.25, 30, 110);
         }
-        Arm.fa.setPower(frontPower);
-        Arm.ba.setPower(backPower);
-        shoulderTargetPosition += (int)(gamepad2.right_stick_y * 100);
-        elbowTargetPosition += (int)(gamepad2.left_stick_y * 100);
-        Arm.fa.setTargetPosition(elbowTargetPosition);
-        Arm.ba.setTargetPosition(shoulderTargetPosition);
-        telemetry.addData("shoulderEncoderValue", shoulderTargetPosition);
-        telemetry.addData("elbowEncoderValue", elbowTargetPosition);
+
     }
 
     // Code to run REPEATEDLY after the driver hits PLAY but before they hit STOP
