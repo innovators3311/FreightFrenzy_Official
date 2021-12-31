@@ -145,11 +145,15 @@ public class TeleOpFreightFrenzy extends OpMode
 
 
     private void handleArm(){
-        Arm.elbowMoveRelative(gamepad2.left_stick_y);
-        Arm.shoulderMoveRelative(gamepad2.right_stick_y);
+        Arm.elbowMoveRelative(gamepad2.left_stick_y * 100);
+        Arm.shoulderMoveRelative(gamepad2.right_stick_y * 100
+        );
 
         telemetry.addData("shoulderEncoderValue", Arm.shoulder.getCurrentPosition());
         telemetry.addData("elbowEncoderValue", Arm.elbow.getCurrentPosition());
+        telemetry.addData("shoulderEncoderTarget", Arm.shoulder.getTargetPosition());
+        telemetry.addData("elbowEncoderTarget", Arm.elbow.getTargetPosition());
+
 
         // puts the arm back to its beginning position
         if(gamepad2.dpad_up){
