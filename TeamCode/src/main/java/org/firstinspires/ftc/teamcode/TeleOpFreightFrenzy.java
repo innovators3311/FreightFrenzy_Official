@@ -202,26 +202,7 @@ public class TeleOpFreightFrenzy extends OpMode
         leftDriveBack.setPower (leftPowerBack);
         rightDriveBack.setPower (rightPowerBack);
 
-/*
 
-        if (gamepad1.a)
-        {
-            slowingFactor = 0.5;
-
-
-            telemetry.addData("ChillMode", "activated");
-        }
-        else
-        {
-            telemetry.addData("ChillMode", "deactivated");
-            slowingFactor=1;
-        }
-
-        if (gamepad1.left_bumper)
-        {
-            speedFactor=-gamepad1.left_stick_y;
-        }
-*/
 
 
 
