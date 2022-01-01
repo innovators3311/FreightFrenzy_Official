@@ -145,32 +145,41 @@ public class TeleOpFreightFrenzy extends OpMode
 
 
     private void handleArm(){
-        Arm.elbowMoveRelative(gamepad2.left_stick_y * 100);
-        Arm.shoulderMoveRelative(gamepad2.right_stick_y * 100
-        );
-
+        if(Math.abs(gamepad2.left_stick_y)>.10) {
+            Arm.elbowMoveRelative(gamepad2.left_stick_y * 1);
+        }
+        if(Math.abs(gamepad2.right_stick_y)>.10) {
+            Arm.shoulderMoveRelative(gamepad2.right_stick_y * 1);
+        }
+//        Arm.shoulder.setTargetPosition(Arm.shoulder.getCurrentPosition() +
+//                (int) (gamepad2.right_stick_y * 20));
+//        Arm.shoulder.setPower(.1);
+//        Arm.elbow.setTargetPosition(Arm.elbow.getCurrentPosition() +
+//                (int) (gamepad2.left_stick_y * 20));
+//        Arm.elbow.setPower(.1);
+        // Publish shoulder values
         telemetry.addData("shoulderEncoderValue", Arm.shoulder.getCurrentPosition());
-        telemetry.addData("elbowEncoderValue", Arm.elbow.getCurrentPosition());
         telemetry.addData("shoulderEncoderTarget", Arm.shoulder.getTargetPosition());
+        // Publish Elbow values
+        telemetry.addData("elbowEncoderValue", Arm.elbow.getCurrentPosition());
         telemetry.addData("elbowEncoderTarget", Arm.elbow.getTargetPosition());
 
-
         // puts the arm back to its beginning position
-        if(gamepad2.dpad_up){
-            Arm.armDriveAbsolute(.25, 0, 0);
-        }
-        // puts the arm to position 1
-        if(gamepad2.dpad_right){
-            Arm.armDriveAbsolute(.25, 160, 110);
-        }
-        // puts the arm back to its position 2
-        if(gamepad2.dpad_left){
-            Arm.armDriveAbsolute(.25, 80, 110);
-        }
-        // puts the arm back to its position 3
-        if(gamepad2.dpad_down){
-            Arm.armDriveAbsolute(.25, 30, 110);
-        }
+//        if(gamepad2.dpad_up){
+//            Arm.armDriveAbsolute(.1, 0, 0);
+//        }
+//        // puts the arm to position 1
+//        if(gamepad2.dpad_right){
+//            Arm.armDriveAbsolute(.1, 16, 11);
+//        }
+//        // puts the arm back to its position 2
+//        if(gamepad2.dpad_left){
+//            Arm.armDriveAbsolute(.1, 80, 110);
+//        }
+//        // puts the arm back to its position 3
+//        if(gamepad2.dpad_down){
+//            Arm.armDriveAbsolute(.1, 30, 110);
+//        }
 
     }
 

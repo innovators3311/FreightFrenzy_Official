@@ -1,3 +1,3 @@
 # Ihgnorte hprof files
 **/*.hprof
-
+**/build
