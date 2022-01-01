@@ -44,9 +44,6 @@ public class Arm2_Control {
         elbow.setPower(0);
         shoulder.setPower(0);
 
-        //make sure that it will run without encoders so that they will operate correctly
-        elbow.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        shoulder.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         elbow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         shoulder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -54,6 +51,10 @@ public class Arm2_Control {
         //brake the motors
         elbow.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         shoulder.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        shoulder.setTargetPosition(0);
+        elbow.setTargetPosition(0);
+        elbow.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        shoulder.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     }
 
     /*
@@ -88,11 +89,10 @@ public class Arm2_Control {
 
     }
 
-    public void elbowMoveRelative(double encoderChange) {
-        elbow.setTargetPosition(elbow.getCurrentPosition() +
-                (int) (encoderChange * ELBOW_COUNTS_PER_DEGREE));
-        elbow.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        elbow.setPower(.15);
+    public void elbowMoveRelative(double power) {
+        elbow.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        elbow.setPower(power);
+
 // (:
     }
 
