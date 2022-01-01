@@ -22,8 +22,8 @@ public class Arm2_Control {
     private ElapsedTime period = new ElapsedTime();
     private Object Servo;
 
-    private double ELBOW_COUNTS_PER_DEGREE    = 17.344444444444444444444444444444444444444444444444444444444444;
-    private double SHOULDER_COUNTS_PER_DEGREE = 17.344444444444444444444444444444444444444444444444444444444444;
+    private double ELBOW_COUNTS_PER_DEGREE    = 4096.0/360.0;
+    private double SHOULDER_COUNTS_PER_DEGREE = 4096.0/360.0;
     public void init(HardwareMap ahwMap) {
 
         // Save reference to Hardware map
@@ -36,7 +36,7 @@ public class Arm2_Control {
         mag = hwMap.get(Servo.class, "mag");
 
         //set the direction that the motors will turn
-        elbow.setDirection(DcMotor.Direction.REVERSE);
+        elbow.setDirection(DcMotor.Direction.FORWARD);
         shoulder.setDirection(DcMotor.Direction.FORWARD);
         //you can not set direction on a servo
 
@@ -91,16 +91,16 @@ public class Arm2_Control {
     public void elbowMoveRelative(double encoderChange) {
         elbow.setTargetPosition(elbow.getCurrentPosition() +
                 (int) (encoderChange * ELBOW_COUNTS_PER_DEGREE));
-        elbow.setPower(.15);
         elbow.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        elbow.setPower(.15);
 // (:
     }
 
     public void shoulderMoveRelative(double encoderChange) {
         shoulder.setTargetPosition(shoulder.getCurrentPosition() +
                 (int) (encoderChange * SHOULDER_COUNTS_PER_DEGREE));
-        shoulder.setPower(.15);
         shoulder.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        shoulder.setPower(.15);
 
     }
 
