@@ -22,8 +22,13 @@ public class Arm2_Control {
     private ElapsedTime period = new ElapsedTime();
     private Object Servo;
 
-    private double ELBOW_COUNTS_PER_DEGREE    = 4096.0/360.0;
-    private double SHOULDER_COUNTS_PER_DEGREE = 4096.0/360.0;
+    private double ELBOW_COUNTS_PER_DEGREE = 4096.0 / 360.0;
+    private double SHOULDER_COUNTS_PER_DEGREE = 4096.0 / 360.0;
+
+    // How much power to add when the shoulder arm is horizontal.
+    // TODO: This could be bigger when the elbow is also extended.
+    private double SHOULDER_GRAVITY_FACTOR = -0.05;
+
     public void init(HardwareMap ahwMap) {
 
         // Save reference to Hardware map
@@ -51,10 +56,9 @@ public class Arm2_Control {
         //brake the motors
         elbow.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         shoulder.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        shoulder.setTargetPosition(0);
-        elbow.setTargetPosition(0);
-        elbow.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        shoulder.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        elbow.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        shoulder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
     /*
@@ -85,27 +89,42 @@ public class Arm2_Control {
         runtime.reset();
         elbow.setPower(Math.abs(speed));
         shoulder.setPower(Math.abs(speed));
-
-
     }
 
-    public void elbowMoveRelative(double power) {
+    public double getShoulderGravityVector() {
+        return Math.cos(getShoulderAngle() * Math.PI / 360.0);
+    }
+
+    public double getElbowAngle() {
+        return elbow.getCurrentPosition() / ELBOW_COUNTS_PER_DEGREE;
+    }
+    public double getElbowTargetAngle(){
+        return elbow.getTargetPosition()/ELBOW_COUNTS_PER_DEGREE;
+    }
+
+    public double getShoulderAngle() {
+        return shoulder.getCurrentPosition() / ELBOW_COUNTS_PER_DEGREE;
+    }
+    public double getShoulderTargetAngle(){
+      return shoulder.getTargetPosition()/ELBOW_COUNTS_PER_DEGREE;
+    }
+
+    public void elbowMovePower(double power) {
         elbow.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         elbow.setPower(power);
 
 // (:
     }
 
-    public void shoulderMoveRelative(double encoderChange) {
-        shoulder.setTargetPosition(shoulder.getCurrentPosition() +
-                (int) (encoderChange * SHOULDER_COUNTS_PER_DEGREE));
-        shoulder.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        shoulder.setPower(.15);
+    public void shoulderMovePower(double power) {
+        shoulder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        power += getShoulderGravityVector() * SHOULDER_GRAVITY_FACTOR;
+        shoulder.setPower(power);
 
     }
 
     public void TopTierShippingHub() {
-        armDriveAbsolute(.25, 0, 0);
+        armDriveAbsolute(.05, -268, 240);
 
     }
 
@@ -141,10 +160,17 @@ public class Arm2_Control {
         return true;
     }
 
-    public boolean waitForDone( ) {
-        while (isBusy()) { }
+    public boolean waitForDone() {
+        while (isBusy()) {
+        }
         return true;
     }
 
+    public void emergencyStop() {
+        shoulder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        elbow.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        elbow.setPower(0);
+        shoulder.setPower(0);
+    }
 
 }                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       //

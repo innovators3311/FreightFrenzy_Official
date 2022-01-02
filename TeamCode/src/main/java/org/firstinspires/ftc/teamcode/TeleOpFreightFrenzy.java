@@ -40,17 +40,16 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  * The names of OpModes appear on the menu of the FTC Driver Station.
  * When an selection is made from the menu, the corresponding OpMode
  * class is instantiated on the Robot Controller and executed.
- *
+ * <p>
  * This particular OpMode just executes a basic Tank Drive Teleop for a two wheeled robot
  * It includes all the skeletal structure that all iterative OpModes contain.
- *
+ * <p>
  * Use Android Studios to Copy this Class, and Paste it into your team's code folder with a new name.
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
-@TeleOp(name="TeleOpFreightFrenzy", group="3311")
-public class TeleOpFreightFrenzy extends OpMode
-{
+@TeleOp(name = "TeleOpFreightFrenzy", group = "3311")
+public class TeleOpFreightFrenzy extends OpMode {
     //Bring in code to setup arm.
     Arm2_Control Arm = new Arm2_Control();
     // Declare OpMode members.
@@ -62,13 +61,13 @@ public class TeleOpFreightFrenzy extends OpMode
     public double speedFactor = 1.0;
     public double slowingFactor = 1.0;
     /* Setup a variable for each drive wheel to save power level for telemetry */
-    public double leftPowerFront    = 1.0;
-    public double rightPowerFront   = 1.0;
-    public double rightPowerBack    = 1.0;
-    public double leftPowerBack     = 1.0;
-    public double drive             = 0.0;
-    public double turn              = 0.0;
-    public double strafe            = 0.0;
+    public double leftPowerFront = 1.0;
+    public double rightPowerFront = 1.0;
+    public double rightPowerBack = 1.0;
+    public double leftPowerBack = 1.0;
+    public double drive = 0.0;
+    public double turn = 0.0;
+    public double strafe = 0.0;
 
     /*
      * Code to run ONCE when the driver hits INIT
@@ -81,11 +80,10 @@ public class TeleOpFreightFrenzy extends OpMode
         // to 'get' must correspond to the names assigned during the robot configuration
         // step (using the FTC Robot Controller app on the phone).
 
-        leftDriveFront  = hardwareMap.get(DcMotor.class, "lf");
+        leftDriveFront = hardwareMap.get(DcMotor.class, "lf");
         rightDriveFront = hardwareMap.get(DcMotor.class, "rf");
-        leftDriveBack  = hardwareMap.get(DcMotor.class, "lb");
+        leftDriveBack = hardwareMap.get(DcMotor.class, "lb");
         rightDriveBack = hardwareMap.get(DcMotor.class, "rb");
-
 
 
         // Set Motor Direction
@@ -128,61 +126,70 @@ public class TeleOpFreightFrenzy extends OpMode
 
 
     }
-    private void handleClaw(){
-        if(gamepad2.a){
+
+    private void handleClaw() {
+        if (gamepad2.a) {
             Arm.cl.setPosition(1);
         }
-        if(gamepad2.b){
+        if (gamepad2.b) {
             Arm.cl.setPosition(0);
         }
-        if(gamepad2.x){
+        if (gamepad2.x) {
             Arm.mag.setPosition(1);
         }
-        if(gamepad2.y){
+        if (gamepad2.y) {
             Arm.mag.setPosition(0);
         }
     }
 
 
-    private void handleArm(){
-        if((Math.abs(gamepad2.left_stick_y)>.10) ||
-        Arm.elbow.getMode()==DcMotor.RunMode.RUN_WITHOUT_ENCODER){
-            Arm.elbowMoveRelative(gamepad2.left_stick_y);
+    private void handleArm() {
+        // If driver moves the stick more than 10% or we're already in run without encoder mode ...
+        if ((Math.abs(gamepad2.left_stick_y) > .10) ||
+                (Arm.elbow.getMode() == DcMotor.RunMode.RUN_WITHOUT_ENCODER)) {
+            Arm.elbowMovePower(gamepad2.left_stick_y * .3);
         }
-        if(Math.abs(gamepad2.right_stick_y)>.10) {
-            Arm.shoulderMoveRelative(gamepad2.right_stick_y);
+
+        if ((Math.abs(gamepad2.right_stick_y) > .10) ||
+                (Arm.shoulder.getMode() == DcMotor.RunMode.RUN_WITHOUT_ENCODER)) {
+            Arm.shoulderMovePower(gamepad2.right_stick_y * 0.5);
         }
-//        Arm.shoulder.setTargetPosition(Arm.shoulder.getCurrentPosition() +
-//                (int) (gamepad2.right_stick_y * 20));
-//        Arm.shoulder.setPower(.1);
-//        Arm.elbow.setTargetPosition(Arm.elbow.getCurrentPosition() +
-//                (int) (gamepad2.left_stick_y * 20));
-//        Arm.elbow.setPower(.1);
-        // Publish shoulder values
 
-
-        telemetry.addData("shoulderEncoderValue", Arm.shoulder.getCurrentPosition());
-        telemetry.addData("shoulderEncoderTarget", Arm.shoulder.getTargetPosition());
+        telemetry.addData("shoulder current angle:", Arm.getShoulderAngle());
+        telemetry.addData("shoulder angle target:", Arm.getShoulderTargetAngle());
         // Publish Elbow values
-        telemetry.addData("elbowEncoderValue", Arm.elbow.getCurrentPosition());
-        telemetry.addData("elbowEncoderTarget", Arm.elbow.getTargetPosition());
+        telemetry.addData("elbow Current angle:", Arm.getElbowAngle());
+        telemetry.addData("elbow angle target:", Arm.getElbowTargetAngle());
         telemetry.addData("is busy?", Arm.isBusy());
+
+        while (gamepad2.right_stick_button || gamepad2.left_stick_button) {
+            Arm.emergencyStop();
+        }
+
+        if (Arm.elbow.getMode() == DcMotor.RunMode.RUN_TO_POSITION){
+            Arm.elbow.setTargetPosition(Arm.elbow.getTargetPosition());
+        }
+        if (Arm.shoulder.getMode() == DcMotor.RunMode.RUN_TO_POSITION){
+            Arm.shoulder.setTargetPosition(Arm.shoulder.getTargetPosition());
+        }
+
+
         // puts the arm back to its beginning position
-//        if(gamepad2.dpad_up){
-//            Arm.armDriveAbsolute(.1, 0, 0);
-//        }
-//        // puts the arm to position 1
-//        if(gamepad2.dpad_right){
-//            Arm.armDriveAbsolute(.1, 16, 11);
-//        }
-//        // puts the arm back to its position 2
-//        if(gamepad2.dpad_left){
-//            Arm.armDriveAbsolute(.1, 80, 110);
-//        }
-//        // puts the arm back to its position 3
-//        if(gamepad2.dpad_down){
-//            Arm.armDriveAbsolute(.1, 30, 110);
-//        }
+        if(gamepad2.dpad_up){
+            Arm.armDriveAbsolute(.1, 0, 0);
+        }
+        // puts the arm to position 1
+        if(gamepad2.dpad_right){
+            Arm.TopTierShippingHub();
+        }
+        // puts the arm back to its position 2
+        if(gamepad2.dpad_left){
+            Arm.armDriveAbsolute(.1, 80, 110);
+        }
+        // puts the arm back to its position 3
+        if(gamepad2.dpad_down){
+            Arm.armDriveAbsolute(.1, 30, 110);
+        }
 
     }
 
@@ -208,36 +215,30 @@ public class TeleOpFreightFrenzy extends OpMode
         strafe = gamepad1.right_stick_x;
 
 //send power to wheels
-        speedFactor=gamepad1.right_trigger+.25;
-        leftDriveFront.setPower (leftPowerFront);
-        rightDriveFront.setPower (rightPowerFront);
-        leftDriveBack.setPower (leftPowerBack);
-        rightDriveBack.setPower (rightPowerBack);
-
-
-
-
-
+        speedFactor = gamepad1.right_trigger + .25;
+        leftDriveFront.setPower(leftPowerFront);
+        rightDriveFront.setPower(rightPowerFront);
+        leftDriveBack.setPower(leftPowerBack);
+        rightDriveBack.setPower(rightPowerBack);
 
 
 //(:
-        leftPowerFront = (drive + turn + strafe)*speedFactor*slowingFactor;
-        rightPowerFront = (drive - turn - strafe)*speedFactor*slowingFactor;
-        leftPowerBack = (drive + turn - strafe)*speedFactor*slowingFactor;
-        rightPowerBack = (drive - turn + strafe)*speedFactor*slowingFactor;
+        leftPowerFront = (drive + turn + strafe) * speedFactor * slowingFactor;
+        rightPowerFront = (drive - turn - strafe) * speedFactor * slowingFactor;
+        leftPowerBack = (drive + turn - strafe) * speedFactor * slowingFactor;
+        rightPowerBack = (drive - turn + strafe) * speedFactor * slowingFactor;
         //send power to wheels
-        leftDriveFront.setPower (leftPowerFront);
-        rightDriveFront.setPower (rightPowerFront);
-        leftDriveBack.setPower (leftPowerBack);
-        rightDriveBack.setPower (rightPowerBack);
-
+        leftDriveFront.setPower(leftPowerFront);
+        rightDriveFront.setPower(rightPowerFront);
+        leftDriveBack.setPower(leftPowerBack);
+        rightDriveBack.setPower(rightPowerBack);
 
 
         // Show the elapsed game time and wheel power.
-       telemetry.addData("Status", "Run Time: " + runtime.toString());
-       telemetry.addData("Motors", "lf(%.2f), rf(%.2f), lb(%.2f), rb(%.2f)", leftPowerFront, rightPowerFront, leftPowerBack, rightPowerBack);
-       telemetry.addData("Variables", "sf(%.2f), slf(%.2f)", speedFactor, slowingFactor);
-   }
+        telemetry.addData("Status", "Run Time: " + runtime.toString());
+        telemetry.addData("Motors", "lf(%.2f), rf(%.2f), lb(%.2f), rb(%.2f)", leftPowerFront, rightPowerFront, leftPowerBack, rightPowerBack);
+        telemetry.addData("Variables", "sf(%.2f), slf(%.2f)", speedFactor, slowingFactor);
+    }
 
     /*
      * Code to run ONCE after the driver hits STOP
@@ -248,4 +249,4 @@ public class TeleOpFreightFrenzy extends OpMode
     }
 
 }
-                                                                                                                                                                                                                                                                                                                                                                                    //If you found this then you are a big brain gamer
+//If you found this then you are a big brain gamer
