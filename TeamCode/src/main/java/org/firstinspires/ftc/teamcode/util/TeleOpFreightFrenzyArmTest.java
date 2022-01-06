@@ -27,12 +27,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.util;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
+
+import org.firstinspires.ftc.teamcode.Arm2_Control;
 
 /**
  * This file contains an example of an iterative (Non-Linear) "OpMode".
@@ -48,16 +50,13 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
-@TeleOp(name = "TeleOpFreightFrenzy", group = "3311")
-public class TeleOpFreightFrenzy extends OpMode {
+@TeleOp(name = "TeleOpFreightFrenzyArmTest", group = "3311")
+public class TeleOpFreightFrenzyArmTest extends OpMode {
     //Bring in code to setup arm.
     Arm2_Control arm = new Arm2_Control();
     // Declare OpMode members.
     private final ElapsedTime runtime = new ElapsedTime();
-    public DcMotor leftDriveFront = null;
-    public DcMotor rightDriveFront = null;
-    public DcMotor leftDriveBack = null;
-    public DcMotor rightDriveBack = null;
+
     public double speedFactor = 1.0;
     public double slowingFactor = 1.0;
     /* Setup a variable for each drive wheel to save power level for telemetry */
@@ -80,30 +79,6 @@ public class TeleOpFreightFrenzy extends OpMode {
         // to 'get' must correspond to the names assigned during the robot configuration
         // step (using the FTC Robot Controller app on the phone).
 
-        leftDriveFront = hardwareMap.get(DcMotor.class, "lf");
-        rightDriveFront = hardwareMap.get(DcMotor.class, "rf");
-        leftDriveBack = hardwareMap.get(DcMotor.class, "lb");
-        rightDriveBack = hardwareMap.get(DcMotor.class, "rb");
-
-
-        // Set Motor Direction
-        leftDriveFront.setDirection(DcMotor.Direction.FORWARD);
-        rightDriveFront.setDirection(DcMotor.Direction.REVERSE);
-        leftDriveBack.setDirection(DcMotor.Direction.FORWARD);
-        rightDriveBack.setDirection(DcMotor.Direction.REVERSE);
-
-
-        // Run Without Encoders
-        leftDriveFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        rightDriveFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        leftDriveBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        rightDriveBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-        // Brake when power set to Zero
-        leftDriveFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        leftDriveBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        rightDriveFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        rightDriveBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         // Tell the driver that initialization is complete.
         telemetry.addData("Status", "Initialized");
@@ -199,50 +174,19 @@ public class TeleOpFreightFrenzy extends OpMode {
         handleArm();
 //        handleClaw();
         telemetry.addData("shoulderPIDF", arm.shoulderPIDF.p);
-        /*
-         Choose to drive using either Tank Mode, or POV Mode
-         Comment out the method that's not used.  The default below is POV.
-         POV Mode uses left stick to go forward, and right stick to turn.
-         - This uses basic math to combine motions and is easier to drive straight.
-        */
-        // Send calculated power to wheels
-
-        // The code below allows you to
-
-        // Get the gamepad control values for this loop iteration
-
-        drive = -gamepad1.left_stick_y;
-        turn = gamepad1.left_stick_x;
-        strafe = gamepad1.right_stick_x;
+       // testing
 
 //send power to wheels
-        speedFactor = gamepad1.right_trigger + .25;
-        leftDriveFront.setPower(leftPowerFront);
-        rightDriveFront.setPower(rightPowerFront);
-        leftDriveBack.setPower(leftPowerBack);
-        rightDriveBack.setPower(rightPowerBack);
-
-
-//(:
-        leftPowerFront = (drive + turn + strafe) * speedFactor * slowingFactor;
-        rightPowerFront = (drive - turn - strafe) * speedFactor * slowingFactor;
-        leftPowerBack = (drive + turn - strafe) * speedFactor * slowingFactor;
-        rightPowerBack = (drive - turn + strafe) * speedFactor * slowingFactor;
-        //send power to wheels
-        leftDriveFront.setPower(leftPowerFront);
-        rightDriveFront.setPower(rightPowerFront);
-        leftDriveBack.setPower(leftPowerBack);
-        rightDriveBack.setPower(rightPowerBack);
 
 
         // Show the elapsed game time and wheel power.
         telemetry.addData("Status", "Run Time: " + runtime.toString());
-        telemetry.addData("Motors", "lf(%.2f), rf(%.2f), lb(%.2f), rb(%.2f)", leftPowerFront, rightPowerFront, leftPowerBack, rightPowerBack);
         telemetry.addData("Variables", "sf(%.2f), slf(%.2f)", speedFactor, slowingFactor);
     }
 
     /*
-     * Code to run ONCE after the driver hits STOP
+      Code to run ONCE after the driver hits STOP
+     Code to run ONCE after the driver hits STOP
      */
 
     @Override

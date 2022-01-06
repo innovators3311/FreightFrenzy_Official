@@ -1,8 +1,9 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -13,21 +14,24 @@ public class Arm2_Control {
 
     //create variables for motors/servos
     public DcMotor elbow = null;
-    public DcMotor shoulder = null;
+    public DcMotorEx shoulder = null;
     public Servo cl = null;
     public Servo mag = null;
+
+    public PIDFCoefficients shoulderPIDF;
 
     /* local OpMode members. */
     HardwareMap hwMap = null;
     private ElapsedTime period = new ElapsedTime();
     private Object Servo;
 
-    private double ELBOW_COUNTS_PER_DEGREE = 4096.0 / 360.0;
-    private double SHOULDER_COUNTS_PER_DEGREE = 4096.0 / 360.0;
+    private double ELBOW_COUNTS_PER_DEGREE = 8192.0 / 360.0;
+    private double SHOULDER_COUNTS_PER_DEGREE = 8192.0 / 360.0;
 
     // How much power to add when the shoulder arm is horizontal.
-    // TODO: This could be bigger when the elbow is also extended.
-    private double SHOULDER_GRAVITY_FACTOR = -0.05;
+
+//    private double SHOULDER_GRAVITY_FACTOR = -0.05;
+    private double SHOULDER_GRAVITY_FACTOR = 0;
 
     public void init(HardwareMap ahwMap) {
 
@@ -35,10 +39,17 @@ public class Arm2_Control {
         hwMap = ahwMap;
 
         //declare motors so that they can be used
-        elbow = hwMap.get(DcMotor.class, "fa");
-        shoulder = hwMap.get(DcMotor.class, "ba");
-        cl = hwMap.get(Servo.class, "cl");
-        mag = hwMap.get(Servo.class, "mag");
+        elbow = hwMap.get(DcMotor.class, "elbow");
+        shoulder = hwMap.get(DcMotorEx.class, "shoulder");
+
+        shoulderPIDF = shoulder.getPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION);
+        //shoulderPIDF.p = -shoulderPIDF.p;
+        shoulderPIDF.d = 0.0;
+        shoulder.setPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION, shoulderPIDF);
+
+     //   cl = hwMap.get(Servo.class, "cl");
+      //  mag = hwMap.get(Servo.class, "mag");
+
 
         //set the direction that the motors will turn
         elbow.setDirection(DcMotor.Direction.FORWARD);
@@ -90,6 +101,24 @@ public class Arm2_Control {
         elbow.setPower(Math.abs(speed));
         shoulder.setPower(Math.abs(speed));
     }
+    public void elbowArmDriveAbsolute(double speed,
+                                 double elbowAngle) {
+        int newElbowTarget;
+        newElbowTarget = (int) (elbowAngle * ELBOW_COUNTS_PER_DEGREE);
+        elbow.setTargetPosition(newElbowTarget);
+        elbow.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        runtime.reset();
+        elbow.setPower(Math.abs(speed));
+    }
+    public void shoulderArmDriveAbsolute(double speed,
+                                      double shoulderAngle) {
+        int newShoulderTarget;
+        newShoulderTarget = (int) (shoulderAngle * ELBOW_COUNTS_PER_DEGREE);
+        shoulder.setTargetPosition(newShoulderTarget);
+        shoulder.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        runtime.reset();
+        shoulder.setPower(Math.abs(speed));
+    }
 
     public double getShoulderGravityVector() {
         return Math.cos(getShoulderAngle() * Math.PI / 360.0);
@@ -113,7 +142,7 @@ public class Arm2_Control {
         elbow.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         elbow.setPower(power);
 
-// (:
+// (: (:
     }
 
     public void shoulderMovePower(double power) {
@@ -173,4 +202,4 @@ public class Arm2_Control {
         shoulder.setPower(0);
     }
 
-}                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       //
+}                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       //Hi. You found me. -SECRET COMMENT
