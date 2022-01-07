@@ -180,7 +180,7 @@ public class TeleOpFreightFrenzy extends OpMode {
         }
         // puts the arm to position 1
         if(gamepad2.dpad_right){
-            arm.TopTierShippingHub();
+            arm.shoulderArmDriveAbsolute(.01, 50);
         }
         // puts the arm back to its position 2
         if(gamepad2.dpad_left){

@@ -54,31 +54,16 @@ import org.firstinspires.ftc.teamcode.Arm2_Control;
 public class TeleOpFreightFrenzyArmTest extends OpMode {
     //Bring in code to setup arm.
     Arm2_Control arm = new Arm2_Control();
+    boolean stickControl = true;
     // Declare OpMode members.
     private final ElapsedTime runtime = new ElapsedTime();
-
-    public double speedFactor = 1.0;
-    public double slowingFactor = 1.0;
-    /* Setup a variable for each drive wheel to save power level for telemetry */
-    public double leftPowerFront = 1.0;
-    public double rightPowerFront = 1.0;
-    public double rightPowerBack = 1.0;
-    public double leftPowerBack = 1.0;
-    public double drive = 0.0;
-    public double turn = 0.0;
-    public double strafe = 0.0;
 
     /*
      * Code to run ONCE when the driver hits INIT
      */
     @Override
     public void init() {
-
         arm.init(hardwareMap);
-        // Initialize the hardware variables. Note that the strings used here as parameters
-        // to 'get' must correspond to the names assigned during the robot configuration
-        // step (using the FTC Robot Controller app on the phone).
-
 
         // Tell the driver that initialization is complete.
         telemetry.addData("Status", "Initialized");
@@ -120,14 +105,14 @@ public class TeleOpFreightFrenzyArmTest extends OpMode {
 
     private void handleArm() {
         // If driver moves the stick more than 10% or we're already in run without encoder mode ...
-        if ((Math.abs(gamepad2.left_stick_y) > .10) ||
-                (arm.elbow.getMode() == DcMotor.RunMode.RUN_WITHOUT_ENCODER)) {
+        if ((Math.abs(gamepad2.left_stick_y) > .10) || (stickControl)) {
             arm.elbowMovePower(gamepad2.left_stick_y * .3);
+            stickControl = true;
         }
 
-        if ((Math.abs(gamepad2.right_stick_y) > .10) ||
-                (arm.shoulder.getMode() == DcMotor.RunMode.RUN_WITHOUT_ENCODER)) {
+        if ((Math.abs(gamepad2.right_stick_y) > .10) || (stickControl)) {
             arm.shoulderMovePower(gamepad2.right_stick_y * 0.5);
+            stickControl = true;
         }
 
         telemetry.addData("shoulder current angle:", arm.getShoulderAngle());
@@ -135,54 +120,50 @@ public class TeleOpFreightFrenzyArmTest extends OpMode {
         // Publish Elbow values
         telemetry.addData("elbow Current angle:", arm.getElbowAngle());
         telemetry.addData("elbow angle target:", arm.getElbowTargetAngle());
+        telemetry.addData("P", arm.shoulderPIDF.p);
+        telemetry.addData("I", arm.shoulderPIDF.i);
+        telemetry.addData("D", arm.shoulderPIDF.d);
+        telemetry.addData("F", arm.shoulderPIDF.f);
+//        telemetry.addData("Commanded shoulder Velocity", arm.shoulder.getVelocity());
+        telemetry.addData("Commanded shoulder Power", arm.shoulder.getPower());
+
         telemetry.addData("is busy?", arm.isBusy());
 
         while (gamepad2.right_stick_button || gamepad2.left_stick_button) {
             arm.emergencyStop();
         }
 
-        if (arm.elbow.getMode() == DcMotor.RunMode.RUN_TO_POSITION){
-            arm.elbow.setTargetPosition(arm.elbow.getTargetPosition());
-        }
-        if (arm.shoulder.getMode() == DcMotor.RunMode.RUN_TO_POSITION){
-            arm.shoulder.setTargetPosition(arm.shoulder.getTargetPosition());
-        }
-
-
         // puts the arm back to its beginning position
         if(gamepad2.dpad_up){
-            arm.armDriveAbsolute(.1, 0, 0);
+            arm.shoulderArmDriveAbsolute(.25, 0);
+            stickControl = false;
+
         }
         // puts the arm to position 1
         if(gamepad2.dpad_right){
-            arm.TopTierShippingHub();
+            arm.shoulderArmDriveAbsolute(.02, 50);
+            stickControl = false;
         }
         // puts the arm back to its position 2
         if(gamepad2.dpad_left){
             arm.shoulderArmDriveAbsolute(.1, 50);
+            stickControl = false;
         }
         // puts the arm back to its position 3
         if(gamepad2.dpad_down){
-            arm.elbowArmDriveAbsolute(.25, 50);
+            arm.shoulderArmDriveAbsolute(.25, -50);
+            stickControl = false;
         }
 
+        arm.update();
     }
 
     // Code to run REPEATEDLY after the driver hits PLAY but before they hit STOP
     @Override
     public void loop() {
         handleArm();
-//        handleClaw();
-        telemetry.addData("shoulderPIDF", arm.shoulderPIDF.p);
-       // testing
-
-//send power to wheels
-
-
         // Show the elapsed game time and wheel power.
-        telemetry.addData("Status", "Run Time: " + runtime.toString());
-        telemetry.addData("Variables", "sf(%.2f), slf(%.2f)", speedFactor, slowingFactor);
-    }
+        telemetry.addData("Status", "Run Time: " + runtime.toString()); }
 
     /*
       Code to run ONCE after the driver hits STOP

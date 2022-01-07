@@ -7,6 +7,8 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.util.PIDControl;
+
 
 public class Arm2_Control {
 
@@ -14,9 +16,10 @@ public class Arm2_Control {
 
     //create variables for motors/servos
     public DcMotor elbow = null;
-    public DcMotorEx shoulder = null;
+    public DcMotor shoulder = null;
     public Servo cl = null;
     public Servo mag = null;
+    public PIDControl sPid = null;
 
     public PIDFCoefficients shoulderPIDF;
 
@@ -28,7 +31,7 @@ public class Arm2_Control {
     private double ELBOW_COUNTS_PER_DEGREE = 8192.0 / 360.0;
     private double SHOULDER_COUNTS_PER_DEGREE = 8192.0 / 360.0;
 
-    // How much power to add when the shoulder arm is horizontal.
+//    How much power to add when the shoulder arm is horizontal.
 
 //    private double SHOULDER_GRAVITY_FACTOR = -0.05;
     private double SHOULDER_GRAVITY_FACTOR = 0;
@@ -40,15 +43,21 @@ public class Arm2_Control {
 
         //declare motors so that they can be used
         elbow = hwMap.get(DcMotor.class, "elbow");
-        shoulder = hwMap.get(DcMotorEx.class, "shoulder");
+        shoulder = hwMap.get(DcMotor.class, "shoulder");
+        PIDControl sPid = new PIDControl(shoulder, 1.0, 0.0, 0.0);
 
-        shoulderPIDF = shoulder.getPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION);
-        //shoulderPIDF.p = -shoulderPIDF.p;
-        shoulderPIDF.d = 0.0;
-        shoulder.setPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION, shoulderPIDF);
+//        shoulderPIDF = shoulder.getPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION);
+//        shoulderPIDF.p = -shoulderPIDF.p/2 ;
+//        shoulderPIDF.d = 0.0;
+//        shoulderPIDF.i = 0.0;
+//
+//
+//        shoulder.setPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION, shoulderPIDF);
+//        shoulder.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, shoulderPIDF);
+//        shoulder.setVelocity(16536);
 
-     //   cl = hwMap.get(Servo.class, "cl");
-      //  mag = hwMap.get(Servo.class, "mag");
+        //  cl = hwMap.get(Servo.class, "cl");
+        //  mag = hwMap.get(Servo.class, "mag");
 
 
         //set the direction that the motors will turn
@@ -70,6 +79,8 @@ public class Arm2_Control {
 
         elbow.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         shoulder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+
     }
 
     /*
@@ -113,11 +124,12 @@ public class Arm2_Control {
     public void shoulderArmDriveAbsolute(double speed,
                                       double shoulderAngle) {
         int newShoulderTarget;
-        newShoulderTarget = (int) (shoulderAngle * ELBOW_COUNTS_PER_DEGREE);
-        shoulder.setTargetPosition(newShoulderTarget);
-        shoulder.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        runtime.reset();
-        shoulder.setPower(Math.abs(speed));
+        // newShoulderTarget = (int) (shoulderAngle * ELBOW_COUNTS_PER_DEGREE);
+        sPid.setTargetAngle(shoulderAngle);
+    }
+
+    public void update(){
+        sPid.update();
     }
 
     public double getShoulderGravityVector() {
