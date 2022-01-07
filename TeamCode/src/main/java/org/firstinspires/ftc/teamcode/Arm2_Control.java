@@ -44,7 +44,7 @@ public class Arm2_Control {
         //declare motors so that they can be used
         elbow = hwMap.get(DcMotor.class, "elbow");
         shoulder = hwMap.get(DcMotor.class, "shoulder");
-        PIDControl sPid = new PIDControl(shoulder, 1.0, 0.0, 0.0);
+        sPid = new PIDControl(shoulder, 1.0, 0.0, 0.0);
 
 //        shoulderPIDF = shoulder.getPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION);
 //        shoulderPIDF.p = -shoulderPIDF.p/2 ;

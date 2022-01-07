@@ -120,10 +120,10 @@ public class TeleOpFreightFrenzyArmTest extends OpMode {
         // Publish Elbow values
         telemetry.addData("elbow Current angle:", arm.getElbowAngle());
         telemetry.addData("elbow angle target:", arm.getElbowTargetAngle());
-        telemetry.addData("P", arm.shoulderPIDF.p);
-        telemetry.addData("I", arm.shoulderPIDF.i);
-        telemetry.addData("D", arm.shoulderPIDF.d);
-        telemetry.addData("F", arm.shoulderPIDF.f);
+//        telemetry.addData("P", arm.shoulderPIDF.p);
+//        telemetry.addData("I", arm.shoulderPIDF.i);
+//        telemetry.addData("D", arm.shoulderPIDF.d);
+//        telemetry.addData("F", arm.shoulderPIDF.f);
 //        telemetry.addData("Commanded shoulder Velocity", arm.shoulder.getVelocity());
         telemetry.addData("Commanded shoulder Power", arm.shoulder.getPower());
 
