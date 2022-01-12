@@ -16,7 +16,7 @@ public class Arm2_Control {
 
     //create variables for motors/servos
     public DcMotor elbow = null;
-    public DcMotor shoulder = null;
+    public DcMotorEx shoulder = null;
     public Servo cl = null;
     public Servo mag = null;
     public PIDControl sPid = null;
@@ -43,18 +43,16 @@ public class Arm2_Control {
 
         //declare motors so that they can be used
         elbow = hwMap.get(DcMotor.class, "elbow");
-        shoulder = hwMap.get(DcMotor.class, "shoulder");
-        sPid = new PIDControl(shoulder, 1.0, 0.0, 0.0);
+        shoulder = hwMap.get(DcMotorEx.class, "shoulder");
+//        sPid = new PIDControl(shoulder, 1.0, 0.0, 0.0);
 
-//        shoulderPIDF = shoulder.getPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION);
-//        shoulderPIDF.p = -shoulderPIDF.p/2 ;
-//        shoulderPIDF.d = 0.0;
-//        shoulderPIDF.i = 0.0;
-//
-//
-//        shoulder.setPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION, shoulderPIDF);
-//        shoulder.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, shoulderPIDF);
-//        shoulder.setVelocity(16536);
+        shoulderPIDF    = shoulder.getPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER);
+        shoulderPIDF.p  = -1;
+        shoulderPIDF.i *= -0.1; // -1e-4;
+        shoulderPIDF.d *= -0.1 ; // -1e-4;
+
+        //        shoulder.setPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION, shoulderPIDF);
+        shoulder.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, shoulderPIDF);
 
         //  cl = hwMap.get(Servo.class, "cl");
         //  mag = hwMap.get(Servo.class, "mag");
@@ -68,7 +66,7 @@ public class Arm2_Control {
         //make sure motors are at zero power
         elbow.setPower(0);
         shoulder.setPower(0);
-
+        shoulder.setVelocity(8192);
 
         elbow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         shoulder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -124,8 +122,14 @@ public class Arm2_Control {
     public void shoulderArmDriveAbsolute(double speed,
                                       double shoulderAngle) {
         int newShoulderTarget;
-        // newShoulderTarget = (int) (shoulderAngle * ELBOW_COUNTS_PER_DEGREE);
-        sPid.setTargetAngle(shoulderAngle);
+        newShoulderTarget = (int) (shoulderAngle * ELBOW_COUNTS_PER_DEGREE);
+        shoulder.setTargetPosition(newShoulderTarget);
+        shoulder.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        runtime.reset();
+        shoulder.setPower(Math.abs(speed));
+//        int newShoulderTarget;
+         newShoulderTarget = (int) (shoulderAngle * ELBOW_COUNTS_PER_DEGREE);
+//        sPid.setTargetAngle(shoulderAngle);
     }
 
     public void update(){
@@ -212,6 +216,7 @@ public class Arm2_Control {
         elbow.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         elbow.setPower(0);
         shoulder.setPower(0);
+
     }
 
 }                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       //Hi. You found me. -SECRET COMMENT

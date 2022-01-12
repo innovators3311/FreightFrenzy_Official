@@ -25,7 +25,7 @@ public class PIDControl {
     public static double clamp(double val, double min, double max) {
         return Math.max(min, Math.min(max, val));
     }
-
+     //must be called in a loop
     public void update(){
      motor.setPower(clamp(p * err(), -1.0, 1.0) / maxPower);
     }
