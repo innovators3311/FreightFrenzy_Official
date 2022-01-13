@@ -121,10 +121,7 @@ public class TeleOpFreightFrenzy extends OpMode {
      */
     @Override
     public void start() {
-
         runtime.reset();
-
-
     }
 
     private void handleClaw() {
@@ -180,15 +177,15 @@ public class TeleOpFreightFrenzy extends OpMode {
         }
         // puts the arm to position 1
         if(gamepad2.dpad_right){
-            arm.shoulderArmDriveAbsolute(.01, 50);
+            arm.shoulderDriveAbsolute(.01, 50);
         }
         // puts the arm back to its position 2
         if(gamepad2.dpad_left){
-            arm.shoulderArmDriveAbsolute(.1, 50);
+            arm.shoulderDriveAbsolute(.1, 50);
         }
         // puts the arm back to its position 3
         if(gamepad2.dpad_down){
-            arm.elbowArmDriveAbsolute(.25, 50);
+            arm.elbowDriveAbsolute(.25, 50);
         }
 
     }

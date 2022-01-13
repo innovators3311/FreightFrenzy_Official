@@ -27,7 +27,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.firstinspires.ftc.teamcode.util;
+package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -35,7 +35,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.Arm2_Control;
+import org.firstinspires.ftc.teamcode.util.PIDControl;
 
 /**
  * This file contains an example of an iterative (Non-Linear) "OpMode".
@@ -158,7 +158,7 @@ public class TeleOpFreightFrenzyArmTest extends OpMode {
         if(gamepad2.dpad_up){
 //            shoulder.setTargetAngle(360);
 //            elbow.setTargetAngle(0);
-            arm.shoulderArmDriveAbsolute( .25, 360);
+            arm.shoulderDriveAbsolute( .25, 360);
             stickControl = false;
 
         }
@@ -183,7 +183,7 @@ public class TeleOpFreightFrenzyArmTest extends OpMode {
         }
         // puts the arm back to its position 3
         if(gamepad2.dpad_down){
-            arm.shoulderArmDriveAbsolute( .25, -360);
+            arm.shoulderDriveAbsolute( .25, -360);
 
 //            shoulder.setTargetAngle(0);
 //            elbow.setTargetAngle(0);
