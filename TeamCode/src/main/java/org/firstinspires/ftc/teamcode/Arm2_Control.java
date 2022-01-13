@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.util.PIDControl;
 
 
@@ -200,4 +201,23 @@ public class Arm2_Control {
 
     }
 
+    public void showPIDs(Telemetry telemetry) {
+        PIDFCoefficients shoulderEncoderPIDF = shoulder.getPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER);
+        telemetry.addData("shoulder p:", String.format("%.4e", shoulderEncoderPIDF.p));
+        telemetry.addData("shoulder i:", String.format("%.4e", shoulderEncoderPIDF.i));
+        telemetry.addData("shoulder d:", String.format("%.4e", shoulderEncoderPIDF.d));
+        PIDFCoefficients shoulderPositionPIDF = shoulder.getPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION);
+        telemetry.addData("shoulder pos p:", String.format("%.4e", shoulderPositionPIDF.p));
+        telemetry.addData("shoulder pos i:", String.format("%.4e", shoulderPositionPIDF.i));
+        telemetry.addData("shoulder pos d:", String.format("%.4e", shoulderPositionPIDF.d));
+        telemetry.addData("shoulder vel:", String.format("%.4e", shoulder.getVelocity()));
+    }
+
+    public void scaleShoulderPid(double v) {
+        PIDFCoefficients shoulderEncoderPIDF = shoulder.getPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER);
+        shoulderEncoderPIDF.p *= v;
+        shoulderEncoderPIDF.d *= v;
+        shoulderEncoderPIDF.i *= v;
+        shoulder.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, shoulderEncoderPIDF);
+    }
 }                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       //Hi. You found me. -SECRET COMMENT

@@ -116,6 +116,15 @@ public class PIDControl {
         integratedError = 0.0;
     }
 
+    public double getTargetAngle() {
+        return targetEncoder / TICKS_PER_DEGREE;
+    }
+
+    public double getTargetPosition() {
+        return targetEncoder;
+    }
+
+
     /**
      * Get the current encoder angle
      *

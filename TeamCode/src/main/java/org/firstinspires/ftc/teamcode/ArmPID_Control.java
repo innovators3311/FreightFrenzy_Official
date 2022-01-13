@@ -28,6 +28,7 @@ public class ArmPID_Control extends Arm2_Control {
     //    private double SHOULDER_GRAVITY_FACTOR = -0.05;
     private final double SHOULDER_GRAVITY_FACTOR = 0;
 
+    @Override
     public void init(HardwareMap ahwMap) {
 
         // Save reference to Hardware map
@@ -61,27 +62,44 @@ public class ArmPID_Control extends Arm2_Control {
         shoulder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
-
+    @Override
     public void elbowDriveAbsolute(double speed,
                                    double elbowAngle) {
         elbowPID.setTargetAngle(elbowAngle);
         elbowPID.maxPower = speed;
     }
 
+    @Override
     public void shoulderDriveAbsolute(double speed,
                                       double shoulderAngle) {
         shoulderPID.setTargetAngle(shoulderAngle);
         shoulderPID.maxPower = speed;
     }
 
+    @Override
+    public double getElbowTargetAngle() {
+        return elbowPID.getTargetAngle();
+    }
+
+    @Override
+    public double getShoulderTargetAngle() {
+        return shoulderPID.getTargetAngle();
+    }
+
+    @Override
     public void update() {
         shoulderPID.update();
         elbowPID.update();
     }
 
+    @Override
     public boolean isBusy() {
         // Might want to have this check the shoulderPID and elbowPID's isBusy functions.
         return shoulder.isBusy() || elbow.isBusy();
     }
 
+    @Override
+    public void scaleShoulderPid(double v) {
+        shoulderPID.p *= v;
+    }
 }                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       //Hi. You found me. -SECRET COMMENT

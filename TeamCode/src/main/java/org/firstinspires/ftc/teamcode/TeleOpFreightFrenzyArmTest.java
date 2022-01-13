@@ -53,23 +53,24 @@ import org.firstinspires.ftc.teamcode.util.PIDControl;
 
 @TeleOp(name = "TeleOpFreightFrenzyArmTest", group = "3311")
 public class TeleOpFreightFrenzyArmTest extends OpMode {
-    //Bring in code to setup arm.
-    Arm2_Control arm = new Arm2_Control();
-    boolean stickControl = true;
-    double elbowSpeed    = 0.0;
-    double shoulderSpeed = 0.0;
     // Declare OpMode members.
     private final ElapsedTime runtime = new ElapsedTime();
+    //Bring in code to setup and control the arm.
+    Arm2_Control arm = new ArmPID_Control();
+    boolean stickControl = true;
+    double elbowSpeed = 0.0;
+    double shoulderSpeed = 0.0;
     PIDControl shoulder = null;
-    PIDControl elbow    = null;
+    PIDControl elbow = null;
+
     /*
      * Code to run ONCE when the driver hits INIT
      */
     @Override
     public void init() {
         arm.init(hardwareMap);
-        this.shoulder = new PIDControl(arm.shoulder, .003, 0, 0 );
-        this.elbow = new PIDControl(arm.elbow, .003, 0, 0 );
+        this.shoulder = new PIDControl(arm.shoulder, .003, 0, 0);
+        this.elbow = new PIDControl(arm.elbow, .003, 0, 0);
         // Tell the driver that initialization is complete.
         telemetry.addData("Status", "Initialized");
     }
@@ -119,12 +120,11 @@ public class TeleOpFreightFrenzyArmTest extends OpMode {
             arm.shoulderMovePower(gamepad2.right_stick_y * shoulderSpeed);
             stickControl = true;
         }
-        if (gamepad2.right_bumper){
-            elbowSpeed    = 0.5;
+        if (gamepad2.right_bumper) {
+            elbowSpeed = 0.5;
             shoulderSpeed = 0.7;
-        }
-        else {
-            elbowSpeed    = 0.2;
+        } else {
+            elbowSpeed = 0.2;
             shoulderSpeed = 0.3;
         }
 
@@ -132,15 +132,7 @@ public class TeleOpFreightFrenzyArmTest extends OpMode {
         telemetry.addData("shoulder current angle:", String.format("%.2f", arm.getShoulderAngle()));
         telemetry.addData("shoulder angle target:", String.format("%.2f", arm.getShoulderTargetAngle()));
 
-        PIDFCoefficients shoulderEncoderPIDF    = arm.shoulder.getPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER);
-        telemetry.addData("shoulder p:",String.format("%.4e",  shoulderEncoderPIDF.p));
-        telemetry.addData("shoulder i:", String.format("%.4e", shoulderEncoderPIDF.i));
-        telemetry.addData("shoulder d:",String.format("%.4e",  shoulderEncoderPIDF.d));
-        PIDFCoefficients shoulderPositionPIDF    = arm.shoulder.getPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION);
-        telemetry.addData("shoulder pos p:",String.format("%.4e",  shoulderPositionPIDF.p));
-        telemetry.addData("shoulder pos i:", String.format("%.4e", shoulderPositionPIDF.i));
-        telemetry.addData("shoulder pos d:",String.format("%.4e",  shoulderPositionPIDF.d));
-        telemetry.addData("shoulder vel:",String.format("%.4e",  arm.shoulder.getVelocity()));
+        arm.showPIDs(telemetry);
 
         //        telemetry.addData("shoulder p:", shoulder.p);
         // Publish Elbow values
@@ -155,43 +147,31 @@ public class TeleOpFreightFrenzyArmTest extends OpMode {
         }
 
         // puts the arm back to its beginning position
-        if(gamepad2.dpad_up){
-//            shoulder.setTargetAngle(360);
-//            elbow.setTargetAngle(0);
-            arm.shoulderDriveAbsolute( .25, 360);
+        if (gamepad2.dpad_up) {
+            arm.shoulderDriveAbsolute(.25, 360);
             stickControl = false;
 
         }
         // puts the arm to position 1
-        if(gamepad2.dpad_right){
+        if (gamepad2.dpad_right) {
 //            shoulder.p *= 1.2;
-            shoulderEncoderPIDF    = arm.shoulder.getPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER);
-            shoulderEncoderPIDF.p*= 1.2;
-            shoulderEncoderPIDF.d *= 1.2;
-            shoulderEncoderPIDF.i *= 1.2;
-            arm.shoulder.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, shoulderEncoderPIDF);
+            arm.scaleShoulderPid(1.2);
             stickControl = false;
         }
+
         // puts the arm back to its position 2
-        if(gamepad2.dpad_left){
-            shoulderEncoderPIDF    = arm.shoulder.getPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER);
-            shoulderEncoderPIDF.p /= 1.2;
-            shoulderEncoderPIDF.d /= 1.2;
-            shoulderEncoderPIDF.i /= 1.2;
-            arm.shoulder.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, shoulderEncoderPIDF);
+        if (gamepad2.dpad_left) {
+            arm.scaleShoulderPid(1.0/1.2);
             stickControl = false;
         }
+
         // puts the arm back to its position 3
-        if(gamepad2.dpad_down){
-            arm.shoulderDriveAbsolute( .25, -360);
-
-//            shoulder.setTargetAngle(0);
-//            elbow.setTargetAngle(0);
+        if (gamepad2.dpad_down) {
+            arm.shoulderDriveAbsolute(.25, -360);
             stickControl = false;
         }
 
-
-//        shoulder.update();
+        arm.update();
     }
 
     // Code to run REPEATEDLY after the driver hits PLAY but before they hit STOP
@@ -199,7 +179,8 @@ public class TeleOpFreightFrenzyArmTest extends OpMode {
     public void loop() {
         handleArm();
         // Show the elapsed game time and wheel power.
-        telemetry.addData("Status", "Run Time: " + runtime.toString()); }
+        telemetry.addData("Status", "Run Time: " + runtime.toString());
+    }
 
     /*
       Code to run ONCE after the driver hits STOP
