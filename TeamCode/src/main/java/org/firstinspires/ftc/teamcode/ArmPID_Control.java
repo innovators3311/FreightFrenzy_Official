@@ -3,8 +3,6 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.PIDFCoefficients;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.util.PIDControl;
 
@@ -18,11 +16,8 @@ public class ArmPID_Control extends Arm2_Control {
     public PIDControl shoulderPID = null;
     public PIDControl elbowPID = null;
 
-    public PIDFCoefficients shoulderPIDF;
-
     /* local OpMode members. */
     HardwareMap hwMap = null;
-    private final ElapsedTime period = new ElapsedTime();
     private Object Servo;
 
     //    private double SHOULDER_GRAVITY_FACTOR = -0.05;
