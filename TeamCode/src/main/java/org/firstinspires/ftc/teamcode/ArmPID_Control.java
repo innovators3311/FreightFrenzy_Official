@@ -3,15 +3,13 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.util.PIDControl;
 
 
 public class ArmPID_Control extends Arm2_Control {
-
-    //create variables for motors/servos
-    public DcMotorEx elbow = null;
-    public DcMotorEx shoulder = null;
 
     public PIDControl shoulderPID = null;
     public PIDControl elbowPID = null;
@@ -19,9 +17,6 @@ public class ArmPID_Control extends Arm2_Control {
     /* local OpMode members. */
     HardwareMap hwMap = null;
     private Object Servo;
-
-    //    private double SHOULDER_GRAVITY_FACTOR = -0.05;
-    private final double SHOULDER_GRAVITY_FACTOR = 0;
 
     @Override
     public void init(HardwareMap ahwMap) {
@@ -33,8 +28,8 @@ public class ArmPID_Control extends Arm2_Control {
         elbow = hwMap.get(DcMotorEx.class, "elbow");
         shoulder = hwMap.get(DcMotorEx.class, "shoulder");
 
-        shoulderPID = new PIDControl(shoulder, 1e-3, 0.0, 0.0);
-        elbowPID = new PIDControl(elbow, 1e-3, 0.0, 0.0);
+        shoulderPID = new PIDControl(shoulder, -3e-3, -1e-4, -3e-5);
+        elbowPID = new PIDControl(elbow, 3e-3, 0.0, 0.0);
 
         // Set the direction that the motors will turn
         elbow.setDirection(DcMotor.Direction.FORWARD);
@@ -55,8 +50,16 @@ public class ArmPID_Control extends Arm2_Control {
 
         elbow.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         shoulder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        SHOULDER_GRAVITY_FACTOR = 0.0;
     }
 
+    /**
+     * Drives the elbow joint to an absolute angle position.
+     *
+     * @param speed the maximum power to apply.
+     * @param elbowAngle The target angle.
+     */
     @Override
     public void elbowDriveAbsolute(double speed,
                                    double elbowAngle) {
@@ -64,6 +67,12 @@ public class ArmPID_Control extends Arm2_Control {
         elbowPID.maxPower = speed;
     }
 
+    /**
+     * Drives the shoulder joint to an absolute angle position.
+     *
+     * @param speed the maximum power to apply.
+     * @param shoulderAngle The target angle.
+     */
     @Override
     public void shoulderDriveAbsolute(double speed,
                                       double shoulderAngle) {
@@ -71,16 +80,31 @@ public class ArmPID_Control extends Arm2_Control {
         shoulderPID.maxPower = speed;
     }
 
+    /**
+     * Gets the current elbow joint target angle.
+     *
+      * @return angle in degrees
+     */
     @Override
     public double getElbowTargetAngle() {
         return elbowPID.getTargetAngle();
     }
 
+    /**
+     * Gets the current shoulder joint target angle.
+     *
+     * @return angle in degrees
+     */
     @Override
     public double getShoulderTargetAngle() {
         return shoulderPID.getTargetAngle();
     }
 
+    /**
+     * This function updates the PID control based on the new encoder values for each joint by
+     * calling the joint's update() command.
+     *
+     */
     @Override
     public void update() {
         shoulderPID.update();
@@ -90,11 +114,26 @@ public class ArmPID_Control extends Arm2_Control {
     @Override
     public boolean isBusy() {
         // Might want to have this check the shoulderPID and elbowPID's isBusy functions.
-        return shoulder.isBusy() || elbow.isBusy();
+        return true; // shoulder.isBusy() || elbow.isBusy();
     }
 
     @Override
     public void scaleShoulderPid(double v) {
         shoulderPID.p *= v;
+        shoulderPID.i *= v;
+        shoulderPID.d *= v;
+    }
+
+    @Override
+    public void showPIDs(Telemetry telemetry) {
+        telemetry.addData("shoulderPID motor:", shoulderPID.motor.toString());
+
+        telemetry.addData("shoulder p:", String.format("%.4e", shoulderPID.p));
+        telemetry.addData("shoulder i:", String.format("%.4e", shoulderPID.i));
+        telemetry.addData("shoulder d:", String.format("%.4e", shoulderPID.d));
+        telemetry.addData("shoulder pos p:", String.format("%.4e", shoulderPID.p));
+        telemetry.addData("shoulder pos i:", String.format("%.4e", shoulderPID.i));
+        telemetry.addData("shoulder pos d:", String.format("%.4e", shoulderPID.d));
+        telemetry.addData("shoulder vel:", String.format("%.4e", shoulder.getVelocity()));
     }
 }                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       //Hi. You found me. -SECRET COMMENT

@@ -194,7 +194,7 @@ public class TeleOpFreightFrenzy extends OpMode {
     @Override
     public void loop() {
         handleArm();
-//        handleClaw();
+        handleClaw();
         telemetry.addData("shoulderPIDF", arm.shoulderPIDF.p);
         /*
          Choose to drive using either Tank Mode, or POV Mode

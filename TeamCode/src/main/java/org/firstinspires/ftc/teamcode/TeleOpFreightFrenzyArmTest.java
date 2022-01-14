@@ -56,12 +56,10 @@ public class TeleOpFreightFrenzyArmTest extends OpMode {
     // Declare OpMode members.
     private final ElapsedTime runtime = new ElapsedTime();
     //Bring in code to setup and control the arm.
-    Arm2_Control arm = new ArmPID_Control();
-    boolean stickControl = true;
+    ArmPID_Control arm = new ArmPID_Control();
+    boolean stickControl = false;
     double elbowSpeed = 0.0;
     double shoulderSpeed = 0.0;
-    PIDControl shoulder = null;
-    PIDControl elbow = null;
 
     /*
      * Code to run ONCE when the driver hits INIT
@@ -69,8 +67,6 @@ public class TeleOpFreightFrenzyArmTest extends OpMode {
     @Override
     public void init() {
         arm.init(hardwareMap);
-        this.shoulder = new PIDControl(arm.shoulder, .003, 0, 0);
-        this.elbow = new PIDControl(arm.elbow, .003, 0, 0);
         // Tell the driver that initialization is complete.
         telemetry.addData("Status", "Initialized");
     }
@@ -87,10 +83,8 @@ public class TeleOpFreightFrenzyArmTest extends OpMode {
      */
     @Override
     public void start() {
-
+        telemetry.addData("Status", "In Start");
         runtime.reset();
-
-
     }
 
     private void handleClaw() {
@@ -129,13 +123,12 @@ public class TeleOpFreightFrenzyArmTest extends OpMode {
         }
 
 
-        telemetry.addData("shoulder current angle:", String.format("%.2f", arm.getShoulderAngle()));
-        telemetry.addData("shoulder angle target:", String.format("%.2f", arm.getShoulderTargetAngle()));
 
         arm.showPIDs(telemetry);
 
-        //        telemetry.addData("shoulder p:", shoulder.p);
-        // Publish Elbow values
+        telemetry.addData("shoulder current angle:", String.format("%.2f", arm.getShoulderAngle()));
+        telemetry.addData("shoulder angle target:", String.format("%.2f", arm.getShoulderTargetAngle()));
+//        // Publish Elbow values
         telemetry.addData("elbow Current angle:", String.format("%.2f", arm.getElbowAngle()));
         telemetry.addData("elbow angle target:", String.format("%.2f", arm.getElbowTargetAngle()));
         telemetry.addData("Commanded shoulder Power", String.format("%.2f", arm.shoulder.getPower()));
@@ -148,7 +141,7 @@ public class TeleOpFreightFrenzyArmTest extends OpMode {
 
         // puts the arm back to its beginning position
         if (gamepad2.dpad_up) {
-            arm.shoulderDriveAbsolute(.25, 360);
+            arm.shoulderDriveAbsolute(.5, arm.getShoulderAngle() + 360);
             stickControl = false;
 
         }
@@ -167,16 +160,20 @@ public class TeleOpFreightFrenzyArmTest extends OpMode {
 
         // puts the arm back to its position 3
         if (gamepad2.dpad_down) {
-            arm.shoulderDriveAbsolute(.25, -360);
+            arm.shoulderDriveAbsolute(.5, arm.getShoulderAngle() - 360);
             stickControl = false;
         }
 
-        arm.update();
+        if (!stickControl) {
+            arm.update();
+        }
     }
 
     // Code to run REPEATEDLY after the driver hits PLAY but before they hit STOP
     @Override
     public void loop() {
+        telemetry.addData("Status", "In loop");
+
         handleArm();
         // Show the elapsed game time and wheel power.
         telemetry.addData("Status", "Run Time: " + runtime.toString());

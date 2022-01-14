@@ -41,11 +41,11 @@ public class PIDControl {
      * @param iValue The value for i
      * @param dValue The value for d
      */
-    public PIDControl(DcMotor motor, double pValue, double iValue, double dValue) {
+    public PIDControl(DcMotor motorValue, double pValue, double iValue, double dValue) {
         this.p = pValue;
         this.d = dValue;
         this.i = iValue;
-        this.motor = motor;
+        this.motor = motorValue;
     }
 
     /**

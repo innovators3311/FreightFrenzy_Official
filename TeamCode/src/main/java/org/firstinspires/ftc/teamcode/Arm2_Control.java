@@ -24,14 +24,20 @@ public class Arm2_Control {
     protected Object Servo;
     protected double ELBOW_COUNTS_PER_DEGREE = 8192.0 / 360.0;
     protected double SHOULDER_COUNTS_PER_DEGREE = 8192.0 / 360.0;
-    //    private double SHOULDER_GRAVITY_FACTOR = -0.05;
-    protected double SHOULDER_GRAVITY_FACTOR = 0;
+
+    protected double SHOULDER_GRAVITY_FACTOR = -0.05;
+    //  0  protected double SHOULDER_GRAVITY_FACTOR = 0;
     ElapsedTime runtime = new ElapsedTime();
 
-//    How much power to add when the shoulder arm is horizontal.
+    //    How much power to add when the shoulder arm is horizontal.
     /* local OpMode members. */
     HardwareMap hwMap = null;
 
+    /**
+     * Initialize hardware and prepare to run TeleOp
+     *
+     * @param ahwMap a hardware map
+     */
     public void init(HardwareMap ahwMap) {
 
         // Save reference to Hardware map
@@ -40,18 +46,17 @@ public class Arm2_Control {
         //declare motors so that they can be used
         elbow = hwMap.get(DcMotorEx.class, "elbow");
         shoulder = hwMap.get(DcMotorEx.class, "shoulder");
-//        sPid = new PIDControl(shoulder, 1.0, 0.0, 0.0);
 
         shoulderPIDF = shoulder.getPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER);
-        shoulderPIDF.p = -1;
+        shoulderPIDF.p = -0.0001;
         shoulderPIDF.i *= -0.1; // -1e-4;
         shoulderPIDF.d *= -0.1; // -1e-4;
 
         //        shoulder.setPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION, shoulderPIDF);
         shoulder.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, shoulderPIDF);
 
-        //  cl = hwMap.get(Servo.class, "cl");
-        //  mag = hwMap.get(Servo.class, "mag");
+        cl = hwMap.get(Servo.class, "claw");
+        mag = hwMap.get(Servo.class, "mag");
 
 
         //set the direction that the motors will turn
@@ -73,8 +78,6 @@ public class Arm2_Control {
 
         elbow.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         shoulder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-
     }
 
     /*
@@ -104,8 +107,7 @@ public class Arm2_Control {
 
     public void shoulderDriveAbsolute(double speed,
                                       double shoulderAngle) {
-        int newShoulderTarget;
-        newShoulderTarget = (int) (shoulderAngle * ELBOW_COUNTS_PER_DEGREE);
+        int newShoulderTarget = (int) (shoulderAngle * ELBOW_COUNTS_PER_DEGREE);
         shoulder.setTargetPosition(newShoulderTarget);
         shoulder.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         runtime.reset();
@@ -137,14 +139,14 @@ public class Arm2_Control {
     }
 
     public void elbowMovePower(double power) {
-        elbow.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+//        elbow.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         elbow.setPower(power);
 
 // (: (:
     }
 
     public void shoulderMovePower(double power) {
-        shoulder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+//        shoulder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         power += getShoulderGravityVector() * SHOULDER_GRAVITY_FACTOR;
         shoulder.setPower(power);
 
