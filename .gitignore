@@ -4,9 +4,6 @@
 *.ap_
 *.aab
 
-# Java dumps
-*.hprof
-
 !libs/*.aar
 
 # Files for the ART/Dalvik VM
@@ -89,3 +86,5 @@ lint/outputs/
 lint/tmp/
 # lint/reports/
 
+.DS_Store
+.idea
