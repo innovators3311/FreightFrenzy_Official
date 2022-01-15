@@ -25,7 +25,7 @@ public class Arm2_Control {
     protected double ELBOW_COUNTS_PER_DEGREE = 8192.0 / 360.0;
     protected double SHOULDER_COUNTS_PER_DEGREE = 8192.0 / 360.0;
 
-    protected double SHOULDER_GRAVITY_FACTOR = -0.05;
+    protected double SHOULDER_GRAVITY_FACTOR = -0.1;
     //  0  protected double SHOULDER_GRAVITY_FACTOR = 0;
     ElapsedTime runtime = new ElapsedTime();
 
@@ -119,7 +119,7 @@ public class Arm2_Control {
     }
 
     public double getShoulderGravityVector() {
-        return Math.cos(getShoulderAngle() * Math.PI / 360.0);
+        return Math.cos(getShoulderAngle() * Math.PI / 180.0);
     }
 
     public double getElbowAngle() {
