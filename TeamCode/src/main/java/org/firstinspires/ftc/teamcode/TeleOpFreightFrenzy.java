@@ -65,7 +65,6 @@ public class TeleOpFreightFrenzy extends OpMode {
     public DcMotor rightDriveBack = null;
     public DcMotor spinner = null;
     public double speedFactor = 1.0;
-    public double slowingFactor = 1.0;
     /* Setup a variable for each drive wheel to save power level for telemetry */
     public double leftPowerFront = 1.0;
     public double rightPowerFront = 1.0;
@@ -161,26 +160,14 @@ public class TeleOpFreightFrenzy extends OpMode {
         double elbowPower = 0.00;
         double shoulderPower = 0.0;
         // If driver moves the stick more than 10% or we're already in run without encoder mode ...
-//        if ((Math.abs(gamepad2.left_stick_y) > .10) ||
-//                (arm.elbow.getMode() == DcMotor.RunMode.RUN_WITHOUT_ENCODER)) {
-////            arm.elbowMovePower(gamepad2.left_stick_y * .7);
-//        }
         elbowPower += gamepad2.left_stick_y * 0.7;
-//        if ((Math.abs(gamepad2.right_stick_y) > .10) ||
-//                (arm.shoulder.getMode() == DcMotor.RunMode.RUN_WITHOUT_ENCODER)) {
-//            arm.shoulderMovePower(gamepad2.right_stick_y * 0.7);
-//        }
         shoulderPower += gamepad2.right_stick_y * 0.7;
-//        if ((Math.abs(gamepad2.right_stick_x) > .10) ||
-//                (arm.shoulder.getMode() == DcMotor.RunMode.RUN_WITHOUT_ENCODER)) {
-//            arm.shoulderMovePower(gamepad2.right_stick_x * 0.7);
-//            arm.elbowMovePower(-gamepad2.right_stick_x * 0.7);
-//        }
         elbowPower -= -gamepad2.right_stick_x * 0.7;
         shoulderPower += -gamepad2.right_stick_x * 0.7;
 
         arm.shoulderMovePower(shoulderPower);
         arm.elbowMovePower(elbowPower);
+
         telemetry.addData("shoulder current angle:", arm.getShoulderAngle());
         telemetry.addData("shoulder angle target:", arm.getShoulderTargetAngle());
         telemetry.addData("gravity vector", arm.getShoulderGravityVector());
@@ -200,40 +187,9 @@ public class TeleOpFreightFrenzy extends OpMode {
             arm.shoulder.setTargetPosition(arm.shoulder.getTargetPosition());
         }
 
-/*
-        // puts the arm back to its beginning position
-        if(gamepad2.dpad_up){
-            arm.armDriveAbsolute(.1, 0, 0);
-        }
-        // puts the arm to position 1
-        if(gamepad2.dpad_right){
-            arm.shoulderDriveAbsolute(.01, 50);
-        }
-        // puts the arm back to its position 2
-        if(gamepad2.dpad_left){
-            arm.shoulderDriveAbsolute(.1, 50);
-        }
-        // puts the arm back to its position 3
-        if(gamepad2.dpad_down){
-            arm.elbowDriveAbsolute(.25, 50);
-        }
-*/
     }
 
-    // Code to run REPEATEDLY after the driver hits PLAY but before they hit STOP
-    @Override
-    public void loop() {
-        handleArm();
-        handleClaw();
-        telemetry.addData("shoulderPIDF", arm.shoulderPIDF.p);
-        /*
-         Choose to drive using either Tank Mode, or POV Mode
-         Comment out the method that's not used.  The default below is POV.
-         POV Mode uses left stick to go forward, and right stick to turn.
-         - This uses basic math to combine motions and is easier to drive straight.
-        */
-        // Send calculated power to wheels
-
+    public void handleSpinner() {
         // The code below allows you to
         if (gamepad2.right_bumper) {
             spinner.setPower(1.5);
@@ -244,36 +200,51 @@ public class TeleOpFreightFrenzy extends OpMode {
         if (!gamepad2.left_bumper && !gamepad2.right_bumper){
             spinner.setPower(0.0);
         }
-        // Get the gamepad control values for this loop iteration
+    }
 
+    public void handleDriving(){
+        /*
+         Choose to drive using either Tank Mode, or POV Mode
+         Comment out the method that's not used.  The default below is POV.
+         POV Mode uses left stick to go forward, and right stick to turn.
+         - This uses basic math to combine motions and is easier to drive straight.
+        */
+
+        // Get the gamepad control values for this loop iteration
         drive = -gamepad1.left_stick_y;
         turn = gamepad1.left_stick_x;
         strafe = gamepad1.right_stick_x;
 
 //send power to wheels
         speedFactor = gamepad1.right_trigger + .25;
-        leftDriveFront.setPower(leftPowerFront);
-        rightDriveFront.setPower(rightPowerFront);
-        leftDriveBack.setPower(leftPowerBack);
-        rightDriveBack.setPower(rightPowerBack);
-
-
 //(:
-        leftPowerFront = (drive + turn + strafe) * speedFactor * slowingFactor;
-        rightPowerFront = (drive - turn - strafe) * speedFactor * slowingFactor;
-        leftPowerBack = (drive + turn - strafe) * speedFactor * slowingFactor;
-        rightPowerBack = (drive - turn + strafe) * speedFactor * slowingFactor;
+        leftPowerFront = (drive + turn + strafe) * speedFactor;
+        rightPowerFront = (drive - turn - strafe) * speedFactor;
+        leftPowerBack = (drive + turn - strafe) * speedFactor;
+        rightPowerBack = (drive - turn + strafe) * speedFactor;
         //send power to wheels
         leftDriveFront.setPower(leftPowerFront);
         rightDriveFront.setPower(rightPowerFront);
         leftDriveBack.setPower(leftPowerBack);
         rightDriveBack.setPower(rightPowerBack);
 
+    }
+
+    // Code to run REPEATEDLY after the driver hits PLAY but before they hit STOP
+    @Override
+    public void loop() {
+        handleArm();
+        handleClaw();
+        handleSpinner();
+        handleDriving();
+
+        telemetry.addData("shoulderPIDF", arm.shoulderPIDF.p);
+
 
         // Show the elapsed game time and wheel power.
         telemetry.addData("Status", "Run Time: " + runtime.toString());
         telemetry.addData("Motors", "lf(%.2f), rf(%.2f), lb(%.2f), rb(%.2f)", leftPowerFront, rightPowerFront, leftPowerBack, rightPowerBack);
-        telemetry.addData("Variables", "sf(%.2f), slf(%.2f)", speedFactor, slowingFactor);
+        telemetry.addData("Variables", "sf(%.2f)", speedFactor);
     }
 
     /*
