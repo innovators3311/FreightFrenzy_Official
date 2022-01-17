@@ -3,7 +3,6 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.util.PIDControl;
@@ -16,11 +15,10 @@ public class ArmPID_Control extends Arm2_Control {
 
     /* local OpMode members. */
     HardwareMap hwMap = null;
-    private Object Servo;
 
     @Override
     public void init(HardwareMap ahwMap) {
-
+        super.init(ahwMap);
         // Save reference to Hardware map
         hwMap = ahwMap;
 
@@ -28,8 +26,8 @@ public class ArmPID_Control extends Arm2_Control {
         elbow = hwMap.get(DcMotorEx.class, "elbow");
         shoulder = hwMap.get(DcMotorEx.class, "shoulder");
 
-        shoulderPID = new PIDControl(shoulder, -3e-3, -1e-4, -3e-5);
-        elbowPID = new PIDControl(elbow, 3e-3, 0.0, 0.0);
+        shoulderPID = new PIDControl(shoulder, -1e-2, -1e-2, -3e-4);
+        elbowPID = new PIDControl(elbow, -1e-2, -1e-2, -3e-4);
 
         // Set the direction that the motors will turn
         elbow.setDirection(DcMotor.Direction.FORWARD);
@@ -107,8 +105,8 @@ public class ArmPID_Control extends Arm2_Control {
      */
     @Override
     public void update() {
-        shoulderPID.update();
-        elbowPID.update();
+        shoulderPID.update(getShoulderGravityVector() * SHOULDER_GRAVITY_FACTOR);
+        elbowPID.update(0);
     }
 
     @Override

@@ -51,14 +51,14 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 @TeleOp(name = "TeleOpFreightFrenzy", group = "3311")
 public class TeleOpFreightFrenzy extends OpMode {
     //Bring in code to setup arm.
-    Arm2_Control arm = new Arm2_Control();
+    protected Arm2_Control arm = new Arm2_Control();
 
     // debounce A & X
     protected boolean debounceA = false;
     protected boolean debounceX = false;
 
     // Declare OpMode members.
-    private final ElapsedTime runtime = new ElapsedTime();
+    protected final ElapsedTime runtime = new ElapsedTime();
     public DcMotor leftDriveFront = null;
     public DcMotor rightDriveFront = null;
     public DcMotor leftDriveBack = null;
@@ -80,7 +80,7 @@ public class TeleOpFreightFrenzy extends OpMode {
     @Override
     public void init() {
 
-        arm.init(hardwareMap);
+        this.arm.init(hardwareMap);
         // Initialize the hardware variables. Note that the strings used here as parameters
         // to 'get' must correspond to the names assigned during the robot configuration
         // step (using the FTC Robot Controller app on the phone).
@@ -129,7 +129,7 @@ public class TeleOpFreightFrenzy extends OpMode {
         runtime.reset();
     }
 
-    private void handleClaw() {
+    protected void handleClaw() {
         if (gamepad2.a) {
             if (!debounceA) {
                 // This code only runs once if A is pressed.
@@ -151,12 +151,10 @@ public class TeleOpFreightFrenzy extends OpMode {
             else {
                 arm.mag.setPosition(0);
             }
-
-
     }
 
 
-    private void handleArm() {
+    protected void handleArm() {
         double elbowPower = 0.00;
         double shoulderPower = 0.0;
         // If driver moves the stick more than 10% or we're already in run without encoder mode ...
@@ -228,23 +226,21 @@ public class TeleOpFreightFrenzy extends OpMode {
         leftDriveBack.setPower(leftPowerBack);
         rightDriveBack.setPower(rightPowerBack);
 
+        telemetry.addData("Motors", "lf(%.2f), rf(%.2f), lb(%.2f), rb(%.2f)", leftPowerFront, rightPowerFront, leftPowerBack, rightPowerBack);
+        telemetry.addData("Variables", "sf(%.2f)", speedFactor);
+
     }
 
     // Code to run REPEATEDLY after the driver hits PLAY but before they hit STOP
     @Override
     public void loop() {
-        handleArm();
-        handleClaw();
-        handleSpinner();
-        handleDriving();
-
-        telemetry.addData("shoulderPIDF", arm.shoulderPIDF.p);
-
+        this.handleArm();
+        this.handleClaw();
+        this.handleSpinner();
+        this.handleDriving();
 
         // Show the elapsed game time and wheel power.
         telemetry.addData("Status", "Run Time: " + runtime.toString());
-        telemetry.addData("Motors", "lf(%.2f), rf(%.2f), lb(%.2f), rb(%.2f)", leftPowerFront, rightPowerFront, leftPowerBack, rightPowerBack);
-        telemetry.addData("Variables", "sf(%.2f)", speedFactor);
     }
 
     /*

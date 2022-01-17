@@ -8,7 +8,6 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.util.PIDControl;
 
 
 public class Arm2_Control {
@@ -18,10 +17,8 @@ public class Arm2_Control {
     public DcMotorEx shoulder = null;
     public Servo cl = null;
     public Servo mag = null;
-    public PIDControl sPid = null;
     public PIDFCoefficients shoulderPIDF;
     protected ElapsedTime period = new ElapsedTime();
-    protected Object Servo;
     protected double ELBOW_COUNTS_PER_DEGREE = 8192.0 / 360.0;
     protected double SHOULDER_COUNTS_PER_DEGREE = 8192.0 / 360.0;
 
