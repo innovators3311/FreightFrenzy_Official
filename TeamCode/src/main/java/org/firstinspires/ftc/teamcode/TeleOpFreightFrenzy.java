@@ -50,13 +50,6 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 @TeleOp(name = "TeleOpFreightFrenzy", group = "3311")
 public class TeleOpFreightFrenzy extends OpMode {
-    //Bring in code to setup arm.
-    protected Arm2_Control arm = new Arm2_Control();
-
-    // debounce A & X
-    protected boolean debounceA = false;
-    protected boolean debounceX = false;
-
     // Declare OpMode members.
     protected final ElapsedTime runtime = new ElapsedTime();
     public DcMotor leftDriveFront = null;
@@ -73,6 +66,11 @@ public class TeleOpFreightFrenzy extends OpMode {
     public double drive = 0.0;
     public double turn = 0.0;
     public double strafe = 0.0;
+    //Bring in code to setup arm.
+    protected Arm2_Control arm = new Arm2_Control();
+    // debounce A & X
+    protected boolean debounceA = false;
+    protected boolean debounceX = false;
 
     /*
      * Code to run ONCE when the driver hits INIT
@@ -147,10 +145,9 @@ public class TeleOpFreightFrenzy extends OpMode {
 
         if (gamepad2.x) {
             arm.mag.setPosition(1);
+        } else {
+            arm.mag.setPosition(0);
         }
-            else {
-                arm.mag.setPosition(0);
-            }
     }
 
 
@@ -178,10 +175,10 @@ public class TeleOpFreightFrenzy extends OpMode {
             arm.emergencyStop();
         }
 
-        if (arm.elbow.getMode() == DcMotor.RunMode.RUN_TO_POSITION){
+        if (arm.elbow.getMode() == DcMotor.RunMode.RUN_TO_POSITION) {
             arm.elbow.setTargetPosition(arm.elbow.getTargetPosition());
         }
-        if (arm.shoulder.getMode() == DcMotor.RunMode.RUN_TO_POSITION){
+        if (arm.shoulder.getMode() == DcMotor.RunMode.RUN_TO_POSITION) {
             arm.shoulder.setTargetPosition(arm.shoulder.getTargetPosition());
         }
 
@@ -195,12 +192,12 @@ public class TeleOpFreightFrenzy extends OpMode {
         if (gamepad2.left_bumper) {
             spinner.setPower(-1.0);
         }
-        if (!gamepad2.left_bumper && !gamepad2.right_bumper){
+        if (!gamepad2.left_bumper && !gamepad2.right_bumper) {
             spinner.setPower(0.0);
         }
     }
 
-    public void handleDriving(){
+    public void handleDriving() {
         /*
          Choose to drive using either Tank Mode, or POV Mode
          Comment out the method that's not used.  The default below is POV.
