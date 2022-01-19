@@ -8,7 +8,6 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.util.PIDControl;
 
 
 public class Arm2_Control {
@@ -18,14 +17,12 @@ public class Arm2_Control {
     public DcMotorEx shoulder = null;
     public Servo cl = null;
     public Servo mag = null;
-    public PIDControl sPid = null;
     public PIDFCoefficients shoulderPIDF;
     protected ElapsedTime period = new ElapsedTime();
-    protected Object Servo;
     protected double ELBOW_COUNTS_PER_DEGREE = 8192.0 / 360.0;
     protected double SHOULDER_COUNTS_PER_DEGREE = 8192.0 / 360.0;
 
-    protected double SHOULDER_GRAVITY_FACTOR = -0.05;
+    protected double SHOULDER_GRAVITY_FACTOR = -0.1;
     //  0  protected double SHOULDER_GRAVITY_FACTOR = 0;
     ElapsedTime runtime = new ElapsedTime();
 
@@ -119,7 +116,7 @@ public class Arm2_Control {
     }
 
     public double getShoulderGravityVector() {
-        return Math.cos(getShoulderAngle() * Math.PI / 360.0);
+        return Math.cos(getShoulderAngle() * Math.PI / 180.0);
     }
 
     public double getElbowAngle() {
@@ -222,4 +219,6 @@ public class Arm2_Control {
         shoulderEncoderPIDF.i *= v;
         shoulder.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, shoulderEncoderPIDF);
     }
+
+
 }                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       //Hi. You found me. -SECRET COMMENT
