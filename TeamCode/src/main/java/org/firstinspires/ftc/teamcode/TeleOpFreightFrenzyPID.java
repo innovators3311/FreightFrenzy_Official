@@ -14,11 +14,12 @@ public class TeleOpFreightFrenzyPID extends TeleOpFreightFrenzy {
     public boolean armLevelDebounceUp = false;
     public boolean armLevelDebounceDown = false;
 
-    public double[][] armPos = {
-            {200,-173}, // position 0
-            {30,-30}, // position 1
-            {210,0}, // position 2
-            {0,0}, // position 3
+    // This is a Java Array. It's stored as (shoulder, elbow) values for each position.
+    public double[][] ARM_POSITIONS = {
+            {200,-173}, // position 0: Ground pickup
+            {30,-30}, // position 1: Soft Reset
+            {210,-170}, // position 2: Top (needs tuning)
+            {0,0}, // position 3: Hard Reset
     };
 
     ArmPID_Control arm = new ArmPID_Control();
@@ -65,7 +66,8 @@ public class TeleOpFreightFrenzyPID extends TeleOpFreightFrenzy {
 //         Publish Elbow values
         telemetry.addData("elbow Current angle:", arm.getElbowAngle());
         telemetry.addData("elbow angle target:", arm.getElbowTargetAngle());
-        telemetry.addData("is busy?", arm.isBusy());
+//        telemetry.addData("is busy?", arm.isBusy());
+        telemetry.addData("Arm Level", armLevel)
 
         while (gamepad2.right_stick_button || gamepad2.left_stick_button) {
             arm.emergencyStop();
@@ -76,14 +78,6 @@ public class TeleOpFreightFrenzyPID extends TeleOpFreightFrenzy {
         }
     }
     public void handleFixedPos(){
-        if(armLevel < 0){
-            armLevel = 0;
-        }
-
-        if(armLevel > 3){
-            armLevel = 3;
-        }
-
         if (gamepad2.dpad_up) {
 
             if (!armLevelDebounceUp) {
@@ -103,9 +97,19 @@ public class TeleOpFreightFrenzyPID extends TeleOpFreightFrenzy {
         }    else{
             armLevelDebounceDown = false;
         }
+
+        if(armLevel < 0){
+            armLevel = 0;
+        }
+
+        int armPosLen = ARM_POSITIONS.length;
+        if(armLevel > armPosLen-1){
+            armLevel = armPosLen-1;
+        }
+
         if(gamepad2.dpad_down || gamepad2.dpad_up){
-            arm.shoulderDriveAbsolute(1, armPos[armLevel][0]);
-            arm.elbowDriveAbsolute(1, armPos[armLevel][1]);
+            arm.shoulderDriveAbsolute(1, ARM_POSITIONS[armLevel][0]);
+            arm.elbowDriveAbsolute(1, ARM_POSITIONS[armLevel][1]);
 
         }
     }
