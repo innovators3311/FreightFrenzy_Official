@@ -49,7 +49,7 @@ public class ArmPID_Control extends Arm2_Control {
         elbow.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         shoulder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        SHOULDER_GRAVITY_FACTOR = 0.0;
+        SHOULDER_GRAVITY_FACTOR = 0.05;
     }
 
     /**

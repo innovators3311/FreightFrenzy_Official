@@ -16,10 +16,12 @@ public class TeleOpFreightFrenzyPID extends TeleOpFreightFrenzy {
 
     // This is a Java Array. It's stored as (shoulder, elbow) values for each position.
     public double[][] ARM_POSITIONS = {
-            {200,-173}, // position 0: Ground pickup
-            {30,-30}, // position 1: Soft Reset
-            {210,-170}, // position 2: Top (needs tuning)
-            {0,0}, // position 3: Hard Reset
+            {0,0}, // position 1: Hard Reset
+            {30,-30}, // position 2: Soft Reset
+            {200,-173}, // position 3: Ground pickup
+            {162.8,-144.3}, //position 4: Middle yaeiout
+            {200,-170}, // position 5: Top (needs tuning)
+
     };
 
     ArmPID_Control arm = new ArmPID_Control();
@@ -31,6 +33,7 @@ public class TeleOpFreightFrenzyPID extends TeleOpFreightFrenzy {
     public void init() {
         super.init();
         this.arm.init(hardwareMap);
+
     }
 
     @Override
@@ -67,7 +70,7 @@ public class TeleOpFreightFrenzyPID extends TeleOpFreightFrenzy {
         telemetry.addData("elbow Current angle:", arm.getElbowAngle());
         telemetry.addData("elbow angle target:", arm.getElbowTargetAngle());
 //        telemetry.addData("is busy?", arm.isBusy());
-        telemetry.addData("Arm Level", armLevel)
+        telemetry.addData("Arm Level", armLevel);
 
         while (gamepad2.right_stick_button || gamepad2.left_stick_button) {
             arm.emergencyStop();

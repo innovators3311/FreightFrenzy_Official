@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -11,17 +12,17 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 
 public class Arm2_Control {
-
+// shoulder limit switch
     //create variables for motors/servos
     public DcMotorEx elbow = null;
     public DcMotorEx shoulder = null;
+    public DigitalChannel shoulderLimitSwitch = null;
     public Servo cl = null;
     public Servo mag = null;
     public PIDFCoefficients shoulderPIDF;
     protected ElapsedTime period = new ElapsedTime();
     protected double ELBOW_COUNTS_PER_DEGREE = 8192.0 / 360.0;
     protected double SHOULDER_COUNTS_PER_DEGREE = 8192.0 / 360.0;
-
     protected double SHOULDER_GRAVITY_FACTOR = -0.1;
     //  0  protected double SHOULDER_GRAVITY_FACTOR = 0;
     ElapsedTime runtime = new ElapsedTime();
@@ -43,7 +44,7 @@ public class Arm2_Control {
         //declare motors so that they can be used
         elbow = hwMap.get(DcMotorEx.class, "elbow");
         shoulder = hwMap.get(DcMotorEx.class, "shoulder");
-
+        shoulderLimitSwitch = hwMap.get(DigitalChannel.class,"shoulder limit switch");
         shoulderPIDF = shoulder.getPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER);
         shoulderPIDF.p = -0.0001;
         shoulderPIDF.i *= -0.1; // -1e-4;
@@ -220,5 +221,12 @@ public class Arm2_Control {
         shoulder.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, shoulderEncoderPIDF);
     }
 
-
+    public void ArmInit(){
+        while (shoulderLimitSwitch.getState() == false){
+            shoulder.setPower(-0.1);
+        }
+        shoulder.setPower(0);
+        shoulder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        elbow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+    }
 }                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       //Hi. You found me. -SECRET COMMENT
