@@ -3,7 +3,6 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.util.PIDControl;
 
@@ -48,8 +47,23 @@ public class ArmPID_Control extends Arm2_Control {
 
         elbow.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         shoulder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    }
 
-        SHOULDER_GRAVITY_FACTOR = 0.05;
+    public void init_loop(){
+        if( !armInitalized ){
+            if (!shoulderLimitSwitch.isPressed() && !armInitalized){
+                shoulder.setPower(0.5);
+            }
+            else{
+                shoulder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                elbow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                shoulderDriveAbsolute(.7, 20);
+                armInitalized = true;
+            }
+        }
+        else{
+            shoulderPID.update(getShoulderGravityVector() * SHOULDER_GRAVITY_FACTOR);
+        }
     }
 
     /**
@@ -134,4 +148,5 @@ public class ArmPID_Control extends Arm2_Control {
         telemetry.addData("shoulder pos d:", String.format("%.4e", shoulderPID.d));
         telemetry.addData("shoulder vel:", String.format("%.4e", shoulder.getVelocity()));
     }
-}                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       //Hi. You found me. -SECRET COMMENT
+}
+                                                                                                                                                                                                                             //Hi. You found me. -SECRET COMMENT

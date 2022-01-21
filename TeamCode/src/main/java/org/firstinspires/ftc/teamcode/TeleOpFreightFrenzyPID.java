@@ -19,7 +19,7 @@ public class TeleOpFreightFrenzyPID extends TeleOpFreightFrenzy {
             {0,0}, // position 1: Hard Reset
             {30,-30}, // position 2: Soft Reset
             {200,-173}, // position 3: Ground pickup
-            {162.8,-144.3}, //position 4: Middle yaeiout
+            {162.8,-144.3}, //position 4: Middle yu yaeiouyt
             {200,-170}, // position 5: Top (needs tuning)
 
     };
@@ -33,7 +33,12 @@ public class TeleOpFreightFrenzyPID extends TeleOpFreightFrenzy {
     public void init() {
         super.init();
         this.arm.init(hardwareMap);
+    }
 
+    @Override
+    public void init_loop(){
+        telemetry.addData("Shoulder Button Pressed", arm.shoulderLimitSwitch.isPressed());
+        arm.init_loop();
     }
 
     @Override
