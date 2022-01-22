@@ -50,6 +50,7 @@ public class ArmPID_Control extends Arm2_Control {
     }
 
     public void init_loop(){
+        //shoulder
         if( !armInitalized ){
             if (!shoulderLimitSwitch.isPressed() && !armInitalized){
                 shoulder.setPower(0.5);
@@ -63,6 +64,22 @@ public class ArmPID_Control extends Arm2_Control {
         }
         else{
             shoulderPID.update(getShoulderGravityVector() * SHOULDER_GRAVITY_FACTOR);
+        }
+
+        //elbow
+        if( !armInitalized ){
+            if (!elbowLimitSwitch.isPressed() && !armInitalized){
+                elbow.setPower(-0.5);
+            }
+            else{
+                shoulder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                elbow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                elbowDriveAbsolute(.7, 20);
+                armInitalized = true;
+            }
+        }
+        else{
+            elbowPID.update(getShoulderGravityVector() * SHOULDER_GRAVITY_FACTOR);
         }
     }
 

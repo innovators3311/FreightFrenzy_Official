@@ -14,9 +14,10 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 public class Arm2_Control {
 // shoulder limit switch
     //create variables for motors/servos
-    public DcMotorEx elbow = null;
+    public DcMotorEx elbow    = null;
     public DcMotorEx shoulder = null;
     public TouchSensor shoulderLimitSwitch = null;
+    public TouchSensor elbowLimitSwitch = null;
     public Servo cl = null;
     public Servo mag = null;
     public PIDFCoefficients shoulderPIDF;
@@ -46,6 +47,7 @@ public class Arm2_Control {
         elbow = hwMap.get(DcMotorEx.class, "elbow");
         shoulder = hwMap.get(DcMotorEx.class, "shoulder");
         shoulderLimitSwitch = hwMap.get(TouchSensor.class,"shoulder_limit");
+        elbowLimitSwitch = hwMap.get(TouchSensor.class,"elbow_limit");
         shoulderPIDF = shoulder.getPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER);
         shoulderPIDF.p = -0.0001;
         shoulderPIDF.i *= -0.1; // -1e-4;
