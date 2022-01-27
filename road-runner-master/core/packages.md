@@ -10,14 +10,14 @@ Common types used to represent robot state, paths, trajectories, etc.
 
 Controllers for generic control tasks including tracking motion profiles (not limited to 2D paths or trajectories).
 
-# Package com.acmerobotics.roadrunner.drive
+# Package com.acmerobotics.roadrunner.org.firstinspires.ftc.teamcode.drive
 
 Drive-specific interfaces that provide functionality for setting robot velocities and using positional feedback for
 localization.
 
 # Package com.acmerobotics.roadrunner.followers
 
-A collection of path and trajectory followers for various drive types.
+A collection of path and trajectory followers for various org.firstinspires.ftc.teamcode.drive types.
 
 # Package com.acmerobotics.roadrunner.geometry
 
@@ -25,7 +25,7 @@ Core geometric types for representing robot state.
 
 # Package com.acmerobotics.roadrunner.kinematics
 
-Kinematics for the various drive types.
+Kinematics for the various org.firstinspires.ftc.teamcode.drive types.
 
 # Package com.acmerobotics.roadrunner.localization
 
@@ -49,7 +49,7 @@ Types for representing 2D robot trajectories, including time parametrizations of
 
 # Package com.acmerobotics.roadrunner.trajectory.constraints
 
-Specific constraints for trajectories and different drive types.
+Specific constraints for trajectories and different org.firstinspires.ftc.teamcode.drive types.
 
 # Package com.acmerobotics.roadrunner.trajectory.config
 

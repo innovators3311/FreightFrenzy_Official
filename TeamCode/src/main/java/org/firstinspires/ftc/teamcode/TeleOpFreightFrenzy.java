@@ -60,7 +60,7 @@ public class TeleOpFreightFrenzy extends OpMode {
     public DcMotor rightDriveBack = null;
     public double speedFactor = 1.0;
     public double slowingFactor = 1.0;
-    /* Setup a variable for each drive wheel to save power level for telemetry */
+    /* Setup a variable for each org.firstinspires.ftc.teamcode.drive wheel to save power level for telemetry */
     public double leftPowerFront = 1.0;
     public double rightPowerFront = 1.0;
     public double rightPowerBack = 1.0;
@@ -197,10 +197,10 @@ public class TeleOpFreightFrenzy extends OpMode {
         handleClaw();
         telemetry.addData("shoulderPIDF", arm.shoulderPIDF.p);
         /*
-         Choose to drive using either Tank Mode, or POV Mode
+         Choose to org.firstinspires.ftc.teamcode.drive using either Tank Mode, or POV Mode
          Comment out the method that's not used.  The default below is POV.
          POV Mode uses left stick to go forward, and right stick to turn.
-         - This uses basic math to combine motions and is easier to drive straight.
+         - This uses basic math to combine motions and is easier to org.firstinspires.ftc.teamcode.drive straight.
         */
         // Send calculated power to wheels
 

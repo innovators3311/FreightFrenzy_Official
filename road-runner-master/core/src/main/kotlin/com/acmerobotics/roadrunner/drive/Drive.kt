@@ -5,7 +5,7 @@ import com.acmerobotics.roadrunner.localization.Localizer
 import com.acmerobotics.roadrunner.util.Angle
 
 /**
- * Abstraction for generic robot drive motion and localization. Robot poses are specified in a coordinate system with
+ * Abstraction for generic robot org.firstinspires.ftc.teamcode.drive motion and localization. Robot poses are specified in a coordinate system with
  * positive x pointing forward, positive y pointing left, and positive heading measured counter-clockwise from the
  * x-axis.
  */
@@ -54,13 +54,13 @@ abstract class Drive {
     }
 
     /**
-     * Sets the current commanded drive state of the robot. Feedforward is applied to [driveSignal] before it reaches
+     * Sets the current commanded org.firstinspires.ftc.teamcode.drive state of the robot. Feedforward is applied to [driveSignal] before it reaches
      * the motors.
      */
     abstract fun setDriveSignal(driveSignal: DriveSignal)
 
     /**
-     * Sets the current commanded drive state of the robot. Feedforward is *not* applied to [drivePower].
+     * Sets the current commanded org.firstinspires.ftc.teamcode.drive state of the robot. Feedforward is *not* applied to [drivePower].
      */
     abstract fun setDrivePower(drivePower: Pose2d)
 

@@ -51,7 +51,7 @@ public class BasicOpMode_It2 extends OpMode
      */
     @Override
     public void loop() {
-        // Setup a variable for each drive wheel to save power level for telemetry
+        // Setup a variable for each org.firstinspires.ftc.teamcode.drive wheel to save power level for telemetry
         double leftPower = 0;
         double rightPower = 0;
         double clawPosition = 0;

@@ -3,7 +3,7 @@ package com.acmerobotics.roadrunner.drive
 import com.acmerobotics.roadrunner.geometry.Pose2d
 
 /**
- * Signal indicating the commanded kinematic state of a drive.
+ * Signal indicating the commanded kinematic state of a org.firstinspires.ftc.teamcode.drive.
  * @param vel robot frame velocity
  * @param accel robot frame acceleration
  */

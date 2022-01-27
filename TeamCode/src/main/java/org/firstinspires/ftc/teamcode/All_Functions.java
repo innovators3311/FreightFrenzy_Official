@@ -89,7 +89,7 @@ public class All_Functions extends LinearOpMode {
         //claw  = hardwareMap.get(Servo.class, "claw");
         //release = hardwareMap.get(Servo.class, "release");
 
-        // Most robots need the motor on one side to be reversed to drive forward
+        // Most robots need the motor on one side to be reversed to org.firstinspires.ftc.teamcode.drive forward
         // Reverse the motor that runs backwards when connected directly to the battery
         leftDrive.setDirection(DcMotor.Direction.FORWARD);
         rightDrive.setDirection(DcMotor.Direction.REVERSE);
@@ -111,7 +111,7 @@ public class All_Functions extends LinearOpMode {
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
 
-            // Setup a variable for each drive wheel to save power level for telemetry
+            // Setup a variable for each org.firstinspires.ftc.teamcode.drive wheel to save power level for telemetry
             double leftPower;
             double rightPower;
             double leftBackPower;
@@ -120,11 +120,11 @@ public class All_Functions extends LinearOpMode {
             double armPower = gamepad2.left_stick_y;
             double secondaryArmPower = gamepad2.right_stick_y;
 
-            // Choose to drive using either Tank Mode, or POV Mode
+            // Choose to org.firstinspires.ftc.teamcode.drive using either Tank Mode, or POV Mode
             // Comment out the method that's not used.  The default below is POV.
 
             // POV Mode uses left stick to go forward, and right stick to turn.
-            // - This uses basic math to combine motions and is easier to drive straight.
+            // - This uses basic math to combine motions and is easier to org.firstinspires.ftc.teamcode.drive straight.
 
             double turn = gamepad1.left_stick_x;
             double drive = -gamepad1.left_stick_y;
@@ -166,7 +166,7 @@ public class All_Functions extends LinearOpMode {
                 max = Math.max(Math.abs(rightPower), max);
                 max = Math.max(Math.abs(rightBackPower), max);
 
-                //divide everything by highest power to keep proper ratios of strafe, drive, and turn
+                //divide everything by highest power to keep proper ratios of strafe, org.firstinspires.ftc.teamcode.drive, and turn
                 leftPower /= max;
                 rightPower /= max;
                 leftBackPower /= max;

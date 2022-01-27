@@ -4,7 +4,7 @@ import com.acmerobotics.roadrunner.geometry.Pose2d
 import com.acmerobotics.roadrunner.util.epsilonEquals
 
 /**
- * Tank drive kinematic equations based upon the unicycle model. All wheel positions and velocities are given in
+ * Tank org.firstinspires.ftc.teamcode.drive kinematic equations based upon the unicycle model. All wheel positions and velocities are given in
  * (left, right) tuples. Robot poses are specified in a coordinate system with positive x pointing forward, positive y
  * pointing left, and positive heading measured counter-clockwise from the x-axis.
  *
@@ -40,7 +40,7 @@ object TankKinematics {
         robotToWheelVelocities(robotAccel, trackWidth)
 
     /**
-     * Computes the robot velocity corresponding to [wheelVelocities] and the given drive parameters.
+     * Computes the robot velocity corresponding to [wheelVelocities] and the given org.firstinspires.ftc.teamcode.drive parameters.
      *
      * @param wheelVelocities wheel velocities (or wheel position deltas)
      * @param trackWidth lateral distance between pairs of wheels on different sides of the robot

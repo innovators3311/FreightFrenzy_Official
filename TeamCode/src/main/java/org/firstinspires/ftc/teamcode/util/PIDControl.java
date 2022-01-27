@@ -36,7 +36,7 @@ public class PIDControl {
      * <p>
      * See <a href="https://en.wikipedia.org/wiki/PID_controller">Wikipedia on PID Controllers</a>.
      *
-     * @param motor  The motor you want to drive.
+     * @param motor  The motor you want to org.firstinspires.ftc.teamcode.drive.
      * @param pValue The value for p
      * @param iValue The value for i
      * @param dValue The value for d

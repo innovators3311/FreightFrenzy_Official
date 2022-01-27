@@ -37,7 +37,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 /**
  * This file illustrates the concept of calibrating a MR Compass
- * It uses the common Pushbot hardware class to define the drive on the robot.
+ * It uses the common Pushbot hardware class to define the org.firstinspires.ftc.teamcode.drive on the robot.
  * The code is structured as a LinearOpMode
  *
  *   This code assumes there is a compass configured with the name "compass"
@@ -68,7 +68,7 @@ public class ConceptCompassCalibration extends LinearOpMode {
     @Override
     public void runOpMode() {
 
-        /* Initialize the drive system variables.
+        /* Initialize the org.firstinspires.ftc.teamcode.drive system variables.
          * The init() method of the hardware class does all the work here
          */
         robot.init(hardwareMap);

@@ -87,7 +87,7 @@ public class BasicOpMode_Iterative_test4 extends OpMode
         claw = hardwareMap.get(Servo.class, "claw");
         mag = hardwareMap.get(Servo.class, "mag");
 
-        // Most robots need the motor on one side to be reversed to drive forward
+        // Most robots need the motor on one side to be reversed to org.firstinspires.ftc.teamcode.drive forward
         // Reverse the motor that runs backwards when connected directly to the battery
         lfMotor.setDirection(DcMotor.Direction.REVERSE);
         rfMotor.setDirection(DcMotor.Direction.FORWARD);
@@ -120,20 +120,20 @@ public class BasicOpMode_Iterative_test4 extends OpMode
      */
     @Override
     public void loop() {
-        // Setup a variable for each drive wheel to save power level for telemetry
+        // Setup a variable for each org.firstinspires.ftc.teamcode.drive wheel to save power level for telemetry
         double leftPower = 0;
         double rightPower = 0;
         double fArmPower = 0;
         double bArmPower = 0;
-        // Choose to drive using either Tank Mode, or POV Mode
+        // Choose to org.firstinspires.ftc.teamcode.drive using either Tank Mode, or POV Mode
         // Comment out the method that's not used.  The default below is POV.
 
         // POV Mode uses left stick to go forward, and right stick to turn.
-        // - This uses basic math to combine motions and is easier to drive straight.
-        /*double drive = -gamepad1.right_stick_y;
+        // - This uses basic math to combine motions and is easier to org.firstinspires.ftc.teamcode.drive straight.
+        /*double org.firstinspires.ftc.teamcode.drive = -gamepad1.right_stick_y;
         double turn  =  gamepad1.right_stick_x;
-        leftPower    = Range.clip(drive + turn, -1.0, 1.0) ;
-        rightPower   = Range.clip(drive - turn, -1.0, 1.0) ;
+        leftPower    = Range.clip(org.firstinspires.ftc.teamcode.drive + turn, -1.0, 1.0) ;
+        rightPower   = Range.clip(org.firstinspires.ftc.teamcode.drive - turn, -1.0, 1.0) ;
         */
          //this is the code that detects the buttons to control the wheels
          leftPower = -gamepad1.left_stick_y;
