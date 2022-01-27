@@ -1,0 +1,1 @@
+This directory is meant to organize classes that might be used in opmodes but would clutter up the teamcode folder.
