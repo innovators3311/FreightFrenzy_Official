@@ -17,7 +17,7 @@ public class Arm2_Control {
     public DcMotorEx elbow    = null;
     public DcMotorEx shoulder = null;
     public TouchSensor shoulderLimitSwitch = null;
-    public TouchSensor elbowLimitSwitch = null;
+    public TouchSensor elbowLimitSwitch    = null;
     public Servo cl = null;
     public Servo mag = null;
     public PIDFCoefficients shoulderPIDF;
@@ -68,7 +68,7 @@ public class Arm2_Control {
         //make sure motors are at zero power
         elbow.setPower(0);
         shoulder.setPower(0);
-        shoulder.setVelocity(8192);
+//        shoulder.setVelocity(8192);
 
         elbow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         shoulder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -144,7 +144,7 @@ public class Arm2_Control {
 //        elbow.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         elbow.setPower(power);
 
-// (: (:
+// (:
     }
 
     public void shoulderMovePower(double power) {

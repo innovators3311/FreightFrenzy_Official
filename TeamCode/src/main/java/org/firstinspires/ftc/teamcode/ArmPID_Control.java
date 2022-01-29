@@ -36,7 +36,7 @@ public class ArmPID_Control extends Arm2_Control {
         //make sure motors are at zero power
         elbow.setPower(0);
         shoulder.setPower(0);
-        shoulder.setVelocity(8192);
+//        shoulder.setVelocity(0);
 
         elbow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         shoulder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);

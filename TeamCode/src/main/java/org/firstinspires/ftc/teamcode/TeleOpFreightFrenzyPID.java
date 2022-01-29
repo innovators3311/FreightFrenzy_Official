@@ -31,10 +31,11 @@ public class TeleOpFreightFrenzyPID extends TeleOpFreightFrenzy {
      */
     @Override
     public void init() {
-        init();
+//        init();
         this.arm.init(hardwareMap);
         arm.arm_reset();
-    }
+
+   }
 
     @Override
     public void init_loop(){
@@ -42,7 +43,8 @@ public class TeleOpFreightFrenzyPID extends TeleOpFreightFrenzy {
         telemetry.addData("Shoulder Initialized", arm.armInitalized);
         telemetry.addData("shoulderPID target:", arm.shoulderPID.getTargetAngle());
         telemetry.addData("shoulderPID angle:", arm.getShoulderAngle());
-
+        arm.mag.setPosition(1);
+        arm.cl.setPosition(1);
 
     }
 
@@ -50,14 +52,14 @@ public class TeleOpFreightFrenzyPID extends TeleOpFreightFrenzy {
     protected void handleArm() {
         double elbowTargetDegrees   = 0.0;
         double shoulderTargetDegrees = 0.0;
-        if (gamepad2.y){
-            arm.shoulder.setPower(0);
-            arm.elbow.setPower(0);
-            PIDenabled = false;
-        }
-        else{
-            PIDenabled = true;
-        }
+//        if (gamepad2.y){
+//            arm.shoulder.setPower(0);
+//            arm.elbow.setPower(0);
+//            PIDenabled = false;
+//        }
+//        else{
+//            PIDenabled = true;
+//        }
 
         if (Math.abs(gamepad2.left_stick_y) > .05 || Math.abs(gamepad2.right_stick_y) > .05
                 || Math.abs(gamepad2.left_stick_x) > .05 || Math.abs(gamepad2.right_stick_x) > .05) {

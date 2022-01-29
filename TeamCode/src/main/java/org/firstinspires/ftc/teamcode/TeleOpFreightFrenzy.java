@@ -52,11 +52,11 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 public class TeleOpFreightFrenzy extends OpMode {
     // Declare OpMode members.
     protected final ElapsedTime runtime = new ElapsedTime();
-    public DcMotor leftDriveFront = null;
+    public DcMotor leftDriveFront  = null;
     public DcMotor rightDriveFront = null;
-    public DcMotor leftDriveBack = null;
-    public DcMotor rightDriveBack = null;
-    public DcMotor spinner = null;
+    public DcMotor leftDriveBack   = null;
+    public DcMotor rightDriveBack  = null;
+    public DcMotor spinner         = null;
     public double speedFactor = 1.0;
     /* Setup a variable for each drive wheel to save power level for telemetry */
     public double leftPowerFront  = 1.0;
