@@ -31,7 +31,7 @@ public class TeleOpFreightFrenzyPID extends TeleOpFreightFrenzy {
      */
     @Override
     public void init() {
-        super.init();
+        init();
         this.arm.init(hardwareMap);
         arm.arm_reset();
     }
@@ -50,6 +50,14 @@ public class TeleOpFreightFrenzyPID extends TeleOpFreightFrenzy {
     protected void handleArm() {
         double elbowTargetDegrees   = 0.0;
         double shoulderTargetDegrees = 0.0;
+        if (gamepad2.y){
+            arm.shoulder.setPower(0);
+            arm.elbow.setPower(0);
+            PIDenabled = false;
+        }
+        else{
+            PIDenabled = true;
+        }
 
         if (Math.abs(gamepad2.left_stick_y) > .05 || Math.abs(gamepad2.right_stick_y) > .05
                 || Math.abs(gamepad2.left_stick_x) > .05 || Math.abs(gamepad2.right_stick_x) > .05) {
