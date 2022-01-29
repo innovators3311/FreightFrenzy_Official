@@ -16,10 +16,10 @@ public class TeleOpFreightFrenzyPID extends TeleOpFreightFrenzy {
 
     // This is a Java Array. It's stored as (shoulder, elbow) values for each position.
     public double[][] ARM_POSITIONS = {
-            {0,0}, // position 1: Hard Reset
-            {30,-30}, // position 2: Soft Reset
+            {0,0}, // position 1: Hard reset
+            {30,-30}, // position 2: Carrying state
             {200,-173}, // position 3: Ground pickup
-            {162.8,-144.3}, //position 4: Middle yu yaeiouyt
+            {162.8,-144.3}, //position 4: Middle tier
             {200,-170}, // position 5: Top (needs tuning)
 
     };
@@ -33,7 +33,7 @@ public class TeleOpFreightFrenzyPID extends TeleOpFreightFrenzy {
     public void init() {
         super.init();
         this.arm.init(hardwareMap);
-        arm.init_loop();
+        arm.arm_reset();
     }
 
     @Override

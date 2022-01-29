@@ -49,7 +49,7 @@ public class ArmPID_Control extends Arm2_Control {
         shoulder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
-    public void init_loop(){
+    public void arm_reset(){
         //shoulder
         if( !armInitalized ){
             if (!shoulderLimitSwitch.isPressed() && !armInitalized){
