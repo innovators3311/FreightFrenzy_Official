@@ -139,7 +139,7 @@ public class Warehouse_v1 extends LinearOpMode {
 
         //Defining trajectories
         Trajectory trajectory1 = drive.trajectoryBuilder(startPose)
-                .splineTo(new Vector2d(49, -61), Math.toRadians(10))
+                .splineTo(new Vector2d(-12, -37), Math.toRadians(10))
                 .build();
         Trajectory trajectory2 = drive.trajectoryBuilder(trajectory1.end())
                 .splineTo(new Vector2d(57, -61), Math.toRadians(10))
