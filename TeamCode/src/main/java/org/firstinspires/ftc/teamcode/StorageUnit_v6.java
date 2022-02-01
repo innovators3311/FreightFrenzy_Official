@@ -19,8 +19,8 @@ import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 
 import org.firstinspires.ftc.teamcode.source.Arm;
 
-@Autonomous(name = "Storage Unit_v5", group = "Storage Unit")
-public class StorageUnit_v5 extends LinearOpMode {
+@Autonomous(name = "Storage Unit_v6", group = "Storage Unit")
+public class StorageUnit_v6 extends LinearOpMode {
 
     /* Note: This sample uses the all-objects Tensor Flow model (FreightFrenzy_BCDM.tflite), which contains
      * the following 4 detectable objects
