@@ -135,8 +135,6 @@ public class StorageUnit_v6 extends LinearOpMode {
         //Initializing our other robot hardware
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
         Arm arm = new Arm(hardwareMap); //Shoulder start angle is 150 degrees, elbow is 20 relative to the shoulder
-        arm.runShoulderTo(60);
-        arm.runElbowTo(90);
 
         //Setting initial position estimate
         drive.setPoseEstimate(startPose);
@@ -163,6 +161,8 @@ public class StorageUnit_v6 extends LinearOpMode {
 
         currentState = mainState.TRAJECTORY_1;
         //drive.followTrajectoryAsync(trajectory1);
+        arm.runShoulderTo(120);
+        arm.runElbowTo(245);
 
         while (opModeIsActive() && !isStopRequested()) {
             //You can have multiple switch statements running together for multiple state machines
@@ -219,7 +219,7 @@ public class StorageUnit_v6 extends LinearOpMode {
                 case DROP:
                     arm.openClaw();
                     arm.retractMagnet();
-                    if(timer.milliseconds() > 1000) {
+                    if(timer.milliseconds() > 5000) {
                         currentState = mainState.TRAJECTORY_5;
                         drive.followTrajectoryAsync(trajectory5);
                     }
@@ -243,17 +243,17 @@ public class StorageUnit_v6 extends LinearOpMode {
             switch(currentArmState) {
                 case TIER_1:
                     arm.runShoulderTo(90);
-                    arm.runElbowTo(80);
+                    arm.runElbowTo(-10);
                     currentArmState = armState.IDLE;
                     break;
                 case TIER_2:
                     arm.runShoulderTo(80);
-                    arm.runElbowTo(80);
+                    arm.runElbowTo(-10);
                     currentArmState = armState.IDLE;
                     break;
                 case TIER_3:
-                    arm.runShoulderTo(70);
-                    arm.runElbowTo(80);
+                    arm.runShoulderTo(110);
+                    arm.runElbowTo(160);
                     currentArmState = armState.IDLE;
                     break;
                 case IDLE:

@@ -33,8 +33,8 @@ public class Arm {
 
     public Arm(HardwareMap hardwareMap) {
         //initializing all hardware
-        shoulderPID.setGains(0.05, 0, 0.000001,-1, 1);
-        elbowPID.setGains(0.02, 0, 0.0000005, -1, 1);
+        shoulderPID.setGains(0.05, 0, 0.0003,-1, 1);
+        elbowPID.setGains(0.02, 0, 0.00015, -1, 1);
 
         shoulder = hardwareMap.get(DcMotor.class, "shoulder");
         elbow = hardwareMap.get(DcMotor.class, "elbow");

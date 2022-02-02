@@ -35,6 +35,7 @@ public class PID {
         this.max = maxOutput;
     }
     public void update(double setpoint, double processValue) {
+        dt = timer.milliseconds()/1000;
         timer.reset();
         Err = setpoint - processValue;
         if(pErr == NaN) {
@@ -46,6 +47,5 @@ public class PID {
         D = -1 * kD * (pErr - Err)/dt;
         output = Range.clip(P + It + D, min, max);
         pErr = Err;
-        dt = timer.milliseconds()/1000;
     }
 }
