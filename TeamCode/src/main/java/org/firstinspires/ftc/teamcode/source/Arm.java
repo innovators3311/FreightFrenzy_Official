@@ -16,15 +16,11 @@ public class Arm {
     public Servo claw = null;
     public Servo magnet = null;
 
-    private int shoulderDistance = 0;
-    private int shoulderState = 0;
-    private int shoulderStartPose = 0;
+    private int shoulderTarget = 0;
     private double shoulderGravity;
     public boolean shoulderIsBusy = false;
 
-    private int elbowDistance = 0;
-    private int elbowState = 0;
-    private int elbowStartPose = 0;
+    private int elbowTarget = 0;
     private double elbowGravity;
     public boolean elbowIsBusy = false;
 
@@ -63,60 +59,44 @@ public class Arm {
     }
 
     public void updateShoulder() {
-        switch (shoulderState) {
-            case 0: //setup
-                shoulderState = 1;
-                shoulderStartPose = shoulder.getCurrentPosition();
-                break;
-            case 1: //run mode
-                shoulderPID.update(encoderMultiplier * shoulderStartPose / 22.76 + shoulderDistance, encoderMultiplier * shoulder.getCurrentPosition() / 22.76);
-                shoulderGravity =  0.05 * Math.cos( Math.toRadians(encoderMultiplier * shoulder.getCurrentPosition() / 22.76 + 150) );
-                shoulder.setPower(shoulderPID.output + shoulderGravity); //forward is towards the back of the robot
-                if(Math.abs(shoulderPID.Err) < 5) {
-                    shoulderIsBusy = false;
-                }
+        shoulderPID.update(shoulderTarget, encoderMultiplier * shoulder.getCurrentPosition() / 22.76);
+        shoulderGravity =  0.05 * Math.cos( Math.toRadians(encoderMultiplier * shoulder.getCurrentPosition() / 22.76 + 150) );
+        shoulder.setPower(shoulderPID.output + shoulderGravity); //forward is towards the back of the robot
+        if(Math.abs(shoulderPID.Err) < 5) {
+            shoulderIsBusy = false;
         }
     }
     public void updateElbow() {
-        switch (elbowState) {
-            case 0: //setup
-                elbowState = 1;
-                elbowStartPose = elbow.getCurrentPosition();
-                break;
-            case 1: //run mode
-                elbowPID.update(encoderMultiplier * elbowStartPose / 22.76 + elbowDistance, encoderMultiplier * elbow.getCurrentPosition() / 22.76);
-                elbowGravity =  0.02 * Math.cos(
-                        Math.toRadians(encoderMultiplier * shoulder.getCurrentPosition() / 22.76 + encoderMultiplier * elbow.getCurrentPosition() / 22.76 - 20)
-                );
-                elbow.setPower(elbowPID.output + elbowGravity);
-                if(Math.abs(elbowPID.Err) < 5) {
-                    elbowIsBusy = false;
-                }
+        elbowPID.update(elbowTarget, encoderMultiplier * elbow.getCurrentPosition() / 22.76);
+        elbowGravity =  0.02 * Math.cos(
+                Math.toRadians(encoderMultiplier * shoulder.getCurrentPosition() / 22.76 + encoderMultiplier * elbow.getCurrentPosition() / 22.76 + 20 )
+        );
+        elbow.setPower(elbowPID.output + elbowGravity);
+        if(Math.abs(elbowPID.Err) < 5) {
+            elbowIsBusy = false;
         }
-    }
 
+    }
     public void openClaw() {
-        claw.setPosition(0.1);
+        claw.setPosition(0);
     }
     public void closeClaw() {
-        claw.setPosition(0.1);
+        claw.setPosition(1);
     }
     public void pushMagnet() {
-        magnet.setPosition(0.3);
+        magnet.setPosition(1);
     }
     public void retractMagnet() {
         magnet.setPosition(0);
     }
 
-    public void runShoulderTo(int shoulderDistance) {
-        shoulderState = 0;
+    public void runShoulderTo(int shoulderTarget) {
         shoulderIsBusy = true;
-        this.shoulderDistance = shoulderDistance;
+        this.shoulderTarget = shoulderTarget - 150;
     }
-    public void runElbowTo(int elbowDistance) {
-        elbowState = 0;
+    public void runElbowTo(int elbowTarget) {
         elbowIsBusy = true;
-        this.elbowDistance = elbowDistance;
+        this.elbowTarget = elbowTarget - 20;
     }
     public void storeArmPose() {
         PoseStorage.shoulderTicks = shoulder.getCurrentPosition();

@@ -130,9 +130,9 @@ public class Warehouse_v1 extends LinearOpMode {
 
         //Initializing our other robot hardware
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
-        Arm arm = new Arm(hardwareMap);
-        arm.runShoulderTo(-90);
-        arm.runElbowTo(45);
+        Arm arm = new Arm(hardwareMap); //Shoulder starts at 150 degrees, elbow at -20 degrees relative to the shoulder
+        arm.runShoulderTo(60);
+        arm.runElbowTo(90);
 
         //Setting initial position estimate
         drive.setPoseEstimate(startPose);

@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
+import android.text.Html;
+
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
@@ -7,6 +9,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.SwitchableCamera;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
@@ -71,6 +74,7 @@ public class StorageUnit_v6 extends LinearOpMode {
         TRAJECTORY_4,   // Drive forward slowly a few inches to the hub
         DROP,           // Drop block
         TRAJECTORY_5,   // Park in the storage unit
+        ARM_RESET,      // Reset the arm position for Teleop
         IDLE            // Enter IDLE state when complete
     }
     enum armState {
@@ -130,9 +134,9 @@ public class StorageUnit_v6 extends LinearOpMode {
 
         //Initializing our other robot hardware
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
-        Arm arm = new Arm(hardwareMap);
-        arm.runShoulderTo(-90);
-        arm.runElbowTo(45);
+        Arm arm = new Arm(hardwareMap); //Shoulder start angle is 150 degrees, elbow is 20 relative to the shoulder
+        arm.runShoulderTo(60);
+        arm.runElbowTo(90);
 
         //Setting initial position estimate
         drive.setPoseEstimate(startPose);
@@ -221,6 +225,13 @@ public class StorageUnit_v6 extends LinearOpMode {
                     }
                 case TRAJECTORY_5: //parking in storage unit
                     if (!drive.isBusy()) {
+                        currentState = mainState.ARM_RESET;
+                    }
+                    break;
+                case ARM_RESET:
+                    arm.runShoulderTo(90);
+                    arm.runElbowTo(20);
+                    if(!arm.shoulderIsBusy && !arm.elbowIsBusy) {
                         currentState = mainState.IDLE;
                     }
                     break;
@@ -231,18 +242,18 @@ public class StorageUnit_v6 extends LinearOpMode {
 
             switch(currentArmState) {
                 case TIER_1:
-                    arm.runShoulderTo(40);
-                    arm.runElbowTo(60);
+                    arm.runShoulderTo(90);
+                    arm.runElbowTo(80);
                     currentArmState = armState.IDLE;
                     break;
                 case TIER_2:
-                    arm.runShoulderTo(50);
-                    arm.runElbowTo(60);
+                    arm.runShoulderTo(80);
+                    arm.runElbowTo(80);
                     currentArmState = armState.IDLE;
                     break;
                 case TIER_3:
-                    arm.runShoulderTo(60);
-                    arm.runElbowTo(60);
+                    arm.runShoulderTo(70);
+                    arm.runElbowTo(80);
                     currentArmState = armState.IDLE;
                     break;
                 case IDLE:
