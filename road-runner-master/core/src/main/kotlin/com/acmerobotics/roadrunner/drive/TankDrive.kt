@@ -7,7 +7,7 @@ import com.acmerobotics.roadrunner.localization.Localizer
 import com.acmerobotics.roadrunner.util.Angle
 
 /**
- * This class provides the basic functionality of a tank/differential drive using [TankKinematics].
+ * This class provides the basic functionality of a tank/differential org.firstinspires.ftc.teamcode.drive using [TankKinematics].
  *
  * @param kV velocity feedforward
  * @param kA acceleration feedforward
@@ -22,9 +22,9 @@ abstract class TankDrive constructor(
 ) : Drive() {
 
     /**
-     * Default localizer for tank drives based on the drive encoders and (optionally) a heading sensor.
+     * Default localizer for tank drives based on the org.firstinspires.ftc.teamcode.drive encoders and (optionally) a heading sensor.
      *
-     * @param drive drive
+     * @param drive org.firstinspires.ftc.teamcode.drive
      * @param useExternalHeading use external heading provided by an external sensor (e.g., IMU, gyroscope)
      */
     class TankLocalizer @JvmOverloads constructor(

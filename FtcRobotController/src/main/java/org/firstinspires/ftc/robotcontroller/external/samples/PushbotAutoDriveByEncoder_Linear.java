@@ -37,13 +37,13 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 /**
  * This file illustrates the concept of driving a path based on encoder counts.
- * It uses the common Pushbot hardware class to define the drive on the robot.
+ * It uses the common Pushbot hardware class to define the org.firstinspires.ftc.teamcode.drive on the robot.
  * The code is structured as a LinearOpMode
  *
  * The code REQUIRES that you DO have encoders on the wheels,
  *   otherwise you would use: PushbotAutoDriveByTime;
  *
- *  This code ALSO requires that the drive Motors have been configured such that a positive
+ *  This code ALSO requires that the org.firstinspires.ftc.teamcode.drive Motors have been configured such that a positive
  *  power command moves them forwards, and causes the encoders to count UP.
  *
  *   The desired path in this example is:
@@ -82,7 +82,7 @@ public class PushbotAutoDriveByEncoder_Linear extends LinearOpMode {
     public void runOpMode() {
 
         /*
-         * Initialize the drive system variables.
+         * Initialize the org.firstinspires.ftc.teamcode.drive system variables.
          * The init() method of the hardware class does all the work here
          */
         robot.init(hardwareMap);

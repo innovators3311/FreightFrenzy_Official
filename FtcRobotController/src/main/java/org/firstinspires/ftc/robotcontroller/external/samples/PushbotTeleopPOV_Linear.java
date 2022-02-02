@@ -82,11 +82,11 @@ public class PushbotTeleopPOV_Linear extends LinearOpMode {
 
             // Run wheels in POV mode (note: The joystick goes negative when pushed forwards, so negate it)
             // In this mode the Left stick moves the robot fwd and back, the Right stick turns left and right.
-            // This way it's also easy to just drive straight, or just turn.
+            // This way it's also easy to just org.firstinspires.ftc.teamcode.drive straight, or just turn.
             drive = -gamepad1.left_stick_y;
             turn  =  gamepad1.right_stick_x;
 
-            // Combine drive and turn for blended motion.
+            // Combine org.firstinspires.ftc.teamcode.drive and turn for blended motion.
             left  = drive + turn;
             right = drive - turn;
 

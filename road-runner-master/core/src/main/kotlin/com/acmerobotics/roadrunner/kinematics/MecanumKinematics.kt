@@ -3,7 +3,7 @@ package com.acmerobotics.roadrunner.kinematics
 import com.acmerobotics.roadrunner.geometry.Pose2d
 
 /**
- * Mecanum drive kinematic equations. All wheel positions and velocities are given starting with front left and
+ * Mecanum org.firstinspires.ftc.teamcode.drive kinematic equations. All wheel positions and velocities are given starting with front left and
  * proceeding counter-clockwise (i.e., front left, rear left, rear right, front right). Robot poses are specified in a
  * coordinate system with positive x pointing forward, positive y pointing left, and positive heading measured
  * counter-clockwise from the x-axis.
@@ -66,7 +66,7 @@ object MecanumKinematics {
         )
 
     /**
-     * Computes the robot velocity corresponding to [wheelVelocities] and the given drive parameters.
+     * Computes the robot velocity corresponding to [wheelVelocities] and the given org.firstinspires.ftc.teamcode.drive parameters.
      *
      * @param wheelVelocities wheel velocities (or wheel position deltas)
      * @param trackWidth lateral distance between pairs of wheels on different sides of the robot

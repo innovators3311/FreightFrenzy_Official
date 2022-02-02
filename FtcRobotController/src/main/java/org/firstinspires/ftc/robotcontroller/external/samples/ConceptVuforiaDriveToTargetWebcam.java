@@ -16,13 +16,13 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefau
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 
 /**
- * This OpMode illustrates using a webcam to locate and drive towards ANY Vuforia target.
+ * This OpMode illustrates using a webcam to locate and org.firstinspires.ftc.teamcode.drive towards ANY Vuforia target.
  * The code assumes a basic two-wheel Robot Configuration with motors named left_drive and right_drive.
- * The motor directions must be set so a positive drive goes forward and a positive turn rotates to the right.
+ * The motor directions must be set so a positive org.firstinspires.ftc.teamcode.drive goes forward and a positive turn rotates to the right.
  *
  * Under manual control, the left stick will move forward/back, and the right stick will turn left/right.
  * This is called POV Joystick mode, different than Tank Drive (where each joystick controls a wheel).
- * Manually drive the robot until it displays Target data on the Driver Station.
+ * Manually org.firstinspires.ftc.teamcode.drive the robot until it displays Target data on the Driver Station.
  * Press and hold the *Left Bumper* to enable the automatic "Drive to target" mode.
  * Release the Left Bumper to return to manual driving mode.
  *
@@ -46,7 +46,7 @@ public class ConceptVuforiaDriveToTargetWebcam extends LinearOpMode
     // Adjust these numbers to suit your robot.
     final double DESIRED_DISTANCE = 8.0; //  this is how close the camera should get to the target (inches)
                                          //  The GAIN constants set the relationship between the measured position error,
-                                         //  and how much power is applied to the drive motors.  Drive = Error * Gain
+                                         //  and how much power is applied to the org.firstinspires.ftc.teamcode.drive motors.  Drive = Error * Gain
                                          //  Make these values smaller for smoother control.
     final double SPEED_GAIN =   0.02 ;   //  Speed Control "Gain". eg: Ramp up to 50% power at a 25 inch error.   (0.50 / 25.0)
     final double TURN_GAIN  =   0.01 ;   //  Turn Control "Gain".  eg: Ramp up to 25% power at a 25 degree error. (0.25 / 25.0)
@@ -111,8 +111,8 @@ public class ConceptVuforiaDriveToTargetWebcam extends LinearOpMode
         leftDrive  = hardwareMap.get(DcMotor.class, "left_drive");
         rightDrive = hardwareMap.get(DcMotor.class, "right_drive");
 
-        // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
-        // Pushing the left stick forward MUST make robot go forward. So adjust these two lines based on your first test drive.
+        // To org.firstinspires.ftc.teamcode.drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
+        // Pushing the left stick forward MUST make robot go forward. So adjust these two lines based on your first test org.firstinspires.ftc.teamcode.drive.
         leftDrive.setDirection(DcMotor.Direction.FORWARD);
         rightDrive.setDirection(DcMotor.Direction.REVERSE);
 
@@ -183,8 +183,8 @@ public class ConceptVuforiaDriveToTargetWebcam extends LinearOpMode
                 telemetry.addData("Auto","Drive %5.2f, Turn %5.2f", drive, turn);
             } else {
 
-                // drive using manual POV Joystick mode.
-                drive = -gamepad1.left_stick_y  / 2.0;  // Reduce drive rate to 50%.
+                // org.firstinspires.ftc.teamcode.drive using manual POV Joystick mode.
+                drive = -gamepad1.left_stick_y  / 2.0;  // Reduce org.firstinspires.ftc.teamcode.drive rate to 50%.
                 turn  =  gamepad1.right_stick_x / 4.0;  // Reduce turn rate to 25%.
                 telemetry.addData("Manual","Drive %5.2f, Turn %5.2f", drive, turn);
             }

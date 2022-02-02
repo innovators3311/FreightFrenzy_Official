@@ -7,7 +7,7 @@ import com.acmerobotics.roadrunner.localization.Localizer
 import com.acmerobotics.roadrunner.util.Angle
 
 /**
- * This class provides the basic functionality of a swerve drive using [SwerveKinematics].
+ * This class provides the basic functionality of a swerve org.firstinspires.ftc.teamcode.drive using [SwerveKinematics].
  *
  * @param kV velocity feedforward
  * @param kA acceleration feedforward
@@ -24,10 +24,10 @@ abstract class SwerveDrive @JvmOverloads constructor(
 ) : Drive() {
 
     /**
-     * Default localizer for swerve drives based on the drive encoder positions, module orientations, and (optionally) a
+     * Default localizer for swerve drives based on the org.firstinspires.ftc.teamcode.drive encoder positions, module orientations, and (optionally) a
      * heading sensor.
      *
-     * @param drive drive
+     * @param drive org.firstinspires.ftc.teamcode.drive
      * @param useExternalHeading use external heading provided by an external sensor (e.g., IMU, gyroscope)
      */
     class SwerveLocalizer @JvmOverloads constructor(

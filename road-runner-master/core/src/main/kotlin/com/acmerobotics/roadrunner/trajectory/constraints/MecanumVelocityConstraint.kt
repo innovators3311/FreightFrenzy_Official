@@ -7,7 +7,7 @@ import kotlin.math.abs
 import kotlin.math.max
 
 /**
- * Mecanum-specific drive constraints that also limit maximum wheel velocities.
+ * Mecanum-specific org.firstinspires.ftc.teamcode.drive constraints that also limit maximum wheel velocities.
  *
  * @param maxWheelVel maximum wheel velocity
  * @param trackWidth track width

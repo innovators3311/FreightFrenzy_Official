@@ -63,7 +63,7 @@ import java.io.File;
 @Disabled
 public class ConceptSoundsOnBotJava extends LinearOpMode {
 
-    // Point to sound files on the phone's drive
+    // Point to sound files on the phone's org.firstinspires.ftc.teamcode.drive
     private String soundPath = "/FIRST/blocks/sounds";
     private File goldFile   = new File("/sdcard" + soundPath + "/gold.wav");
     private File silverFile = new File("/sdcard" + soundPath + "/silver.wav");

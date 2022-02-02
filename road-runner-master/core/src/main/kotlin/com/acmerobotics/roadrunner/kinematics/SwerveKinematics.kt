@@ -6,7 +6,7 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 /**
- * Swerve drive kinematic equations. All wheel positions and velocities are given starting with front left and
+ * Swerve org.firstinspires.ftc.teamcode.drive kinematic equations. All wheel positions and velocities are given starting with front left and
  * proceeding counter-clockwise (i.e., front left, rear left, rear right, front right). Robot poses are specified in a
  * coordinate system with positive x pointing forward, positive y pointing left, and positive heading measured
  * counter-clockwise from the x-axis.
@@ -169,7 +169,7 @@ object SwerveKinematics {
         }
 
     /**
-     * Computes the robot velocities corresponding to [wheelVelocities], [moduleOrientations], and the drive parameters.
+     * Computes the robot velocities corresponding to [wheelVelocities], [moduleOrientations], and the org.firstinspires.ftc.teamcode.drive parameters.
      *
      * @param wheelVelocities wheel velocities (or wheel position deltas)
      * @param moduleOrientations wheel orientations (in radians)
