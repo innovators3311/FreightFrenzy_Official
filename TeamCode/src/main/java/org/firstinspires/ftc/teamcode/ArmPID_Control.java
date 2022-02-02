@@ -3,6 +3,8 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.Servo;
+
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.util.PIDControl;
 
@@ -20,13 +22,15 @@ public class ArmPID_Control extends Arm2_Control {
         super.init(ahwMap);
         // Save reference to Hardware map
         hwMap = ahwMap;
+        cl = hwMap.get(Servo.class, "claw");
+        mag = hwMap.get(Servo.class, "mag");
 
         //declare motors so that they can be used
         elbow = hwMap.get(DcMotorEx.class, "elbow");
         shoulder = hwMap.get(DcMotorEx.class, "shoulder");
 
-        shoulderPID = new PIDControl(shoulder, -1e-2, -1e-2, -3e-4);
-        elbowPID = new PIDControl(elbow, -1e-2, -1e-2, -3e-4);
+        shoulderPID = new PIDControl(shoulder, -1e-2, -1e-3, -1e-4);
+        elbowPID = new PIDControl(elbow, -1e-2, -1e-3, -1e-4);
 
         // Set the direction that the motors will turn
         elbow.setDirection(DcMotor.Direction.FORWARD);

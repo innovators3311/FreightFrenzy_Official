@@ -5,7 +5,9 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 @TeleOp(name = "TeleOpFreightFrenzyPID", group = "3311")
 public class TeleOpFreightFrenzyPID extends TeleOpFreightFrenzy {
     // Arm setup
-    public boolean PIDenabled = true;
+    public boolean PIDEnabled = true;
+    public boolean inUse = false;
+
 
     // These values affect joystick sensitivity of the arm.
     public double ELBOW_MANUAL_FACTOR    =2.0;
@@ -16,12 +18,12 @@ public class TeleOpFreightFrenzyPID extends TeleOpFreightFrenzy {
 
     // This is a Java Array. It's stored as (shoulder, elbow) values for each position.
     public double[][] ARM_POSITIONS = {
-            {0,0}, // position 1: Hard reset
-            {30,-30}, // position 2: Carrying state
-            {187,-148}, // position 3: Ground pickup
-            {78,-135}, //position 4: Middle tier
-            {83,169}, // position 5: Top (needs tuning)
-            {79,137} // POSITION 6: Top-er
+            {0,0}, // position 0: Hard reset
+            {30,-30}, // position 1: Carrying state
+            {221,-180}, // poSitIon 2: Ground pickup
+            {78,-135}, //position 3: Middle tier
+            {87,-58}, // position 4: Top (needs tuning)
+            {79,137} // POSITION 5: Top-er
     };
 
     ArmPID_Control arm = new ArmPID_Control();
@@ -31,7 +33,7 @@ public class TeleOpFreightFrenzyPID extends TeleOpFreightFrenzy {
      */
     @Override
     public void init() {
-//        init();
+        super.init();
         this.arm.init(hardwareMap);
         arm.arm_reset();
 
@@ -45,7 +47,6 @@ public class TeleOpFreightFrenzyPID extends TeleOpFreightFrenzy {
         telemetry.addData("shoulderPID angle:", arm.getShoulderAngle());
         arm.mag.setPosition(1);
         arm.cl.setPosition(1);
-
     }
 
     @Override
@@ -60,10 +61,16 @@ public class TeleOpFreightFrenzyPID extends TeleOpFreightFrenzy {
 //        else{
 //            PIDenabled = true;
 //        }
-
+        if(arm.getShoulderAngle() < 5 && arm.getElbowAngle() < 5 && !inUse) {
+            arm.shoulder.setPower(0);
+            arm.elbow.setPower(0);
+        }
+        else {
+            inUse = true;
+        }
         if (Math.abs(gamepad2.left_stick_y) > .05 || Math.abs(gamepad2.right_stick_y) > .05
                 || Math.abs(gamepad2.left_stick_x) > .05 || Math.abs(gamepad2.right_stick_x) > .05) {
-
+        inUse = true;
             // If driver moves the stick more than 10% or we're already in run without encoder mode ...
             elbowTargetDegrees += gamepad2.left_stick_y * ELBOW_MANUAL_FACTOR;
             shoulderTargetDegrees += gamepad2.right_stick_y * SHOULDER_MANUAL_FACTOR;
@@ -72,15 +79,16 @@ public class TeleOpFreightFrenzyPID extends TeleOpFreightFrenzy {
 
             arm.shoulderDriveAbsolute(1, arm.getShoulderTargetAngle() + shoulderTargetDegrees);
             arm.elbowDriveAbsolute(1, arm.getElbowTargetAngle() + elbowTargetDegrees);
-            PIDenabled = true;
+            PIDEnabled = true;
         }
 
         //set arm to shared hub level
-        if (gamepad2.dpad_right || gamepad2.dpad_left) {
-            arm.shoulderDriveAbsolute(0.7, 162.8);
-            arm.elbowDriveAbsolute(0.7, -144.3);
-            PIDenabled = true;
-        }
+//        if (gamepad2.dpad_right || gamepad2.dpad_left) {
+//            arm.shoulderDriveAbsolute(0.7, 162.8);
+//            arm.elbowDriveAbsolute(0.7, -144.3);
+//            PIDenabled = true;
+//            inUse = true;
+//        }
         //
 
         telemetry.addData("shoulder current angle:", arm.getShoulderAngle());
@@ -92,11 +100,12 @@ public class TeleOpFreightFrenzyPID extends TeleOpFreightFrenzy {
 //        telemetry.addData("is busy?", arm.isBusy());
         telemetry.addData("Arm Level", armLevel);
 
-        while (gamepad2.right_stick_button || gamepad2.left_stick_button) {
+        while (gamepad2.left_bumper || gamepad2.right_bumper) {
             arm.emergencyStop();
-            PIDenabled = false;
+            gamepad2.rumble(100);
+            PIDEnabled = false;
         }
-        if (PIDenabled) {
+        if (PIDEnabled) {
             arm.update();
         }
     }
@@ -105,19 +114,24 @@ public class TeleOpFreightFrenzyPID extends TeleOpFreightFrenzy {
 
             if (!armLevelDebounceUp) {
                 armLevel = armLevel + 1;
+                inUse = true;
             }
             armLevelDebounceUp = true;
 
         }    else{
             armLevelDebounceUp = false;
+            inUse = false;
         }
         if (gamepad2.dpad_down) {
             if (!armLevelDebounceDown) {
                 armLevel = armLevel - 1;
+                inUse = true;
             }
             armLevelDebounceDown = true;
+            inUse = true;
 
         }    else{
+            inUse = false;
             armLevelDebounceDown = false;
         }
 
@@ -142,6 +156,7 @@ public class TeleOpFreightFrenzyPID extends TeleOpFreightFrenzy {
       // Code to run REPEATEDLY after the driver hits PLAY but before they hit STOP
     @Override
     public void loop() {
+        inUse = false;
         this.handleArm();
         this.handleClaw();
         this.handleSpinner();
