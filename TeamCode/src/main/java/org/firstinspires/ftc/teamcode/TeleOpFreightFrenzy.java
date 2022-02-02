@@ -52,20 +52,21 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 public class TeleOpFreightFrenzy extends OpMode {
     // Declare OpMode members.
     protected final ElapsedTime runtime = new ElapsedTime();
-    public DcMotor leftDriveFront = null;
+    public DcMotor leftDriveFront  = null;
     public DcMotor rightDriveFront = null;
-    public DcMotor leftDriveBack = null;
-    public DcMotor rightDriveBack = null;
-    public DcMotor spinner = null;
+    public DcMotor leftDriveBack   = null;
+    public DcMotor rightDriveBack  = null;
+    public DcMotor spinner         = null;
     public double speedFactor = 1.0;
     /* Setup a variable for each drive wheel to save power level for telemetry */
-    public double leftPowerFront = 1.0;
+    public double leftPowerFront  = 1.0;
     public double rightPowerFront = 1.0;
-    public double rightPowerBack = 1.0;
-    public double leftPowerBack = 1.0;
-    public double drive = 0.0;
-    public double turn = 0.0;
-    public double strafe = 0.0;
+    public double rightPowerBack  = 1.0;
+    public double leftPowerBack   = 1.0;
+    public double drive           = 0.0;
+    public double turn            = 0.0;
+    public double strafe          = 0.0;
+    public double strafeValue     = 0.0;
     //Bring in code to setup arm.
     protected Arm2_Control arm = new Arm2_Control();
     // debounce A & X
@@ -152,7 +153,7 @@ public class TeleOpFreightFrenzy extends OpMode {
 
 
     protected void handleArm() {
-        double elbowPower = 0.00;
+        double elbowPower    = 0.0;
         double shoulderPower = 0.0;
         // If driver moves the stick more than 10% or we're already in run without encoder mode ...
         elbowPower += gamepad2.left_stick_y * 0.7;
@@ -169,7 +170,6 @@ public class TeleOpFreightFrenzy extends OpMode {
         // Publish Elbow values
         telemetry.addData("elbow Current angle:", arm.getElbowAngle());
         telemetry.addData("elbow angle target:", arm.getElbowTargetAngle());
-        telemetry.addData("is busy?", arm.isBusy());
 
         while (gamepad2.right_stick_button || gamepad2.left_stick_button) {
             arm.emergencyStop();
@@ -198,21 +198,20 @@ public class TeleOpFreightFrenzy extends OpMode {
     }
 
     public void handleDriving() {
-        /*
-         Choose to drive using either Tank Mode, or POV Mode
-         Comment out the method that's not used.  The default below is POV.
-         POV Mode uses left stick to go forward, and right stick to turn.
-         - This uses basic math to combine motions and is easier to drive straight.
-        */
 
-        // Get the gamepad control values for this loop iteration
+
+        // Get the game pad control values for this loop iteration
         drive = -gamepad1.left_stick_y;
-        turn = gamepad1.left_stick_x;
-        strafe = gamepad1.right_stick_x;
+        turn = gamepad1.right_stick_x;
+        strafe = 0;
+        if (gamepad1.dpad_left)
+            strafe = -1;
+        if (gamepad1.dpad_right)
+            strafe = 1;
 
 //send power to wheels
-        speedFactor = gamepad1.right_trigger + .25;
-//(:
+        speedFactor = (-gamepad1.left_trigger * 0.75) + 1;
+
         leftPowerFront = (drive + turn + strafe) * speedFactor;
         rightPowerFront = (drive - turn - strafe) * speedFactor;
         leftPowerBack = (drive + turn - strafe) * speedFactor;
@@ -249,4 +248,4 @@ public class TeleOpFreightFrenzy extends OpMode {
     }
 
 }
-//If you found this then you are a big brain gamer
+//                                                                                                                                                  If you found this then you are a big brain gamer
