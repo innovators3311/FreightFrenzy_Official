@@ -30,8 +30,8 @@ public class ArmPID_Control extends Arm2_Control {
         elbow = hwMap.get(DcMotorEx.class, "elbow");
         shoulder = hwMap.get(DcMotorEx.class, "shoulder");
 
-        shoulderPID = new PIDControl(shoulder, -5e-2, -1e-3, -1e-5);
-        elbowPID = new PIDControl(elbow, -5e-2, -1e-3, -1e-5);
+        shoulderPID = new PIDControl(shoulder, -1e-1, -1e-3, -1e-5);
+        elbowPID = new PIDControl(elbow, -2e-2, -1e-3, -1e-5);
 
         // Set the direction that the motors will turn
         elbow.setDirection(DcMotor.Direction.FORWARD);
@@ -74,8 +74,8 @@ public class ArmPID_Control extends Arm2_Control {
                 }
                 break;
             case 2: // Move arm to init position.
-                elbowDriveAbsolute(.7, -20);
-                shoulderDriveAbsolute(.7, 60);
+                elbowDriveAbsolute(.7, 6);
+                shoulderDriveAbsolute(.7, 39);
                 armInitalized = true;
                 armState = 3;
                 break;
