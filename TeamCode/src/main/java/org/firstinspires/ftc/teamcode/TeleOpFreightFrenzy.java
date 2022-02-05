@@ -50,24 +50,28 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 @TeleOp(name = "TeleOpFreightFrenzy", group = "3311")
 public class TeleOpFreightFrenzy extends OpMode {
-    //Bring in code to setup arm.
-    Arm2_Control arm = new Arm2_Control();
     // Declare OpMode members.
-    private final ElapsedTime runtime = new ElapsedTime();
-    public DcMotor leftDriveFront = null;
+    protected final ElapsedTime runtime = new ElapsedTime();
+    public DcMotor leftDriveFront  = null;
     public DcMotor rightDriveFront = null;
-    public DcMotor leftDriveBack = null;
-    public DcMotor rightDriveBack = null;
+    public DcMotor leftDriveBack   = null;
+    public DcMotor rightDriveBack  = null;
+    public DcMotor spinner         = null;
     public double speedFactor = 1.0;
-    public double slowingFactor = 1.0;
-    /* Setup a variable for each org.firstinspires.ftc.teamcode.drive wheel to save power level for telemetry */
-    public double leftPowerFront = 1.0;
+    /* Setup a variable for each drive wheel to save power level for telemetry */
+    public double leftPowerFront  = 1.0;
     public double rightPowerFront = 1.0;
-    public double rightPowerBack = 1.0;
-    public double leftPowerBack = 1.0;
-    public double drive = 0.0;
-    public double turn = 0.0;
-    public double strafe = 0.0;
+    public double rightPowerBack  = 1.0;
+    public double leftPowerBack   = 1.0;
+    public double drive           = 0.0;
+    public double turn            = 0.0;
+    public double strafe          = 0.0;
+    public double strafeValue     = 0.0;
+    //Bring in code to setup arm.
+    protected Arm2_Control arm = new Arm2_Control();
+    // debounce A & X
+    protected boolean debounceA = false;
+    protected boolean debounceX = false;
 
     /*
      * Code to run ONCE when the driver hits INIT
@@ -75,7 +79,7 @@ public class TeleOpFreightFrenzy extends OpMode {
     @Override
     public void init() {
 
-        arm.init(hardwareMap);
+        this.arm.init(hardwareMap);
         // Initialize the hardware variables. Note that the strings used here as parameters
         // to 'get' must correspond to the names assigned during the robot configuration
         // step (using the FTC Robot Controller app on the phone).
@@ -84,7 +88,7 @@ public class TeleOpFreightFrenzy extends OpMode {
         rightDriveFront = hardwareMap.get(DcMotor.class, "rf");
         leftDriveBack = hardwareMap.get(DcMotor.class, "lb");
         rightDriveBack = hardwareMap.get(DcMotor.class, "rb");
-
+        spinner = hardwareMap.get(DcMotor.class, "spinner");
 
         // Set Motor Direction
         leftDriveFront.setDirection(DcMotor.Direction.FORWARD);
@@ -124,118 +128,115 @@ public class TeleOpFreightFrenzy extends OpMode {
         runtime.reset();
     }
 
-    private void handleClaw() {
+    protected void handleClaw() {
         if (gamepad2.a) {
-            arm.cl.setPosition(1);
+            if (!debounceA) {
+                // This code only runs once if A is pressed.
+                if (arm.cl.getPosition() < .5) {
+                    arm.cl.setPosition(1);
+                } else {
+                    arm.cl.setPosition(0);
+                }
+            }
+            debounceA = true;
+        } else {
+            debounceA = false;
         }
-        if (gamepad2.b) {
-            arm.cl.setPosition(0);
-        }
+
+
         if (gamepad2.x) {
             arm.mag.setPosition(1);
-        }
-        if (gamepad2.y) {
+        } else {
             arm.mag.setPosition(0);
         }
     }
 
 
-    private void handleArm() {
+    protected void handleArm() {
+        double elbowPower    = 0.0;
+        double shoulderPower = 0.0;
         // If driver moves the stick more than 10% or we're already in run without encoder mode ...
-        if ((Math.abs(gamepad2.left_stick_y) > .10) ||
-                (arm.elbow.getMode() == DcMotor.RunMode.RUN_WITHOUT_ENCODER)) {
-            arm.elbowMovePower(gamepad2.left_stick_y * .3);
-        }
+        elbowPower += gamepad2.left_stick_y * 0.7;
+        shoulderPower += gamepad2.right_stick_y * 0.7;
+        elbowPower -= -gamepad2.right_stick_x * 0.7;
+        shoulderPower += -gamepad2.right_stick_x * 0.7;
 
-        if ((Math.abs(gamepad2.right_stick_y) > .10) ||
-                (arm.shoulder.getMode() == DcMotor.RunMode.RUN_WITHOUT_ENCODER)) {
-            arm.shoulderMovePower(gamepad2.right_stick_y * 0.5);
-        }
+        arm.shoulderMovePower(shoulderPower);
+        arm.elbowMovePower(elbowPower);
 
         telemetry.addData("shoulder current angle:", arm.getShoulderAngle());
         telemetry.addData("shoulder angle target:", arm.getShoulderTargetAngle());
+        telemetry.addData("gravity vector", arm.getShoulderGravityVector());
         // Publish Elbow values
         telemetry.addData("elbow Current angle:", arm.getElbowAngle());
         telemetry.addData("elbow angle target:", arm.getElbowTargetAngle());
-        telemetry.addData("is busy?", arm.isBusy());
 
         while (gamepad2.right_stick_button || gamepad2.left_stick_button) {
             arm.emergencyStop();
         }
 
-        if (arm.elbow.getMode() == DcMotor.RunMode.RUN_TO_POSITION){
+        if (arm.elbow.getMode() == DcMotor.RunMode.RUN_TO_POSITION) {
             arm.elbow.setTargetPosition(arm.elbow.getTargetPosition());
         }
-        if (arm.shoulder.getMode() == DcMotor.RunMode.RUN_TO_POSITION){
+        if (arm.shoulder.getMode() == DcMotor.RunMode.RUN_TO_POSITION) {
             arm.shoulder.setTargetPosition(arm.shoulder.getTargetPosition());
-        }
-
-
-        // puts the arm back to its beginning position
-        if(gamepad2.dpad_up){
-            arm.armDriveAbsolute(.1, 0, 0);
-        }
-        // puts the arm to position 1
-        if(gamepad2.dpad_right){
-            arm.shoulderDriveAbsolute(.01, 50);
-        }
-        // puts the arm back to its position 2
-        if(gamepad2.dpad_left){
-            arm.shoulderDriveAbsolute(.1, 50);
-        }
-        // puts the arm back to its position 3
-        if(gamepad2.dpad_down){
-            arm.elbowDriveAbsolute(.25, 50);
         }
 
     }
 
-    // Code to run REPEATEDLY after the driver hits PLAY but before they hit STOP
-    @Override
-    public void loop() {
-        handleArm();
-        handleClaw();
-        telemetry.addData("shoulderPIDF", arm.shoulderPIDF.p);
-        /*
-         Choose to org.firstinspires.ftc.teamcode.drive using either Tank Mode, or POV Mode
-         Comment out the method that's not used.  The default below is POV.
-         POV Mode uses left stick to go forward, and right stick to turn.
-         - This uses basic math to combine motions and is easier to org.firstinspires.ftc.teamcode.drive straight.
-        */
-        // Send calculated power to wheels
-
+    public void handleSpinner() {
         // The code below allows you to
+        if (gamepad2.right_bumper) {
+            spinner.setPower(1.5);
+        }
+        if (gamepad2.left_bumper) {
+            spinner.setPower(-1.0);
+        }
+        if (!gamepad2.left_bumper && !gamepad2.right_bumper) {
+            spinner.setPower(0.0);
+        }
+    }
 
-        // Get the gamepad control values for this loop iteration
+    public void handleDriving() {
 
+
+        // Get the game pad control values for this loop iteration
         drive = -gamepad1.left_stick_y;
-        turn = gamepad1.left_stick_x;
-        strafe = gamepad1.right_stick_x;
+        turn = gamepad1.right_stick_x;
+        strafe = 0;
+        if (gamepad1.dpad_left)
+            strafe = -1;
+        if (gamepad1.dpad_right)
+            strafe = 1;
 
 //send power to wheels
-        speedFactor = gamepad1.right_trigger + .25;
-        leftDriveFront.setPower(leftPowerFront);
-        rightDriveFront.setPower(rightPowerFront);
-        leftDriveBack.setPower(leftPowerBack);
-        rightDriveBack.setPower(rightPowerBack);
+        speedFactor = (-gamepad1.left_trigger * 0.75) + 1;
 
-
-//(:
-        leftPowerFront = (drive + turn + strafe) * speedFactor * slowingFactor;
-        rightPowerFront = (drive - turn - strafe) * speedFactor * slowingFactor;
-        leftPowerBack = (drive + turn - strafe) * speedFactor * slowingFactor;
-        rightPowerBack = (drive - turn + strafe) * speedFactor * slowingFactor;
+        leftPowerFront = (drive + turn + strafe) * speedFactor;
+        rightPowerFront = (drive - turn - strafe) * speedFactor;
+        leftPowerBack = (drive + turn - strafe) * speedFactor;
+        rightPowerBack = (drive - turn + strafe) * speedFactor;
         //send power to wheels
         leftDriveFront.setPower(leftPowerFront);
         rightDriveFront.setPower(rightPowerFront);
         leftDriveBack.setPower(leftPowerBack);
         rightDriveBack.setPower(rightPowerBack);
 
+        telemetry.addData("Motors", "lf(%.2f), rf(%.2f), lb(%.2f), rb(%.2f)", leftPowerFront, rightPowerFront, leftPowerBack, rightPowerBack);
+        telemetry.addData("Variables", "sf(%.2f)", speedFactor);
+
+    }
+
+    // Code to run REPEATEDLY after the driver hits PLAY but before they hit STOP
+    @Override
+    public void loop() {
+        this.handleArm();
+        this.handleClaw();
+        this.handleSpinner();
+        this.handleDriving();
 
         // Show the elapsed game time and wheel power.
         telemetry.addData("Status", "Run Time: " + runtime.toString());
-        telemetry.addData("Motors", "lf(%.2f), rf(%.2f), lb(%.2f), rb(%.2f)", leftPowerFront, rightPowerFront, leftPowerBack, rightPowerBack);
-        telemetry.addData("Variables", "sf(%.2f), slf(%.2f)", speedFactor, slowingFactor);
     }
 
     /*
@@ -247,4 +248,4 @@ public class TeleOpFreightFrenzy extends OpMode {
     }
 
 }
-//If you found this then you are a big brain gamer
+//                                                                                                                                                  If you found this then you are a big brain gamer

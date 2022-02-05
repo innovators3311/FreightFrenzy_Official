@@ -36,7 +36,7 @@ public class PIDControl {
      * <p>
      * See <a href="https://en.wikipedia.org/wiki/PID_controller">Wikipedia on PID Controllers</a>.
      *
-     * @param motor  The motor you want to org.firstinspires.ftc.teamcode.drive.
+     * @param motorValue  The motor you want to drive.
      * @param pValue The value for p
      * @param iValue The value for i
      * @param dValue The value for d
@@ -76,7 +76,7 @@ public class PIDControl {
      * Call this function inside the loop to update the PID calculations and set the optimal
      * motor power.
      */
-    public void update() {
+    public void update(double feedForward) {
         // Calculate how long since the last update and reset the timer.
         double timestep = period.seconds();
         period.reset();
@@ -86,14 +86,19 @@ public class PIDControl {
         // Store thisDerivative because it makes the later equations easier to understand
         double thisDerivative = (thisError - lastError) / timestep;
 
-        // Use weighted averaging to smooth out the derivative and integral terms.
-        integratedError = integratedError + thisError * timestep;
+        // Only start integrating when we get close so large moves don't over-weight the error.
+        if (Math.abs(thisError) < 5) {
+            // Use weighted averaging to smooth out the derivative and integral terms.
+            integratedError = integratedError + thisError * timestep;
+        } else {
+            integratedError = thisError * timestep;
+        }
         averagedDerivative = thisDerivative * alpha + averagedDerivative * (1 - alpha);
 
         lastError = thisError;
 
-        double powerCalc = p * angleError() + i * integratedError + d * averagedDerivative;
-        motor.setPower(clamp(powerCalc, -1.0, 1.0) / maxPower);
+        double powerCalc = p * angleError() + i * integratedError + d * averagedDerivative + feedForward;
+        motor.setPower( clamp(powerCalc, -maxPower, maxPower) );
     }
 
     /**

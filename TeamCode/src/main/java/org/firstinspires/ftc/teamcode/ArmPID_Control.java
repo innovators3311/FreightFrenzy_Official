@@ -3,7 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.util.PIDControl;
@@ -16,20 +16,21 @@ public class ArmPID_Control extends Arm2_Control {
 
     /* local OpMode members. */
     HardwareMap hwMap = null;
-    private Object Servo;
 
     @Override
     public void init(HardwareMap ahwMap) {
-
+        super.init(ahwMap);
         // Save reference to Hardware map
         hwMap = ahwMap;
+        cl = hwMap.get(Servo.class, "claw");
+        mag = hwMap.get(Servo.class, "mag");
 
         //declare motors so that they can be used
         elbow = hwMap.get(DcMotorEx.class, "elbow");
         shoulder = hwMap.get(DcMotorEx.class, "shoulder");
 
-        shoulderPID = new PIDControl(shoulder, -3e-3, -1e-4, -3e-5);
-        elbowPID = new PIDControl(elbow, 3e-3, 0.0, 0.0);
+        shoulderPID = new PIDControl(shoulder, -1e-2, -1e-3, -1e-4);
+        elbowPID = new PIDControl(elbow, -1e-2, -1e-3, -1e-4);
 
         // Set the direction that the motors will turn
         elbow.setDirection(DcMotor.Direction.FORWARD);
@@ -39,7 +40,7 @@ public class ArmPID_Control extends Arm2_Control {
         //make sure motors are at zero power
         elbow.setPower(0);
         shoulder.setPower(0);
-        shoulder.setVelocity(8192);
+//        shoulder.setVelocity(0);
 
         elbow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         shoulder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -50,8 +51,40 @@ public class ArmPID_Control extends Arm2_Control {
 
         elbow.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         shoulder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    }
 
-        SHOULDER_GRAVITY_FACTOR = 0.0;
+    public void arm_reset(){
+        //shoulder
+        if( !armInitalized ){
+            if (!shoulderLimitSwitch.isPressed() && !armInitalized){
+                shoulder.setPower(0.5);
+            }
+            else{
+                shoulder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                elbow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                shoulderDriveAbsolute(.7, 20);
+                armInitalized = true;
+            }
+        }
+        else{
+            shoulderPID.update(getShoulderGravityVector() * SHOULDER_GRAVITY_FACTOR);
+        }
+
+        //elbow
+        if( !armInitalized ){
+            if (!elbowLimitSwitch.isPressed() && !armInitalized){
+                elbow.setPower(-0.5);
+            }
+            else{
+                shoulder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                elbow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                elbowDriveAbsolute(.7, 20);
+                armInitalized = true;
+            }
+        }
+        else{
+            elbowPID.update(getShoulderGravityVector() * SHOULDER_GRAVITY_FACTOR);
+        }
     }
 
     /**
@@ -107,8 +140,8 @@ public class ArmPID_Control extends Arm2_Control {
      */
     @Override
     public void update() {
-        shoulderPID.update();
-        elbowPID.update();
+        shoulderPID.update(getShoulderGravityVector() * SHOULDER_GRAVITY_FACTOR);
+        elbowPID.update(0);
     }
 
     @Override
@@ -136,4 +169,5 @@ public class ArmPID_Control extends Arm2_Control {
         telemetry.addData("shoulder pos d:", String.format("%.4e", shoulderPID.d));
         telemetry.addData("shoulder vel:", String.format("%.4e", shoulder.getVelocity()));
     }
-}                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       //Hi. You found me. -SECRET COMMENT
+}
+                                                                                                                                                                                                                             //Hi. You found me. -SECRET COMMENT

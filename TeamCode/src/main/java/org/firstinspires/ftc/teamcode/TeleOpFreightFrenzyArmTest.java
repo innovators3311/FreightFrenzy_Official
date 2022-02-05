@@ -29,6 +29,7 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -51,6 +52,7 @@ import org.firstinspires.ftc.teamcode.util.PIDControl;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
+@Disabled
 @TeleOp(name = "TeleOpFreightFrenzyArmTest", group = "3311")
 public class TeleOpFreightFrenzyArmTest extends OpMode {
     // Declare OpMode members.

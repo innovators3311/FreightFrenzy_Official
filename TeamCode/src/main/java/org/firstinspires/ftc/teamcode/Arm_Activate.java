@@ -12,7 +12,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 public class Arm_Activate {
 // Declare OpMode members.
-    private ElapsedTime runtime = new ElapsedTime();
+    private final ElapsedTime runtime = new ElapsedTime();
     Arm_Setup Arm = new Arm_Setup();
     public void init () {
 
@@ -21,8 +21,8 @@ public class Arm_Activate {
 
     public void init_loop() {
         double frontPower = 0;
-        double backPower = 0;
-        double clawPower = 0;
+        double backPower  = 0;
+        double clawPower  = 0;
 
         frontPower = gamepad2.right_stick_y;
         backPower = gamepad2.left_stick_y;
