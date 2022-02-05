@@ -24,6 +24,9 @@ public class Arm {
     private double elbowGravity;
     public boolean elbowIsBusy = false;
 
+    public double shoulderErr;
+    public double elbowErr;
+
     //both shoulder and elbow encoders have 8192 ticks per revolution
 
     PID shoulderPID = new PID();
@@ -33,8 +36,8 @@ public class Arm {
 
     public Arm(HardwareMap hardwareMap) {
         //initializing all hardware
-        shoulderPID.setGains(0.05, 0, 0.0003,-1, 1);
-        elbowPID.setGains(0.02, 0, 0.00015, -1, 1);
+        shoulderPID.setGains(0.05, 0.01, 0.0006,-1, 1, 5);
+        elbowPID.setGains(0.035, 0.007, 0.00015, -1, 1, 5);
 
         shoulder = hardwareMap.get(DcMotor.class, "shoulder");
         elbow = hardwareMap.get(DcMotor.class, "elbow");
@@ -65,6 +68,7 @@ public class Arm {
         if(Math.abs(shoulderPID.Err) < 5) {
             shoulderIsBusy = false;
         }
+        shoulderErr = shoulderPID.Err;
     }
     public void updateElbow() {
         elbowPID.update(elbowTarget, encoderMultiplier * elbow.getCurrentPosition() / 22.76);
@@ -75,7 +79,7 @@ public class Arm {
         if(Math.abs(elbowPID.Err) < 5) {
             elbowIsBusy = false;
         }
-
+        elbowErr = elbowPID.Err;
     }
     public void openClaw() {
         claw.setPosition(0);
