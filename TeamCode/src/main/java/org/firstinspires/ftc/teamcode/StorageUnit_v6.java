@@ -135,26 +135,40 @@ public class StorageUnit_v6 extends LinearOpMode {
         //Initializing our other robot hardware
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
         Arm arm = new Arm(hardwareMap); //Shoulder start angle is 150 degrees, elbow is 20 relative to the shoulder
-        arm.runShoulderTo(60);
-        arm.runElbowTo(90);
 
         //Setting initial position estimate
         drive.setPoseEstimate(startPose);
 
         //Defining trajectories
         Trajectory trajectory1 = drive.trajectoryBuilder(startPose)
-                .splineTo(new Vector2d(49, -61), Math.toRadians(10))
+                .splineTo(new Vector2d(49, -61), Math.toRadians(10)) //to duck carousel
                 .build();
-        Trajectory trajectory2 = drive.trajectoryBuilder(trajectory1.end())
+        Trajectory trajectory2 = drive.trajectoryBuilder(trajectory1.end()) //creeping up to carousel
                 .splineTo(new Vector2d(57, -61), Math.toRadians(10))
                 .build();
-        Trajectory trajectory3 = drive.trajectoryBuilder(trajectory2.end())
+        Trajectory trajectory3_1 = drive.trajectoryBuilder(trajectory2.end()) //turning back of robot to face shipping hub
                 .lineToLinearHeading(new Pose2d(52, -55, Math.toRadians(-35)))
                 .build();
-        Trajectory trajectory4 = drive.trajectoryBuilder(trajectory3.end())
-                .back(30)
+        Trajectory trajectory3_2 = drive.trajectoryBuilder(trajectory2.end()) //turning front of robot to face shipping hub
+                .lineToLinearHeading(new Pose2d(52, -55, Math.toRadians(145)))
                 .build();
-        Trajectory trajectory5 = drive.trajectoryBuilder(trajectory4.end())
+        Trajectory trajectory4_1 = drive.trajectoryBuilder(trajectory3_1.end()) //*duck spot 1* positions for bottom tier
+                .back(38)
+                .build();
+        Trajectory trajectory4_2 = drive.trajectoryBuilder(trajectory3_1.end()) //*duck spot 2* positions for middle tier
+                .back(36)
+                .build();
+        Trajectory trajectory4_3 = drive.trajectoryBuilder(trajectory3_2.end()) //*duck spot 3* positions for top tier
+                .forward(30)
+                .build();
+        //*trajectory5* parking in the storage unit
+        Trajectory trajectory5_1 = drive.trajectoryBuilder(trajectory4_1.end())
+                .lineToLinearHeading(new Pose2d(54, -25, Math.toRadians(90)))
+                .build();
+        Trajectory trajectory5_2 = drive.trajectoryBuilder(trajectory4_2.end())
+                .lineToLinearHeading(new Pose2d(54, -25, Math.toRadians(90)))
+                .build();
+        Trajectory trajectory5_3 = drive.trajectoryBuilder(trajectory4_3.end())
                 .lineToLinearHeading(new Pose2d(54, -25, Math.toRadians(90)))
                 .build();
         waitForStart();
@@ -163,6 +177,8 @@ public class StorageUnit_v6 extends LinearOpMode {
 
         currentState = mainState.TRAJECTORY_1;
         //drive.followTrajectoryAsync(trajectory1);
+        arm.runShoulderTo(50);
+        arm.runElbowTo(160);
 
         while (opModeIsActive() && !isStopRequested()) {
             //You can have multiple switch statements running together for multiple state machines
@@ -187,29 +203,43 @@ public class StorageUnit_v6 extends LinearOpMode {
                     if (timer.milliseconds() > 2500) {
                         arm.spinner.setPower(0);
                         currentState = mainState.TRAJECTORY_3;
-                        drive.followTrajectoryAsync(trajectory3);
+                        if(Duck == 3) {
+                            drive.followTrajectoryAsync(trajectory3_2);
+                        } else {
+                            drive.followTrajectoryAsync(trajectory3_1);
+                        }
                     }
                     break;
                 case TRAJECTORY_3: //turning to go to shipping hub
                     if (!drive.isBusy()) {
                         timer.reset();
                         currentState = mainState.TRAJECTORY_4;
-                        drive.followTrajectoryAsync(trajectory4);
+                        if(Duck == 3) {
+                            drive.followTrajectoryAsync(trajectory4_3);
+                        } else {
+                            drive.followTrajectoryAsync(trajectory4_1);
+                        }
+                        switch(Duck) {
+                            case 1:
+                                drive.followTrajectoryAsync(trajectory4_1);
+                            case 2:
+                                drive.followTrajectoryAsync(trajectory4_2);
+                            case 3:
+                                drive.followTrajectoryAsync(trajectory4_3);
+                        }
                     }
                     break;
                 case TRAJECTORY_4: //going to the shipping hub
-                    if(timer.milliseconds() > 1000) {
-                        switch(Duck) {
-                            case 1:
-                                currentArmState = armState.TIER_1;
-                                break;
-                            case 2:
-                                currentArmState = armState.TIER_2;
-                                break;
-                            case 3:
-                                currentArmState = armState.TIER_3;
-                                break;
-                        }
+                    switch(Duck) {
+                        case 1:
+                            currentArmState = armState.TIER_1;
+                            break;
+                        case 2:
+                           currentArmState = armState.TIER_2;
+                           break;
+                        case 3:
+                            currentArmState = armState.TIER_3;
+                            break;
                     }
                     if (!drive.isBusy() && !arm.shoulderIsBusy && !arm.elbowIsBusy) {
                         timer.reset();
@@ -221,7 +251,14 @@ public class StorageUnit_v6 extends LinearOpMode {
                     arm.retractMagnet();
                     if(timer.milliseconds() > 1000) {
                         currentState = mainState.TRAJECTORY_5;
-                        drive.followTrajectoryAsync(trajectory5);
+                        switch(Duck) {
+                            case 1:
+                                drive.followTrajectoryAsync(trajectory5_1);
+                            case 2:
+                                drive.followTrajectoryAsync(trajectory5_2);
+                            case 3:
+                                drive.followTrajectoryAsync(trajectory5_3);
+                        }
                     }
                 case TRAJECTORY_5: //parking in storage unit
                     if (!drive.isBusy()) {
@@ -229,7 +266,7 @@ public class StorageUnit_v6 extends LinearOpMode {
                     }
                     break;
                 case ARM_RESET:
-                    arm.runShoulderTo(90);
+                    arm.runShoulderTo(150);
                     arm.runElbowTo(20);
                     if(!arm.shoulderIsBusy && !arm.elbowIsBusy) {
                         currentState = mainState.IDLE;
@@ -242,18 +279,18 @@ public class StorageUnit_v6 extends LinearOpMode {
 
             switch(currentArmState) {
                 case TIER_1:
-                    arm.runShoulderTo(90);
-                    arm.runElbowTo(80);
+                    arm.runShoulderTo(153);
+                    arm.runElbowTo(270);
                     currentArmState = armState.IDLE;
                     break;
                 case TIER_2:
-                    arm.runShoulderTo(80);
-                    arm.runElbowTo(80);
+                    arm.runShoulderTo(120);
+                    arm.runElbowTo(285);
                     currentArmState = armState.IDLE;
                     break;
                 case TIER_3:
-                    arm.runShoulderTo(70);
-                    arm.runElbowTo(80);
+                    arm.runShoulderTo(50);
+                    arm.runElbowTo(165);
                     currentArmState = armState.IDLE;
                     break;
                 case IDLE:
@@ -269,6 +306,8 @@ public class StorageUnit_v6 extends LinearOpMode {
 
             //Printing data to telemetry
             telemetry.addData("current state", currentState);
+            telemetry.addData("Shoulder error", arm.shoulderErr);
+            telemetry.addData("Elbow error", arm.elbowErr);
             telemetry.update();
         }
     }
