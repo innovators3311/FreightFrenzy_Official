@@ -12,7 +12,7 @@ public class PID {
     private double D;
 
     private double It = 0;
-    private double dt = 0.1;
+    public double dt = 0.1;
     public double output;
     public double Err;
     private double pErr = NaN;
