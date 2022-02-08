@@ -2,7 +2,9 @@ package org.firstinspires.ftc.teamcode.source;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.Range;
 
 /**
  * This is the setup and control class for the arm motors and servos, and the duck spinner motor
@@ -13,8 +15,8 @@ public class Arm {
     public DcMotor shoulder = null;
     public DcMotor elbow = null;
     public DcMotor spinner = null;
-    public Servo claw = null;
-    public Servo magnet = null;
+    public CRServo claw = null;
+    public CRServo magnet = null;
 
     private int shoulderTarget = 0;
     private double shoulderGravity;
@@ -27,12 +29,16 @@ public class Arm {
     public double shoulderErr;
     public double elbowErr;
 
-    public double deltaTime;
-
     //both shoulder and elbow encoders have 8192 ticks per revolution
 
     PID shoulderPID = new PID();
     PID elbowPID = new PID();
+
+    ElapsedTime timer = new ElapsedTime();
+    double clawTimestamp = 0;
+    private double clawPower = 0;
+    double magnetTimestamp = 0;
+    private double magnetPower = 0;
 
     private int encoderMultiplier = -1;
 
@@ -44,8 +50,8 @@ public class Arm {
         shoulder = hardwareMap.get(DcMotor.class, "shoulder");
         elbow = hardwareMap.get(DcMotor.class, "elbow");
         spinner = hardwareMap.get(DcMotor.class, "spinner");
-        claw  = hardwareMap.get(Servo.class, "claw");
-        magnet = hardwareMap.get(Servo.class, "mag");
+        claw  = hardwareMap.get(CRServo.class, "claw");
+        magnet = hardwareMap.get(CRServo.class, "mag");
 
         shoulder.setDirection(DcMotor.Direction.FORWARD);
         elbow.setDirection(DcMotor.Direction.FORWARD);
@@ -71,7 +77,6 @@ public class Arm {
             shoulderIsBusy = false;
         }
         shoulderErr = shoulderPID.Err;
-        deltaTime = shoulderPID.dt;
     }
     public void updateElbow() {
         elbowPID.update(elbowTarget, encoderMultiplier * elbow.getCurrentPosition() / 22.76);
@@ -84,17 +89,33 @@ public class Arm {
         }
         elbowErr = elbowPID.Err;
     }
-    public void openClaw() {
-        claw.setPosition(0);
+
+    /**
+     * Since there is no method to grab encoder counts from a servo, it must be done using time (milliseconds).  Unless, of course, you wish
+     * to use the qualcomm setPosition() method, which is terrible (like most qualcomm methods) because it takes forever to even set power to the servos.
+     * I'm getting cynical if you can't tell.
+     */
+    public void runClaw(double milliseconds, double power) {
+        clawTimestamp = timer.milliseconds() + milliseconds;
+        clawPower = Range.clip(power, -1, 1);
     }
-    public void closeClaw() {
-        claw.setPosition(1);
+    public void updateClaw() {
+        if(timer.milliseconds() < clawTimestamp) {
+            claw.setPower(clawPower);
+        } else {
+            claw.setPower(0);
+        }
     }
-    public void pushMagnet() {
-        magnet.setPosition(0);
+    public void runMagnet(double milliseconds, double power) {
+        magnetTimestamp = timer.milliseconds() + milliseconds;
+        magnetPower = Range.clip(power, -1, 1);
     }
-    public void retractMagnet() {
-        magnet.setPosition(0);
+    public void updateMagnet() {
+        if(timer.milliseconds() < magnetTimestamp) {
+            magnet.setPower(magnetPower);
+        } else {
+            magnet.setPower(0);
+        }
     }
 
     public void runShoulderTo(int shoulderTarget) {

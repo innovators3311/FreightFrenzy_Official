@@ -19,8 +19,8 @@ import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 
 import org.firstinspires.ftc.teamcode.source.Arm;
 
-@Autonomous(name = "Storage Unit_v6", group = "Storage Unit")
-public class StorageUnit_v6 extends LinearOpMode {
+@Autonomous(name = "Whole Field_v2", group = "Whole Field")
+public class WholeField_v2 extends LinearOpMode {
 
     /* Note: This sample uses the all-objects Tensor Flow model (FreightFrenzy_BCDM.tflite), which contains
      * the following 4 detectable objects
@@ -69,15 +69,23 @@ public class StorageUnit_v6 extends LinearOpMode {
         SPIN,           // Spin the duck
         TRAJECTORY_3,   // Go to the shipping hub
         TRAJECTORY_4,   // Drive forward slowly a few inches to the hub
-        DROP,           // Drop block
-        TRAJECTORY_5,   // Park in the storage unit
-        ARM_RESET,      // Reset the arm position for Teleop
+        DROP_1,         // Drop block
+        WAIT_1,
+        TRAJECTORY_5,   // Position to get some freight
+        TRAJECTORY_6,
+        TRAJECTORY_7,   // Get the freight
+        TRAJECTORY_8,   // Get out of the warehouse
+        TRAJECTORY_9,   // Go to shipping hub and place the freight
+        DROP_2,         // Dropping freight in shipping hub for second time
+        TRAJECTORY_10,   // Park in warehouse
         IDLE            // Enter IDLE state when complete
     }
     enum armState {
         TIER_1,
         TIER_2,
         TIER_3,
+        PICKUP,
+        ARM_RESET,
         IDLE
     }
 
@@ -158,16 +166,38 @@ public class StorageUnit_v6 extends LinearOpMode {
         Trajectory trajectory4_3 = drive.trajectoryBuilder(trajectory3_2.end()) //*duck spot 3* positions for top tier
                 .forward(30)
                 .build();
-        //*trajectory5* parking in the storage unit
+        //*trajectory5* position to get some freight
         Trajectory trajectory5_1 = drive.trajectoryBuilder(trajectory4_1.end())
-                .lineToLinearHeading(new Pose2d(64, -25, Math.toRadians(90)))
+                .splineTo(new Vector2d(20.87, -67), Math.toRadians(180))
                 .build();
         Trajectory trajectory5_2 = drive.trajectoryBuilder(trajectory4_2.end())
-                .lineToLinearHeading(new Pose2d(64, -25, Math.toRadians(90)))
+                .splineTo(new Vector2d(-12, -67), Math.toRadians(180))
                 .build();
         Trajectory trajectory5_3 = drive.trajectoryBuilder(trajectory4_3.end())
-                .lineToLinearHeading(new Pose2d(64, -25, Math.toRadians(90)))
+                .lineToLinearHeading(new Pose2d(20.87, -33.2, Math.toRadians(180)))
                 .build();
+        Trajectory trajectory6_1 = drive.trajectoryBuilder(trajectory5_3.end())
+                .strafeLeft(37)
+                .build();
+        Trajectory trajectory6_2 = drive.trajectoryBuilder(trajectory5_3.end())
+                .strafeLeft(37)
+                .build();
+        Trajectory trajectory6_3 = drive.trajectoryBuilder(trajectory5_3.end())
+                .strafeLeft(37)
+                .build();
+        Trajectory trajectory7 = drive.trajectoryBuilder(trajectory6_3.end()) //going to get freight from warehouse
+                .forward(40)
+                .build();
+        Trajectory trajectory8 = drive.trajectoryBuilder(trajectory7.end()) //positioning to drive to shipping hub
+                .back(40)
+                .build();
+        Trajectory trajectory9 = drive.trajectoryBuilder(trajectory8.end()) //driving to shipping hub
+                .splineTo(new Vector2d(-12, 45), Math.toRadians(45))
+                .build();
+        Trajectory trajectory10 = drive.trajectoryBuilder(trajectory9.end()) //parking in warehouse
+                .splineTo(new Vector2d(-60, -40), Math.toRadians(180))
+                .build();
+
         waitForStart();
 
         if (isStopRequested()) return;
@@ -207,7 +237,6 @@ public class StorageUnit_v6 extends LinearOpMode {
                     break;
                 case TRAJECTORY_3: //turning to go to shipping hub
                     if (!drive.isBusy()) {
-                        timer.reset();
                         currentState = mainState.TRAJECTORY_4;
                         if(Duck == 3) {
                             drive.followTrajectoryAsync(trajectory4_3);
@@ -217,34 +246,26 @@ public class StorageUnit_v6 extends LinearOpMode {
                         switch(Duck) {
                             case 1:
                                 drive.followTrajectoryAsync(trajectory4_1);
+                                currentArmState = armState.TIER_1;
                             case 2:
                                 drive.followTrajectoryAsync(trajectory4_2);
+                                currentArmState = armState.TIER_2;
                             case 3:
                                 drive.followTrajectoryAsync(trajectory4_3);
+                                currentArmState = armState.TIER_3;
                         }
                     }
                     break;
-                case TRAJECTORY_4: //going to the shipping hub
-                    switch(Duck) {
-                        case 1:
-                            currentArmState = armState.TIER_1;
-                            break;
-                        case 2:
-                           currentArmState = armState.TIER_2;
-                           break;
-                        case 3:
-                            currentArmState = armState.TIER_3;
-                            break;
-                    }
+                case TRAJECTORY_4: //going to the shipping hub and dropping freight
                     if (!drive.isBusy() && !arm.shoulderIsBusy && !arm.elbowIsBusy) {
+                        arm.runClaw(750, 1);
+                        arm.runMagnet(750, 1);
+                        currentState = mainState.WAIT_1;
                         timer.reset();
-                        currentState = mainState.DROP;
                     }
                     break;
-                case DROP:
-                    //arm.runClaw();
-                    //arm.retractMagnet();
-                    if(timer.milliseconds() > 2000) {
+                case WAIT_1:
+                    if(timer.milliseconds() > 800) {
                         currentState = mainState.TRAJECTORY_5;
                         switch(Duck) {
                             case 1:
@@ -255,16 +276,55 @@ public class StorageUnit_v6 extends LinearOpMode {
                                 drive.followTrajectoryAsync(trajectory5_3);
                         }
                     }
-                case TRAJECTORY_5: //parking in storage unit
+                case TRAJECTORY_5: //turning to strafe to wall
                     if (!drive.isBusy()) {
-                        currentState = mainState.ARM_RESET;
+                        currentState = mainState.TRAJECTORY_6;
+                        switch(Duck) {
+                            case 1:
+                                drive.followTrajectoryAsync(trajectory6_1);
+                            case 2:
+                                drive.followTrajectoryAsync(trajectory6_2);
+                            case 3:
+                                drive.followTrajectoryAsync(trajectory6_3);
+                        }
+                        currentArmState = armState.PICKUP;
                     }
                     break;
-                case ARM_RESET:
-                    arm.runShoulderTo(150);
-                    arm.runElbowTo(20);
-                    currentState = mainState.IDLE;
+                case TRAJECTORY_6: //strafing to wall and lowering arm
+                    if (!drive.isBusy() && !arm.shoulderIsBusy && !arm.elbowIsBusy) {
+                        currentState = mainState.TRAJECTORY_7;
+                        drive.followTrajectoryAsync(trajectory7);
+                    }
                     break;
+                case TRAJECTORY_7: //driving forward to get the freight
+                    if (!drive.isBusy()) {
+                        currentArmState = armState.PICKUP;
+                        currentState = mainState.TRAJECTORY_8;
+                        drive.followTrajectoryAsync(trajectory8);
+                    }
+                    break;
+                case TRAJECTORY_8: //going out of the warehouse
+                    if (!drive.isBusy()) {
+                        currentArmState = armState.TIER_3;
+                        currentState = mainState.TRAJECTORY_9;
+                        drive.followTrajectoryAsync(trajectory9);
+                    }
+                    break;
+                case TRAJECTORY_9: //driving to shipping hub
+                    if(!drive.isBusy()) {
+                        timer.reset();
+                        currentState = mainState.DROP_2;
+                    }
+                case DROP_2: //dropping another block
+                    if(timer.milliseconds() > 2000) {
+                        currentArmState = armState.ARM_RESET;
+                        currentState = mainState.IDLE;
+                        drive.followTrajectoryAsync(trajectory10);
+                    }
+                case TRAJECTORY_10: //parking in warehouse
+                    if(!drive.isBusy()) {
+                        currentState = mainState.IDLE;
+                    }
                 case IDLE:
                     arm.storeArmPose();
                     break;
@@ -283,16 +343,28 @@ public class StorageUnit_v6 extends LinearOpMode {
                     break;
                 case TIER_3:
                     arm.runShoulderTo(50);
-                    arm.runElbowTo(165);
+                    arm.runElbowTo(175);
+                    currentArmState = armState.IDLE;
+                    break;
+                case PICKUP:
+                    arm.runShoulderTo(-25);
+                    arm.runElbowTo(205);
+                    currentArmState = armState.IDLE;
+                    break;
+                case ARM_RESET:
+                    arm.runShoulderTo(150);
+                    arm.runElbowTo(20);
                     currentArmState = armState.IDLE;
                     break;
                 case IDLE:
                     break;
             }
 
-            //Updating the arm and elbow continuously in the background, regardless of state
+            //Updating all arm components continuously in the background, regardless of state
             arm.updateShoulder();
             arm.updateElbow();
+            arm.updateClaw();
+            arm.updateMagnet();
 
             //Updating drive continuously in the background, regardless of state
             drive.update();
@@ -301,6 +373,9 @@ public class StorageUnit_v6 extends LinearOpMode {
             telemetry.addData("current state", currentState);
             telemetry.addData("Shoulder error", arm.shoulderErr);
             telemetry.addData("Elbow error", arm.elbowErr);
+            telemetry.addData("1", trajectory4_1.end());
+            telemetry.addData("2", trajectory4_1.end());
+            telemetry.addData("3", trajectory4_1.end());
             telemetry.update();
         }
     }

@@ -69,8 +69,10 @@ public class WholeField_v1 extends LinearOpMode {
         SPIN,           // Spin the duck
         TRAJECTORY_3,   // Go to the shipping hub
         TRAJECTORY_4,   // Drive forward slowly a few inches to the hub
-        DROP_1,           // Drop block
+        DROP_1,         // Drop block
+        WAIT_1,
         TRAJECTORY_5,   // Position to get some freight
+        TRAJECTORY_5_2,
         TRAJECTORY_6,   // Get the freight
         TRAJECTORY_7,   // Get out of the warehouse
         TRAJECTORY_8,   // Go to shipping hub and place the freight
@@ -166,19 +168,22 @@ public class WholeField_v1 extends LinearOpMode {
                 .build();
         //*trajectory5* position to get some freight
         Trajectory trajectory5_1 = drive.trajectoryBuilder(trajectory4_1.end())
-                .lineToLinearHeading(new Pose2d(-12, -64, Math.toRadians(180)))
+                .splineTo(new Vector2d(20.87, -67), Math.toRadians(180))
                 .build();
         Trajectory trajectory5_2 = drive.trajectoryBuilder(trajectory4_2.end())
-                .lineToLinearHeading(new Pose2d(-12, -64, Math.toRadians(180)))
+                .splineTo(new Vector2d(-12, -67), Math.toRadians(180))
                 .build();
         Trajectory trajectory5_3 = drive.trajectoryBuilder(trajectory4_3.end())
-                .lineToLinearHeading(new Pose2d(-12, -64, Math.toRadians(180)))
+                .lineToLinearHeading(new Pose2d(20.87, -33.2, Math.toRadians(180)))
                 .build();
-        Trajectory trajectory6 = drive.trajectoryBuilder(trajectory5_1.end()) //going to get freight from warehouse
-                .forward(20)
+        Trajectory trajectory5_2_3 = drive.trajectoryBuilder(trajectory5_3.end())
+                .strafeLeft(37)
+                .build();
+        Trajectory trajectory6 = drive.trajectoryBuilder(trajectory5_2_3.end()) //going to get freight from warehouse
+                .forward(40)
                 .build();
         Trajectory trajectory7 = drive.trajectoryBuilder(trajectory6.end()) //positioning to drive to shipping hub
-                .back(20)
+                .back(40)
                 .build();
         Trajectory trajectory8 = drive.trajectoryBuilder(trajectory7.end()) //driving to shipping hub
                 .splineTo(new Vector2d(-12, 45), Math.toRadians(45))
@@ -248,14 +253,16 @@ public class WholeField_v1 extends LinearOpMode {
                     break;
                 case TRAJECTORY_4: //going to the shipping hub
                     if (!drive.isBusy() && !arm.shoulderIsBusy && !arm.elbowIsBusy) {
-                        timer.reset();
                         currentState = mainState.DROP_1;
+                        arm.runClaw();
+                        arm.retractMagnet();
                     }
                     break;
                 case DROP_1:
-                    arm.openClaw();
-                    arm.retractMagnet();
-                    if(timer.milliseconds() > 2000) {
+                    timer.reset();
+                    currentState = mainState.WAIT_1;
+                case WAIT_1:
+                    if(timer.milliseconds() > 4500) {
                         currentState = mainState.TRAJECTORY_5;
                         switch(Duck) {
                             case 1:
@@ -268,21 +275,27 @@ public class WholeField_v1 extends LinearOpMode {
                     }
                 case TRAJECTORY_5: //go get some more freight!!!
                     if (!drive.isBusy()) {
-                        currentArmState = armState.PICKUP;
                         arm.pushMagnet();
+                        currentState = mainState.TRAJECTORY_5_2;
+                        drive.followTrajectoryAsync(trajectory5_2_3);
+                    }
+                    break;
+                case TRAJECTORY_5_2: //go get some more freight!!!
+                    if (!drive.isBusy()) {
                         currentState = mainState.TRAJECTORY_6;
                         drive.followTrajectoryAsync(trajectory6);
                     }
                     break;
                 case TRAJECTORY_6: //drive forward slowly to get the freight
                     if (!drive.isBusy()) {
-                        currentArmState = armState.TIER_3;
+                        currentArmState = armState.PICKUP;
                         currentState = mainState.TRAJECTORY_7;
                         drive.followTrajectoryAsync(trajectory7);
                     }
                     break;
                 case TRAJECTORY_7: //going out of the warehouse
                     if (!drive.isBusy()) {
+                        currentArmState = armState.TIER_3;
                         currentState = mainState.TRAJECTORY_8;
                         drive.followTrajectoryAsync(trajectory8);
                     }
@@ -293,7 +306,7 @@ public class WholeField_v1 extends LinearOpMode {
                         currentState = mainState.DROP_2;
                     }
                 case DROP_2: //dropping another block
-                    arm.openClaw();
+                    arm.runClaw();
                     arm.retractMagnet();
                     if(timer.milliseconds() > 2000) {
                         currentArmState = armState.ARM_RESET;
@@ -322,12 +335,12 @@ public class WholeField_v1 extends LinearOpMode {
                     break;
                 case TIER_3:
                     arm.runShoulderTo(50);
-                    arm.runElbowTo(165);
+                    arm.runElbowTo(175);
                     currentArmState = armState.IDLE;
                     break;
                 case PICKUP:
                     arm.runShoulderTo(-25);
-                    arm.runElbowTo(165);
+                    arm.runElbowTo(205);
                     currentArmState = armState.IDLE;
                     break;
                 case ARM_RESET:
@@ -350,7 +363,9 @@ public class WholeField_v1 extends LinearOpMode {
             telemetry.addData("current state", currentState);
             telemetry.addData("Shoulder error", arm.shoulderErr);
             telemetry.addData("Elbow error", arm.elbowErr);
-            telemetry.addData("Delta time estimate", arm.deltaTime);
+            telemetry.addData("1", trajectory4_1.end());
+            telemetry.addData("2", trajectory4_1.end());
+            telemetry.addData("3", trajectory4_1.end());
             telemetry.update();
         }
     }

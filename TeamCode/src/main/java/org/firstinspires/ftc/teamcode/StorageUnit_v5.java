@@ -213,7 +213,7 @@ public class StorageUnit_v5 extends LinearOpMode {
                     }
                     break;
                 case DROP:
-                    arm.openClaw();
+                    arm.runClaw();
                     arm.retractMagnet();
                     if(timer.milliseconds() > 1000) {
                         currentState = mainState.TRAJECTORY_5;
