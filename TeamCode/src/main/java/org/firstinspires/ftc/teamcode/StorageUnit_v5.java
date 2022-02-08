@@ -213,8 +213,8 @@ public class StorageUnit_v5 extends LinearOpMode {
                     }
                     break;
                 case DROP:
-                    arm.runClaw();
-                    arm.retractMagnet();
+                    //arm.runClaw();
+                    //arm.retractMagnet();
                     if(timer.milliseconds() > 1000) {
                         currentState = mainState.TRAJECTORY_5;
                         drive.followTrajectoryAsync(trajectory5);

@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
+import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer.CameraDirection.BACK;
+
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
@@ -11,16 +13,28 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.SwitchableCamera
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 
+import java.util.ArrayList;
 import java.util.List;
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 
+import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
+import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
+import static org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.DEGREES;
+import static org.firstinspires.ftc.robotcore.external.navigation.AxesOrder.XYZ;
+import static org.firstinspires.ftc.robotcore.external.navigation.AxesOrder.YZX;
+import static org.firstinspires.ftc.robotcore.external.navigation.AxesReference.EXTRINSIC;
+
 import org.firstinspires.ftc.teamcode.source.Arm;
 
-@Autonomous(name = "Whole Field_v1", group = "Whole Field")
-public class WholeField_v1 extends LinearOpMode {
+@Autonomous(name = "Whole Field_v4", group = "Whole Field")
+public class WholeField_v4 extends LinearOpMode {
 
     /* Note: This sample uses the all-objects Tensor Flow model (FreightFrenzy_BCDM.tflite), which contains
      * the following 4 detectable objects
@@ -62,6 +76,46 @@ public class WholeField_v1 extends LinearOpMode {
      */
     private TFObjectDetector tfod;
 
+    //SETTING UP VUFORIA IMAGE TRACKING
+
+    // IMPORTANT:  For Phone Camera, set 1) the camera source and 2) the orientation, based on how your phone is mounted:
+    // 1) Camera Source.  Valid choices are:  BACK (behind screen) or FRONT (selfie side)
+    // 2) Phone Orientation. Choices are: PHONE_IS_PORTRAIT = true (portrait) or PHONE_IS_PORTRAIT = false (landscape)
+
+    private static final VuforiaLocalizer.CameraDirection CAMERA_CHOICE = BACK;
+    private static final boolean PHONE_IS_PORTRAIT = false  ;
+
+    /*
+     * IMPORTANT: You need to obtain your own license key to use Vuforia. The string below with which
+     * 'parameters.vuforiaLicenseKey' is initialized is for illustration only, and will not function.
+     * A Vuforia 'Development' license key, can be obtained free of charge from the Vuforia developer
+     * web site at https://developer.vuforia.com/license-manager.
+     *
+     * Vuforia license keys are always 380 characters long, and look as if they contain mostly
+     * random data. As an example, here is a example of a fragment of a valid key:
+     *      ... yIgIzTqZ4mWjk9wd3cZO9T1axEqzuhxoGlfOOI2dRzKS4T0hQ8kT ...
+     * Once you've obtained a license key, copy the string from the Vuforia web site
+     * and paste it in to your code on the next line, between the double quotes.
+     */
+
+
+    // Since ImageTarget trackables use mm to specifiy their dimensions, we must use mm for all the physical dimension.
+    // We will define some constants and conversions here.  These are useful for the Freight Frenzy field.
+    private static final float mmPerInch        = 25.4f;
+    private static final float mmTargetHeight   = 6 * mmPerInch;          // the height of the center of the target image above the floor
+    private static final float halfField        = 72 * mmPerInch;
+    private static final float halfTile         = 12 * mmPerInch;
+    private static final float oneAndHalfTile   = 36 * mmPerInch;
+
+    // Class Members
+    private OpenGLMatrix lastLocation = null;
+    private VuforiaTrackables targets = null ;
+
+    private boolean targetVisible = false;
+    private float phoneXRotate    = 0;
+    private float phoneYRotate    = 0;
+    private float phoneZRotate    = 0;
+
     //defining program states
     enum mainState {
         TRAJECTORY_1,   // Head to the duck carousel
@@ -72,12 +126,12 @@ public class WholeField_v1 extends LinearOpMode {
         DROP_1,         // Drop block
         WAIT_1,
         TRAJECTORY_5,   // Position to get some freight
-        TRAJECTORY_5_2,
-        TRAJECTORY_6,   // Get the freight
-        TRAJECTORY_7,   // Get out of the warehouse
-        TRAJECTORY_8,   // Go to shipping hub and place the freight
+        TRAJECTORY_6,
+        TRAJECTORY_7,   // Get the freight
+        TRAJECTORY_8,   // Get out of the warehouse
+        TRAJECTORY_9,   // Go to shipping hub and place the freight
         DROP_2,         // Dropping freight in shipping hub for second time
-        TRAJECTORY_9,   // Park in warehouse
+        TRAJECTORY_10,   // Park in warehouse
         IDLE            // Enter IDLE state when complete
     }
     enum armState {
@@ -88,12 +142,19 @@ public class WholeField_v1 extends LinearOpMode {
         ARM_RESET,
         IDLE
     }
+    enum imageTrackerState { //so as not to severely slow the loop down by running the tracker when it's not needed
+        TRACK,
+        IDLE
+    }
 
     //defining the main state
     mainState currentState = mainState.IDLE;
 
     //defining the arm state
     armState currentArmState = armState.IDLE;
+
+    //defining the tracker state
+    imageTrackerState currentTrackerState = imageTrackerState.IDLE;
 
     //defining start pose
     Pose2d startPose = new Pose2d(30, -64, Math.toRadians(0));
@@ -104,7 +165,79 @@ public class WholeField_v1 extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
 
-        initVuforia();
+        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
+
+        parameters.vuforiaLicenseKey = VUFORIA_KEY;
+        parameters.cameraDirection   = CAMERA_CHOICE;
+
+        // Indicate that we wish to be able to switch cameras.
+        webcam1 = hardwareMap.get(WebcamName.class, "Webcam 1");
+        webcam2 = hardwareMap.get(WebcamName.class, "Webcam 2");
+        parameters.cameraName = ClassFactory.getInstance().getCameraManager().nameForSwitchableCamera(webcam1, webcam2);
+
+        // Instantiate the Vuforia engine
+        vuforia = ClassFactory.getInstance().createVuforia(parameters);
+
+        // Set the active camera to Webcam 1.
+        switchableCamera = (SwitchableCamera) vuforia.getCamera();
+        switchableCamera.setActiveCamera(webcam1);
+
+        // Turn off Extended tracking.  Set this true if you want Vuforia to track beyond the target.
+        parameters.useExtendedTracking = false;
+
+        // Load the data sets for the trackable objects. These particular data
+        // sets are stored in the 'assets' part of our application.
+        targets = this.vuforia.loadTrackablesFromAsset("FreightFrenzy");
+
+        // For convenience, gather together all the trackable objects in one easily-iterable collection */
+        List<VuforiaTrackable> allTrackables = new ArrayList<VuforiaTrackable>();
+        allTrackables.addAll(targets);
+
+        identifyTarget(0, "Blue Storage",       -halfField,  oneAndHalfTile, mmTargetHeight, 90, 0, 90);
+        identifyTarget(1, "Blue Alliance Wall",  halfTile,   halfField,      mmTargetHeight, 90, 0, 0);
+        identifyTarget(2, "Red Storage",        -halfField, -oneAndHalfTile, mmTargetHeight, 90, 0, 90);
+        identifyTarget(3, "Red Alliance Wall",   halfTile,  -halfField,      mmTargetHeight, 90, 0, 180);
+
+        /*
+         * Create a transformation matrix describing where the phone is on the robot.
+         *
+         * NOTE !!!!  It's very important that you turn OFF your phone's Auto-Screen-Rotation option.
+         * Lock it into Portrait for these numbers to work.
+         *
+         * Info:  The coordinate frame for the robot looks the same as the field.
+         * The robot's "forward" direction is facing out along X axis, with the LEFT side facing out along the Y axis.
+         * Z is UP on the robot.  This equates to a heading angle of Zero degrees.
+         *
+         * The phone starts out lying flat, with the screen facing Up and with the physical top of the phone
+         * pointing to the LEFT side of the Robot.
+         * The two examples below assume that the camera is facing forward out the front of the robot.
+         */
+
+        // We need to rotate the camera around its long axis to bring the correct camera forward.
+        if (CAMERA_CHOICE == BACK) {
+            phoneYRotate = -90;
+        } else {
+            phoneYRotate = 90;
+        }
+        // Rotate the phone vertical about the X axis if it's in portrait mode
+        if (PHONE_IS_PORTRAIT) {
+            phoneXRotate = 90 ;
+        }
+        // Next, translate the camera lens to where it is on the robot.
+        // In this example, it is centered on the robot (left-to-right and front-to-back), and 6 inches above ground level.
+        final float CAMERA_FORWARD_DISPLACEMENT  = 0.0f * mmPerInch;   // eg: Enter the forward distance from the center of the robot to the camera lens
+        final float CAMERA_VERTICAL_DISPLACEMENT = 6.0f * mmPerInch;   // eg: Camera is 6 Inches above ground
+        final float CAMERA_LEFT_DISPLACEMENT     = 0.0f * mmPerInch;   // eg: Enter the left distance from the center of the robot to the camera lens
+
+        OpenGLMatrix robotFromCamera = OpenGLMatrix
+                .translation(CAMERA_FORWARD_DISPLACEMENT, CAMERA_LEFT_DISPLACEMENT, CAMERA_VERTICAL_DISPLACEMENT)
+                .multiplied(Orientation.getRotationMatrix(EXTRINSIC, YZX, DEGREES, phoneYRotate, phoneZRotate, phoneXRotate));
+
+        /**  Let all the trackable listeners know where the phone is.  */
+        for (VuforiaTrackable trackable : allTrackables) {
+            ((VuforiaTrackableDefaultListener) trackable.getListener()).setPhoneInformation(robotFromCamera, parameters.cameraDirection);
+        }
+
         initTfod();
 
         /**
@@ -176,19 +309,25 @@ public class WholeField_v1 extends LinearOpMode {
         Trajectory trajectory5_3 = drive.trajectoryBuilder(trajectory4_3.end())
                 .lineToLinearHeading(new Pose2d(20.87, -33.2, Math.toRadians(180)))
                 .build();
-        Trajectory trajectory5_2_3 = drive.trajectoryBuilder(trajectory5_3.end())
+        Trajectory trajectory6_1 = drive.trajectoryBuilder(trajectory5_3.end())
                 .strafeLeft(37)
                 .build();
-        Trajectory trajectory6 = drive.trajectoryBuilder(trajectory5_2_3.end()) //going to get freight from warehouse
+        Trajectory trajectory6_2 = drive.trajectoryBuilder(trajectory5_3.end())
+                .strafeLeft(37)
+                .build();
+        Trajectory trajectory6_3 = drive.trajectoryBuilder(trajectory5_3.end())
+                .strafeLeft(37)
+                .build();
+        Trajectory trajectory7 = drive.trajectoryBuilder(trajectory6_3.end()) //going to get freight from warehouse
                 .forward(40)
                 .build();
-        Trajectory trajectory7 = drive.trajectoryBuilder(trajectory6.end()) //positioning to drive to shipping hub
+        Trajectory trajectory8 = drive.trajectoryBuilder(trajectory7.end()) //positioning to drive to shipping hub
                 .back(40)
                 .build();
-        Trajectory trajectory8 = drive.trajectoryBuilder(trajectory7.end()) //driving to shipping hub
+        Trajectory trajectory9 = drive.trajectoryBuilder(trajectory8.end()) //driving to shipping hub
                 .splineTo(new Vector2d(-12, 45), Math.toRadians(45))
                 .build();
-        Trajectory trajectory9 = drive.trajectoryBuilder(trajectory8.end()) //parking in warehouse
+        Trajectory trajectory10 = drive.trajectoryBuilder(trajectory9.end()) //parking in warehouse
                 .splineTo(new Vector2d(-60, -40), Math.toRadians(180))
                 .build();
 
@@ -231,7 +370,6 @@ public class WholeField_v1 extends LinearOpMode {
                     break;
                 case TRAJECTORY_3: //turning to go to shipping hub
                     if (!drive.isBusy()) {
-                        timer.reset();
                         currentState = mainState.TRAJECTORY_4;
                         if(Duck == 3) {
                             drive.followTrajectoryAsync(trajectory4_3);
@@ -249,20 +387,20 @@ public class WholeField_v1 extends LinearOpMode {
                                 drive.followTrajectoryAsync(trajectory4_3);
                                 currentArmState = armState.TIER_3;
                         }
+                        targets.activate(); //activating vuforia tracking
+                        currentTrackerState = imageTrackerState.TRACK;
                     }
                     break;
-                case TRAJECTORY_4: //going to the shipping hub
+                case TRAJECTORY_4: //going to the shipping hub and dropping freight
                     if (!drive.isBusy() && !arm.shoulderIsBusy && !arm.elbowIsBusy) {
-                        currentState = mainState.DROP_1;
-                        //arm.runClaw();
-                        //arm.retractMagnet();
+                        arm.runClaw(750, 1);
+                        arm.runMagnet(750, 1);
+                        currentState = mainState.WAIT_1;
+                        timer.reset();
                     }
                     break;
-                case DROP_1:
-                    timer.reset();
-                    currentState = mainState.WAIT_1;
                 case WAIT_1:
-                    if(timer.milliseconds() > 4500) {
+                    if(timer.milliseconds() > 800) {
                         currentState = mainState.TRAJECTORY_5;
                         switch(Duck) {
                             case 1:
@@ -273,49 +411,56 @@ public class WholeField_v1 extends LinearOpMode {
                                 drive.followTrajectoryAsync(trajectory5_3);
                         }
                     }
-                case TRAJECTORY_5: //go get some more freight!!!
-                    if (!drive.isBusy()) {
-                        //arm.pushMagnet();
-                        currentState = mainState.TRAJECTORY_5_2;
-                        drive.followTrajectoryAsync(trajectory5_2_3);
-                    }
-                    break;
-                case TRAJECTORY_5_2: //go get some more freight!!!
+                case TRAJECTORY_5: //turning to strafe to wall
                     if (!drive.isBusy()) {
                         currentState = mainState.TRAJECTORY_6;
-                        drive.followTrajectoryAsync(trajectory6);
+                        switch(Duck) {
+                            case 1:
+                                drive.followTrajectoryAsync(trajectory6_1);
+                            case 2:
+                                drive.followTrajectoryAsync(trajectory6_2);
+                            case 3:
+                                drive.followTrajectoryAsync(trajectory6_3);
+                        }
+                        currentArmState = armState.PICKUP;
                     }
                     break;
-                case TRAJECTORY_6: //drive forward slowly to get the freight
-                    if (!drive.isBusy()) {
-                        currentArmState = armState.PICKUP;
+                case TRAJECTORY_6: //strafing to wall and lowering arm
+                    if (!drive.isBusy() && !arm.shoulderIsBusy && !arm.elbowIsBusy) {
                         currentState = mainState.TRAJECTORY_7;
                         drive.followTrajectoryAsync(trajectory7);
                     }
                     break;
-                case TRAJECTORY_7: //going out of the warehouse
+                case TRAJECTORY_7: //driving forward to get the freight
                     if (!drive.isBusy()) {
-                        currentArmState = armState.TIER_3;
+                        currentArmState = armState.PICKUP;
                         currentState = mainState.TRAJECTORY_8;
                         drive.followTrajectoryAsync(trajectory8);
                     }
                     break;
-                case TRAJECTORY_8: //driving to shipping hub
+                case TRAJECTORY_8: //going out of the warehouse
+                    if (!drive.isBusy()) {
+                        currentArmState = armState.TIER_3;
+                        currentState = mainState.TRAJECTORY_9;
+                        drive.followTrajectoryAsync(trajectory9);
+                    }
+                    break;
+                case TRAJECTORY_9: //driving to shipping hub
                     if(!drive.isBusy()) {
                         timer.reset();
                         currentState = mainState.DROP_2;
                     }
                 case DROP_2: //dropping another block
-                    //arm.runClaw();
-                    //arm.retractMagnet();
                     if(timer.milliseconds() > 2000) {
                         currentArmState = armState.ARM_RESET;
                         currentState = mainState.IDLE;
-                        drive.followTrajectoryAsync(trajectory9);
+                        drive.followTrajectoryAsync(trajectory10);
                     }
-                case TRAJECTORY_9: //parking in warehouse
+                case TRAJECTORY_10: //parking in warehouse
                     if(!drive.isBusy()) {
                         currentState = mainState.IDLE;
+                        targets.deactivate(); //deactivating vuforia tracking to save battery
+                        currentTrackerState = imageTrackerState.IDLE;
                     }
                 case IDLE:
                     arm.storeArmPose();
@@ -351,10 +496,47 @@ public class WholeField_v1 extends LinearOpMode {
                 case IDLE:
                     break;
             }
+            switch (currentTrackerState) {
+                case TRACK:
+                    // check all the trackable targets to see which one (if any) is visible.
+                    targetVisible = false;
+                    for (VuforiaTrackable trackable : allTrackables) {
+                        if (((VuforiaTrackableDefaultListener)trackable.getListener()).isVisible()) {
+                            telemetry.addData("Visible Target", trackable.getName());
+                            targetVisible = true;
 
-            //Updating the arm and elbow continuously in the background, regardless of state
+                            // getUpdatedRobotLocation() will return null if no new information is available since
+                            // the last time that call was made, or if the trackable is not currently visible.
+                            OpenGLMatrix robotLocationTransform = ((VuforiaTrackableDefaultListener)trackable.getListener()).getUpdatedRobotLocation();
+                            if (robotLocationTransform != null) {
+                                lastLocation = robotLocationTransform;
+                            }
+                            break;
+                        }
+                    }
+                    if (targetVisible) {
+                        // express position (translation) of robot in inches.
+                        VectorF translation = lastLocation.getTranslation();
+                        telemetry.addData("Pos (inches)", "{X, Y, Z} = %.1f, %.1f, %.1f",
+                                translation.get(0) / mmPerInch, translation.get(1) / mmPerInch, translation.get(2) / mmPerInch);
+
+                        // express the rotation of the robot in degrees.
+                        Orientation rotation = Orientation.getOrientation(lastLocation, EXTRINSIC, XYZ, DEGREES);
+                        telemetry.addData("Rot (deg)", "{Roll, Pitch, Heading} = %.0f, %.0f, %.0f", rotation.firstAngle, rotation.secondAngle, rotation.thirdAngle);
+                    }
+                    else {
+                        telemetry.addData("Visible Target", "none");
+                    }
+                    break;
+                case IDLE:
+                    break;
+            }
+
+            //Updating all arm components continuously in the background, regardless of state
             arm.updateShoulder();
             arm.updateElbow();
+            arm.updateClaw();
+            arm.updateMagnet();
 
             //Updating drive continuously in the background, regardless of state
             drive.update();
@@ -370,27 +552,6 @@ public class WholeField_v1 extends LinearOpMode {
         }
     }
 
-    private void initVuforia() {
-        /*
-         * Configure Vuforia by creating a Parameter object, and passing it to the Vuforia engine.
-         */
-        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
-
-        parameters.vuforiaLicenseKey = VUFORIA_KEY;
-
-        // Indicate that we wish to be able to switch cameras.
-        webcam1 = hardwareMap.get(WebcamName.class, "Webcam 1");
-        webcam2 = hardwareMap.get(WebcamName.class, "Webcam 2");
-        parameters.cameraName = ClassFactory.getInstance().getCameraManager().nameForSwitchableCamera(webcam1, webcam2);
-
-        // Instantiate the Vuforia engine
-        vuforia = ClassFactory.getInstance().createVuforia(parameters);
-
-        // Set the active camera to Webcam 1.
-        switchableCamera = (SwitchableCamera) vuforia.getCamera();
-        switchableCamera.setActiveCamera(webcam1);
-    }
-
     /**
      * Initialize the TensorFlow Object Detection engine.
      */
@@ -403,6 +564,12 @@ public class WholeField_v1 extends LinearOpMode {
         tfodParameters.inputSize = 320;
         tfod = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, vuforia);
         tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABELS);
+    }
+    void identifyTarget(int targetIndex, String targetName, float dx, float dy, float dz, float rx, float ry, float rz) {
+        VuforiaTrackable aTarget = targets.get(targetIndex);
+        aTarget.setName(targetName);
+        aTarget.setLocation(OpenGLMatrix.translation(dx, dy, dz)
+                .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, rx, ry, rz)));
     }
     private int DuckSpot(double DuckX) {
         if(DuckX < 233) {
