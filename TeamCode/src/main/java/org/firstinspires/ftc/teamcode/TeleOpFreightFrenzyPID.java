@@ -21,10 +21,10 @@ public class TeleOpFreightFrenzyPID extends TeleOpFreightFrenzy {
     public double[][] ARM_POSITIONS = {
             {0,0}, // position 0: Hard reset
             {30,-30}, // position 1: Carrying state
-            {213,-175}, // poSitIon 2: Ground pickup
+            {213,-175}, // position 2: Ground pickup
             {218,-231}, //position 3: Middle tier
-            {125,-100}, // position 4: Top (needs tuning)
-            {79,137} // POSITION 5: Top-er
+            {125,-100}, // position 4: Top (needs tuning. bit to low)
+            {79,137} // position 5: Top-er
     };
 
     ArmPID_Control arm = new ArmPID_Control();
