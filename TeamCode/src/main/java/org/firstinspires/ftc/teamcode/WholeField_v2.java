@@ -258,8 +258,8 @@ public class WholeField_v2 extends LinearOpMode {
                     break;
                 case TRAJECTORY_4: //going to the shipping hub and dropping freight
                     if (!drive.isBusy() && !arm.shoulderIsBusy && !arm.elbowIsBusy) {
-                        arm.runClaw(750, 1);
-                        arm.runMagnet(750, 1);
+                        //arm.openClaw(750, 1);
+                        //arm.retractMagnet(750, 1);
                         currentState = mainState.WAIT_1;
                         timer.reset();
                     }
@@ -363,8 +363,8 @@ public class WholeField_v2 extends LinearOpMode {
             //Updating all arm components continuously in the background, regardless of state
             arm.updateShoulder();
             arm.updateElbow();
-            arm.updateClaw();
-            arm.updateMagnet();
+            //arm.updateClaw();
+            //arm.updateMagnet();
 
             //Updating drive continuously in the background, regardless of state
             drive.update();

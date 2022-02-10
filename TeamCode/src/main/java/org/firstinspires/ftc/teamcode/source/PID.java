@@ -28,7 +28,7 @@ public class PID {
 
     public PID() {}
 
-    public void setGains(double kP, double kI, double kD, double minOutput, double maxOutput, double integralErrCap) {
+    public void setCoefficients(double kP, double kI, double kD, double minOutput, double maxOutput, double integralErrCap) {
         this.kP = kP;
         this.kI = kI;
         this.kD = kD;

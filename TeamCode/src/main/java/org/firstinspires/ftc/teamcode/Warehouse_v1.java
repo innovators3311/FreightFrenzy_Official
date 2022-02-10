@@ -198,8 +198,8 @@ public class Warehouse_v1 extends LinearOpMode {
                     }
                     break;
                 case DROP:
-                    arm.runClaw();
-                    arm.retractMagnet();
+                    //arm.runClaw();
+                    //arm.retractMagnet();
                     if(timer.milliseconds() > 2000) {
                         switch(Duck) {
                             case 1:

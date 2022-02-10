@@ -142,10 +142,10 @@ public class BasicTeleop extends LinearOpMode {
                 claw.setPosition(0);
             }
             if (gamepad2.b) {
-                claw.setPosition(10);
+                claw.setPosition(1);
             }
             if (gamepad2.x) {
-                release.setPosition(10);
+                release.setPosition(1);
             }
             if (gamepad2.y) {
                 release.setPosition(0);

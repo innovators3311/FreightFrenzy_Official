@@ -22,11 +22,9 @@ import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 
 import org.firstinspires.ftc.teamcode.source.Arm;
 
-import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
 import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
@@ -34,7 +32,6 @@ import static org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.DEGR
 import static org.firstinspires.ftc.robotcore.external.navigation.AxesOrder.XYZ;
 import static org.firstinspires.ftc.robotcore.external.navigation.AxesOrder.YZX;
 import static org.firstinspires.ftc.robotcore.external.navigation.AxesReference.EXTRINSIC;
-import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer.CameraDirection.BACK;
 
 @Autonomous(name = "Whole Field_v3", group = "Whole Field")
 public class WholeField_v3 extends LinearOpMode {
@@ -383,8 +380,8 @@ public class WholeField_v3 extends LinearOpMode {
                     break;
                 case TRAJECTORY_4: //going to the shipping hub and dropping freight
                     if (!drive.isBusy() && !arm.shoulderIsBusy && !arm.elbowIsBusy) {
-                        arm.runClaw(750, 1);
-                        arm.runMagnet(750, 1);
+                        //arm.openClaw(750, 1);
+                        //arm.retractMagnet(750, 1);
                         currentState = mainState.WAIT_1;
                         timer.reset();
                     }
@@ -523,8 +520,6 @@ public class WholeField_v3 extends LinearOpMode {
             //Updating all arm components continuously in the background, regardless of state
             arm.updateShoulder();
             arm.updateElbow();
-            arm.updateClaw();
-            arm.updateMagnet();
 
             //Updating drive continuously in the background, regardless of state
             drive.update();

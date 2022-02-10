@@ -33,8 +33,8 @@ import static org.firstinspires.ftc.robotcore.external.navigation.AxesReference.
 
 import org.firstinspires.ftc.teamcode.source.Arm;
 
-@Autonomous(name = "Whole Field_v4", group = "Whole Field")
-public class WholeField_v4 extends LinearOpMode {
+@Autonomous(name = "Whole Field_v5", group = "Whole Field")
+public class WholeField_v5 extends LinearOpMode {
 
     /* Note: This sample uses the all-objects Tensor Flow model (FreightFrenzy_BCDM.tflite), which contains
      * the following 4 detectable objects
@@ -124,13 +124,13 @@ public class WholeField_v4 extends LinearOpMode {
         TRAJECTORY_3,   // Go to the shipping hub
         TRAJECTORY_4,   // Drive forward slowly a few inches to the hub
         TRAJECTORY_4_2,
-        WAIT_0,
-        DROP_1,         // Drop block
         WAIT_1,
+        DROP_1,         // Drop block
+        WAIT_2,
         TRAJECTORY_5,   // Position to get some freight
         TRAJECTORY_6,
         TRAJECTORY_7,   // Get the freight
-        WAIT_2,
+        WAIT_3,
         TRAJECTORY_8,   // Get out of the warehouse
         TRAJECTORY_9,   // Go to shipping hub and place the freight
         DROP_2,         // Dropping freight in shipping hub for second time
@@ -295,6 +295,9 @@ public class WholeField_v4 extends LinearOpMode {
         Trajectory trajectory4_1 = drive.trajectoryBuilder(trajectory3_1.end()) //*duck spot 1* positions for bottom tier
                 .back(38)
                 .build();
+        Trajectory trajectory4_2_1 = drive.trajectoryBuilder(trajectory4_1.end()) //*duck spot 3* positions for middle tier
+                .back(8)
+                .build();
         Trajectory trajectory4_2 = drive.trajectoryBuilder(trajectory3_1.end()) //*duck spot 2* positions for middle tier
                 .back(28)
                 .build();
@@ -398,25 +401,22 @@ public class WholeField_v4 extends LinearOpMode {
                     if (!drive.isBusy() && !arm.shoulderIsBusy && !arm.elbowIsBusy) {
                         if(Duck < 3) {
                             timer.reset();
-                            currentState = mainState.WAIT_0;
+                            currentState = mainState.WAIT_1;
                         } else {
                             arm.openClaw();
                             arm.retractMagnet();
-                            currentState = mainState.WAIT_1;
+                            currentState = mainState.WAIT_2;
                             timer.reset();
                         }
                     }
                     break;
-                case WAIT_0:
+                case WAIT_1:
                     if(timer.milliseconds() > 1000) {
                         currentState = mainState.TRAJECTORY_4_2;
-                        switch(Duck) {
-                            case 1:
-                                //drive.followTrajectoryAsync(trajectory4_2_2);
-                                break;
-                            case 2:
-                                drive.followTrajectoryAsync(trajectory4_2_2);
-                                break;
+                        if(Duck == 1) {
+                           drive.followTrajectoryAsync(trajectory4_2_1);
+                        } else {
+                            drive.followTrajectoryAsync(trajectory4_2_2);
                         }
                     }
                     break;
@@ -424,11 +424,11 @@ public class WholeField_v4 extends LinearOpMode {
                     if (!drive.isBusy()) {
                         arm.openClaw();
                         arm.retractMagnet();
-                        currentState = mainState.WAIT_1;
+                        currentState = mainState.WAIT_2;
                         timer.reset();
                     }
                     break;
-                case WAIT_1:
+                case WAIT_2:
                     if(timer.milliseconds() > 1500) { //if it doesn't stop here something's up; it must be skipping this state somehow
                         currentState = mainState.TRAJECTORY_5;
                         switch(Duck) {
@@ -462,14 +462,14 @@ public class WholeField_v4 extends LinearOpMode {
                     }
                     break;
                 case TRAJECTORY_7: //driving forward to get the freight
-                    if (!drive.isBusy()) {
+                    if (!drive.isBusy() && false) {
                         arm.pushMagnet();
                         currentArmState = armState.PICKUP_2;
                         timer.reset();
-                        currentState = mainState.WAIT_2;
+                        currentState = mainState.WAIT_3;
                     }
                     break;
-                case WAIT_2:
+                case WAIT_3:
                     if(timer.milliseconds() > 1000) {
                         arm.closeClaw();
                         currentArmState = armState.PICKUP_1;
