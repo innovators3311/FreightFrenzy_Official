@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.source;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 /**
  * This is the setup and control class for the arm motors and servos, and the duck spinner motor
@@ -24,17 +25,26 @@ public class Arm {
     private double elbowGravity;
     public boolean elbowIsBusy = false;
 
+    public double shoulderErr;
+    public double elbowErr;
+
     //both shoulder and elbow encoders have 8192 ticks per revolution
 
     PID shoulderPID = new PID();
     PID elbowPID = new PID();
 
+    ElapsedTime timer = new ElapsedTime();
+    double clawTimestamp = 0;
+    private double clawPower = 0;
+    double magnetTimestamp = 0;
+    private double magnetPower = 0;
+
     private int encoderMultiplier = -1;
 
     public Arm(HardwareMap hardwareMap) {
         //initializing all hardware
-        shoulderPID.setGains(0.05, 0, 0.000001,-1, 1);
-        elbowPID.setGains(0.02, 0, 0.0000005, -1, 1);
+        shoulderPID.setCoefficients(0.05, 0.01, 0.0006,-1, 1, 5);
+        elbowPID.setCoefficients(0.035, 0.007, 0.00015, -1, 1, 5);
 
         shoulder = hardwareMap.get(DcMotor.class, "shoulder");
         elbow = hardwareMap.get(DcMotor.class, "elbow");
@@ -62,9 +72,10 @@ public class Arm {
         shoulderPID.update(shoulderTarget, encoderMultiplier * shoulder.getCurrentPosition() / 22.76);
         shoulderGravity =  0.05 * Math.cos( Math.toRadians(encoderMultiplier * shoulder.getCurrentPosition() / 22.76 + 150) );
         shoulder.setPower(shoulderPID.output + shoulderGravity); //forward is towards the back of the robot
-        if(Math.abs(shoulderPID.Err) < 5) {
+        if(Math.abs(shoulderPID.Err) < 3) {
             shoulderIsBusy = false;
         }
+        shoulderErr = shoulderPID.Err;
     }
     public void updateElbow() {
         elbowPID.update(elbowTarget, encoderMultiplier * elbow.getCurrentPosition() / 22.76);
@@ -72,24 +83,29 @@ public class Arm {
                 Math.toRadians(encoderMultiplier * shoulder.getCurrentPosition() / 22.76 + encoderMultiplier * elbow.getCurrentPosition() / 22.76 + 20 )
         );
         elbow.setPower(elbowPID.output + elbowGravity);
-        if(Math.abs(elbowPID.Err) < 5) {
+        if(Math.abs(elbowPID.Err) < 3) {
             elbowIsBusy = false;
         }
-
+        elbowErr = elbowPID.Err;
     }
+
+    /**
+     * Since there is no method to grab encoder counts from a servo, it must be done using time (milliseconds).  Unless, of course, you wish
+     * to use the qualcomm setPosition() method, which is terrible (like most qualcomm methods) because it takes forever to even set power to the servos.
+     * I'm getting cynical if you can't tell.
+     */
     public void openClaw() {
         claw.setPosition(0);
     }
     public void closeClaw() {
         claw.setPosition(1);
     }
-    public void pushMagnet() {
+    public void retractMagnet() {
         magnet.setPosition(1);
     }
-    public void retractMagnet() {
+    public void pushMagnet() {
         magnet.setPosition(0);
     }
-
     public void runShoulderTo(int shoulderTarget) {
         shoulderIsBusy = true;
         this.shoulderTarget = shoulderTarget - 150;

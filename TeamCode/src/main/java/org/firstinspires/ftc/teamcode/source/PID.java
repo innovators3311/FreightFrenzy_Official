@@ -12,7 +12,7 @@ public class PID {
     private double D;
 
     private double It = 0;
-    private double dt = 0.1;
+    private double dt = 0.05;
     public double output;
     public double Err;
     private double pErr = NaN;
@@ -23,29 +23,35 @@ public class PID {
     private double kP;
     private double kI;
     private double kD;
+    private double integralErrCap;
     private ElapsedTime timer = new ElapsedTime();
 
     public PID() {}
 
-    public void setGains(double kP, double kI, double kD, double minOutput, double maxOutput) {
+    public void setCoefficients(double kP, double kI, double kD, double minOutput, double maxOutput, double integralErrCap) {
         this.kP = kP;
         this.kI = kI;
         this.kD = kD;
+        this.integralErrCap = integralErrCap;
         this.min = minOutput;
         this.max = maxOutput;
     }
     public void update(double setpoint, double processValue) {
+        dt = timer.milliseconds()/1000;
         timer.reset();
         Err = setpoint - processValue;
         if(pErr == NaN) {
             pErr = Err;
         }
         P = kP * Err;
-        I = kI * Err * dt;
-        It += I;
+        if(Math.abs(Err) < integralErrCap) {
+            I = kI * Err * dt;
+            It += I;
+        } else {
+            It = 0;
+        }
         D = -1 * kD * (pErr - Err)/dt;
         output = Range.clip(P + It + D, min, max);
         pErr = Err;
-        dt = timer.milliseconds()/1000;
     }
 }
