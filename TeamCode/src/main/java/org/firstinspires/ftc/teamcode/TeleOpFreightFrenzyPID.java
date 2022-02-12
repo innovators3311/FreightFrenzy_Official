@@ -13,8 +13,8 @@ public class TeleOpFreightFrenzyPID extends TeleOpFreightFrenzy {
 
 
     // These values affect joystick sensitivity of the arm.
-    public double ELBOW_MANUAL_FACTOR    =2.0;
-    public double SHOULDER_MANUAL_FACTOR =2.0;
+    public double ELBOW_MANUAL_FACTOR    =3.0;
+    public double SHOULDER_MANUAL_FACTOR =3.0;
     public int armLevel = 1;
     public boolean armLevelDebounceUp = false;
     public boolean armLevelDebounceDown = false;
@@ -53,8 +53,8 @@ public class TeleOpFreightFrenzyPID extends TeleOpFreightFrenzy {
         telemetry.addData("elbow Power:", arm.elbow.getPower());
         arm.arm_reset();
         if (arm.armInitalized){
-            gamepad1.rumble(1, 1 , 1000);
-            gamepad2.rumble(1, 1 , 1000);
+            gamepad1.rumble(1000);
+            gamepad2.rumble(1000);
         }
 
     }
@@ -89,8 +89,8 @@ public class TeleOpFreightFrenzyPID extends TeleOpFreightFrenzy {
 //        telemetry.addData("is busy?", arm.isBusy());
         telemetry.addData("Arm Level", armLevel);
 
-        arm.shoulderPID.chillFactor = -0.5 * Math.max(gamepad2.left_trigger , gamepad2.right_trigger) + 1;
-        arm.elbowPID.chillFactor    = -0.75 * Math.max(gamepad2.left_trigger , gamepad2.right_trigger) + 1;
+        arm.shoulderPID.chillFactor = -0.75 * Math.max(gamepad2.left_trigger , gamepad2.right_trigger) + 1;
+        arm.elbowPID.chillFactor    = -0.9 * Math.max(gamepad2.left_trigger , gamepad2.right_trigger) + 1;
 
         if (PIDEnabled) {
             arm.update();

@@ -23,6 +23,7 @@ public class PIDControl {
     private double lastError = 0;
     private double integratedError = 0.0;
     private double averagedDerivative = 0.0;
+    public double pChill = 1;
 
     /**
      * This PID Controller drives a motor using PID control as specified.  The function is
@@ -98,7 +99,7 @@ public class PIDControl {
 
         lastError = thisError;
 
-        double powerCalc = p * angleError() + i * integratedError + d * averagedDerivative + feedForward;
+        double powerCalc = p * pChill * angleError() + i * integratedError + d * averagedDerivative + feedForward;
         motor.setPower( clamp(powerCalc, -maxPower * chillFactor, maxPower * chillFactor) );
     }
 

@@ -210,7 +210,7 @@ public class TeleOpFreightFrenzy extends OpMode {
             strafe = 1;
 
 //send power to wheels
-        speedFactor = -0.5 *Math.max(gamepad1.left_trigger , gamepad1.right_trigger) + 1;
+        speedFactor = -0.25 *Math.max(gamepad1.left_trigger , gamepad1.right_trigger) + 1;
 
         leftPowerFront = (drive + turn + strafe) * speedFactor;
         rightPowerFront = (drive - turn - strafe) * speedFactor;

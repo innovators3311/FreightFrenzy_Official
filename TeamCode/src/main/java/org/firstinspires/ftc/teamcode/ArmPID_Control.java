@@ -33,7 +33,7 @@ public class ArmPID_Control extends Arm2_Control {
         shoulder = hwMap.get(DcMotorEx.class, "shoulder");
 
         shoulderPID = new PIDControl(shoulder,  -1e-1, -1e-3, -2e-5);
-        elbowPID = new PIDControl(elbow, -1e-2, -1e-3, -5e-5);
+        elbowPID = new PIDControl(elbow, -4e-2, -1e-3, -5e-5);
 
         // Set the direction that the motors will turn
         elbow.setDirection(DcMotor.Direction.FORWARD);
@@ -144,9 +144,26 @@ public class ArmPID_Control extends Arm2_Control {
      */
     @Override
     public void update() {
-      double chill =  .75 + .25*Math.cos(shoulderPID.getAngle()*(Math.PI/180));
-      chill = PIDControl.clamp(chill, 0, 1);
-        shoulderPID.chillFactor = chill;
+      //   Graph: https://www.desmos.com/calculator/g4xnx2gddv
+      //  Graph 2: https://www.desmos.com/calculator/pizueafjgr
+        double chill =  .75 + .5*Math.cos(2*(shoulderPID.getTargetAngle())*(Math.PI/180));
+        chill = PIDControl.clamp(chill, 0, 1);
+        shoulderPID.pChill = chill;
+
+//        if (Math.abs(shoulderPID.getAngle()-90)< 30 &&
+//                Math.abs(shoulderPID.getTargetAngle() - 90) < 30){
+//          shoulderPID.pChill=.2;
+//        }
+//        else {
+//            shoulderPID.pChill = 1;
+//        }
+//        if (Math.abs(elbowPID.getAngle()-100)< 30 &&
+//                Math.abs(elbowPID.getTargetAngle() - 100) < 30){
+//            elbowPID.pChill=.2;
+//        }
+//        else {
+//            elbowPID.pChill = 1;
+//        }
         shoulderPID.update(getShoulderGravityVector() * SHOULDER_GRAVITY_FACTOR);
         elbowPID.update(0);
     }
