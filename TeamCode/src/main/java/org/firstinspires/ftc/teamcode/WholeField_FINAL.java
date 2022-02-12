@@ -164,7 +164,8 @@ public class WholeField_FINAL extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-
+        telemetry.addLine("Initializing...");
+        telemetry.update();
         VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
 
         parameters.vuforiaLicenseKey = VUFORIA_KEY;
@@ -246,6 +247,9 @@ public class WholeField_FINAL extends LinearOpMode {
             tfod.setZoom(1, 16.0/9.0);
         }
 
+        telemetry.clear();
+        telemetry.addLine("Scanning for duck...");
+        telemetry.update();
         int Duck = 0;
         timer.reset();
         while(Duck == 0 && timer.milliseconds() < 3000) {
@@ -264,7 +268,9 @@ public class WholeField_FINAL extends LinearOpMode {
         if(Duck == 0) { //If it took too long to find the duck then it defaults to spot 3
             Duck = 3;
         }
+        telemetry.clear();
         telemetry.addData("Duck Spot", Duck);
+        telemetry.addLine("Building trajectories...");
         telemetry.update();
 
         //Initializing our other robot hardware
@@ -285,7 +291,7 @@ public class WholeField_FINAL extends LinearOpMode {
                 .lineToLinearHeading(new Pose2d(52, -55, Math.toRadians(-35)))
                 .build();
         Trajectory trajectory3_2 = drive.trajectoryBuilder(trajectory2.end()) //turning front of robot to face shipping hub
-                .lineToLinearHeading(new Pose2d(52, -55, Math.toRadians(141)))
+                .lineToLinearHeading(new Pose2d(52, -55, Math.toRadians(137)))
                 .build();
         Trajectory trajectory4_1 = drive.trajectoryBuilder(trajectory3_1.end()) //*duck spot 1* positions for bottom tier
                 .back(24)
@@ -297,7 +303,7 @@ public class WholeField_FINAL extends LinearOpMode {
                 .back(27)
                 .build();
         Trajectory trajectory4_2_2 = drive.trajectoryBuilder(trajectory4_2.end()) //*duck spot 2* positions for middle tier
-                .back(8.5)
+                .back(7)
                 .build();
         Trajectory trajectory4_3 = drive.trajectoryBuilder(trajectory3_2.end()) //*duck spot 3* positions for top tier
                 .forward(29)
@@ -313,18 +319,20 @@ public class WholeField_FINAL extends LinearOpMode {
                 .lineToLinearHeading(new Pose2d(30, -33.2, Math.toRadians(180)))
                 .build();
         Trajectory trajectory6_1 = drive.trajectoryBuilder(trajectory5_1.end())
-                .lineToLinearHeading(new Pose2d(30, -67, Math.toRadians(180)))
+                .lineToLinearHeading(new Pose2d(30, -45, Math.toRadians(170)))
                 .build();
         Trajectory trajectory6_2 = drive.trajectoryBuilder(trajectory5_2.end())
-                .lineToLinearHeading(new Pose2d(30, -67, Math.toRadians(180)))
+                .lineToLinearHeading(new Pose2d(30, -45, Math.toRadians(170)))
                 .build();
         Trajectory trajectory6_3 = drive.trajectoryBuilder(trajectory5_3.end())
-                .lineToLinearHeading(new Pose2d(30, -67, Math.toRadians(180)))
+                .lineToLinearHeading(new Pose2d(30, -45, Math.toRadians(170)))
                 .build();
         Trajectory trajectory7 = drive.trajectoryBuilder(trajectory6_3.end()) //going to get freight from warehouse
-                .forward(75)
+                .forward(100)
                 .build();
-
+        telemetry.clear();
+        telemetry.addLine("Done!  Smash that play button!");
+        telemetry.update();
         waitForStart();
 
         if (isStopRequested()) return;
@@ -415,6 +423,7 @@ public class WholeField_FINAL extends LinearOpMode {
                     }
                     break;
                 case WAIT_2:
+                    arm.openClaw();
                     if(timer.milliseconds() > 1500) {
                         currentState = mainState.TRAJECTORY_5;
                         switch(Duck) {
@@ -465,7 +474,7 @@ public class WholeField_FINAL extends LinearOpMode {
                     currentArmState = armState.IDLE;
                     break;
                 case TIER_2:
-                    arm.runShoulderTo(130);
+                    arm.runShoulderTo(128);
                     arm.runElbowTo(285);
                     currentArmState = armState.IDLE;
                     break;
