@@ -313,13 +313,13 @@ public class WholeField_FINAL extends LinearOpMode {
                 .lineToLinearHeading(new Pose2d(30, -33.2, Math.toRadians(180)))
                 .build();
         Trajectory trajectory6_1 = drive.trajectoryBuilder(trajectory5_1.end())
-                .lineToLinearHeading(new Pose2d(30, -66, Math.toRadians(180)))
+                .lineToLinearHeading(new Pose2d(30, -67, Math.toRadians(180)))
                 .build();
         Trajectory trajectory6_2 = drive.trajectoryBuilder(trajectory5_2.end())
-                .lineToLinearHeading(new Pose2d(30, -66, Math.toRadians(180)))
+                .lineToLinearHeading(new Pose2d(30, -67, Math.toRadians(180)))
                 .build();
         Trajectory trajectory6_3 = drive.trajectoryBuilder(trajectory5_3.end())
-                .lineToLinearHeading(new Pose2d(30, -66, Math.toRadians(180)))
+                .lineToLinearHeading(new Pose2d(30, -67, Math.toRadians(180)))
                 .build();
         Trajectory trajectory7 = drive.trajectoryBuilder(trajectory6_3.end()) //going to get freight from warehouse
                 .forward(75)
