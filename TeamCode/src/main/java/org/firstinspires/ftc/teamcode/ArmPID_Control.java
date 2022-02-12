@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
@@ -83,6 +84,7 @@ public class ArmPID_Control extends Arm2_Control {
             case 3: // Continue to update arm.
                 shoulderPID.update(getShoulderGravityVector() * SHOULDER_GRAVITY_FACTOR);
                 elbowPID.update(0.0);
+
                 break;
         }
     }

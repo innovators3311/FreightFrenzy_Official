@@ -52,6 +52,11 @@ public class TeleOpFreightFrenzyPID extends TeleOpFreightFrenzy {
         telemetry.addData("shoulder Power:", arm.shoulder.getPower());
         telemetry.addData("elbow Power:", arm.elbow.getPower());
         arm.arm_reset();
+        if (arm.armInitalized){
+            gamepad1.rumble(1, 1 , 1000);
+            gamepad2.rumble(1, 1 , 1000);
+        }
+
     }
 
     @Override
