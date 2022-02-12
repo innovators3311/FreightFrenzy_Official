@@ -78,20 +78,20 @@ public class PIDControl {
      */
     public void update(double feedForward) {
         // Calculate how long since the last update and reset the timer.
-        double timestep = period.seconds();
+        double timeStep = period.seconds();
         period.reset();
 
         // Store thisError because we'll use it several times.
         double thisError = angleError();
         // Store thisDerivative because it makes the later equations easier to understand
-        double thisDerivative = (thisError - lastError) / timestep;
+        double thisDerivative = (thisError - lastError) / timeStep;
 
         // Only start integrating when we get close so large moves don't over-weight the error.
         if (Math.abs(thisError) < 5) {
             // Use weighted averaging to smooth out the derivative and integral terms.
-            integratedError = integratedError + thisError * timestep;
+            integratedError = integratedError + thisError * timeStep;
         } else {
-            integratedError = thisError * timestep;
+            integratedError = thisError * timeStep;
         }
         averagedDerivative = thisDerivative * alpha + averagedDerivative * (1 - alpha);
 
