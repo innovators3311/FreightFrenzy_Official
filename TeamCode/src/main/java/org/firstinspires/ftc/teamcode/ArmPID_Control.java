@@ -15,6 +15,7 @@ public class ArmPID_Control extends Arm2_Control {
     public PIDControl elbowPID = null;
     public boolean shoulderInitialized = false;
     public int armState = 0;
+
     /* local OpMode members. */
     HardwareMap hwMap = null;
 
