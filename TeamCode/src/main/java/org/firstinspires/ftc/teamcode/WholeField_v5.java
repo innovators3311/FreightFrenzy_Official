@@ -6,6 +6,7 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -33,6 +34,7 @@ import static org.firstinspires.ftc.robotcore.external.navigation.AxesReference.
 
 import org.firstinspires.ftc.teamcode.source.Arm;
 
+@Disabled
 @Autonomous(name = "Whole Field_v5", group = "Whole Field")
 public class WholeField_v5 extends LinearOpMode {
 
@@ -290,22 +292,22 @@ public class WholeField_v5 extends LinearOpMode {
                 .lineToLinearHeading(new Pose2d(52, -55, Math.toRadians(-35)))
                 .build();
         Trajectory trajectory3_2 = drive.trajectoryBuilder(trajectory2.end()) //turning front of robot to face shipping hub
-                .lineToLinearHeading(new Pose2d(52, -55, Math.toRadians(140)))
+                .lineToLinearHeading(new Pose2d(52, -55, Math.toRadians(141)))
                 .build();
         Trajectory trajectory4_1 = drive.trajectoryBuilder(trajectory3_1.end()) //*duck spot 1* positions for bottom tier
-                .back(38)
+                .back(24)
                 .build();
-        Trajectory trajectory4_2_1 = drive.trajectoryBuilder(trajectory4_1.end()) //*duck spot 3* positions for middle tier
-                .back(8)
+        Trajectory trajectory4_1_1 = drive.trajectoryBuilder(trajectory4_1.end()) //*duck spot 3* positions for middle tier
+                .back(8.5)
                 .build();
         Trajectory trajectory4_2 = drive.trajectoryBuilder(trajectory3_1.end()) //*duck spot 2* positions for middle tier
-                .back(28)
+                .back(27)
                 .build();
         Trajectory trajectory4_2_2 = drive.trajectoryBuilder(trajectory4_2.end()) //*duck spot 2* positions for middle tier
-                .back(8)
+                .back(8.5)
                 .build();
         Trajectory trajectory4_3 = drive.trajectoryBuilder(trajectory3_2.end()) //*duck spot 3* positions for top tier
-                .forward(31)
+                .forward(29)
                 .build();
         //*trajectory5* position to get some freight
         Trajectory trajectory5_1 = drive.trajectoryBuilder(trajectory4_1.end())
@@ -317,11 +319,11 @@ public class WholeField_v5 extends LinearOpMode {
         Trajectory trajectory5_3 = drive.trajectoryBuilder(trajectory4_3.end())
                 .lineToLinearHeading(new Pose2d(30, -33.2, Math.toRadians(180)))
                 .build();
-        Trajectory trajectory6_1 = drive.trajectoryBuilder(trajectory5_3.end())
-                .strafeLeft(37)
+        Trajectory trajectory6_1 = drive.trajectoryBuilder(trajectory5_1.end())
+                .lineToLinearHeading(new Pose2d(30, -66, Math.toRadians(180)))
                 .build();
-        Trajectory trajectory6_2 = drive.trajectoryBuilder(trajectory5_3.end())
-                .strafeLeft(37)
+        Trajectory trajectory6_2 = drive.trajectoryBuilder(trajectory5_2.end())
+                .lineToLinearHeading(new Pose2d(30, -66, Math.toRadians(180)))
                 .build();
         Trajectory trajectory6_3 = drive.trajectoryBuilder(trajectory5_3.end())
                 .lineToLinearHeading(new Pose2d(30, -66, Math.toRadians(180)))
@@ -411,10 +413,10 @@ public class WholeField_v5 extends LinearOpMode {
                     }
                     break;
                 case WAIT_1:
-                    if(timer.milliseconds() > 1000) {
+                    if(timer.milliseconds() > 750) {
                         currentState = mainState.TRAJECTORY_4_2;
                         if(Duck == 1) {
-                           drive.followTrajectoryAsync(trajectory4_2_1);
+                           drive.followTrajectoryAsync(trajectory4_1_1);
                         } else {
                             drive.followTrajectoryAsync(trajectory4_2_2);
                         }
@@ -429,7 +431,7 @@ public class WholeField_v5 extends LinearOpMode {
                     }
                     break;
                 case WAIT_2:
-                    if(timer.milliseconds() > 1500) { //if it doesn't stop here something's up; it must be skipping this state somehow
+                    if(timer.milliseconds() > 1500) {
                         currentState = mainState.TRAJECTORY_5;
                         switch(Duck) {
                             case 1:
@@ -458,7 +460,7 @@ public class WholeField_v5 extends LinearOpMode {
                     if (!drive.isBusy() && !arm.shoulderIsBusy && !arm.elbowIsBusy) {
                         currentState = mainState.TRAJECTORY_7;
                         drive.followTrajectoryAsync(trajectory7);
-                        currentArmState = armState.PICKUP_1;
+                        currentArmState = armState.ARM_RESET;
                     }
                     break;
                 case TRAJECTORY_7: //driving forward to get the freight
@@ -509,7 +511,7 @@ public class WholeField_v5 extends LinearOpMode {
 
             switch(currentArmState) {
                 case TIER_1:
-                    arm.runShoulderTo(153);
+                    arm.runShoulderTo(158);
                     arm.runElbowTo(270);
                     currentArmState = armState.IDLE;
                     break;
@@ -525,12 +527,12 @@ public class WholeField_v5 extends LinearOpMode {
                     break;
                 case PICKUP_1:
                     arm.runShoulderTo(-25);
-                    arm.runElbowTo(205);
+                    arm.runElbowTo(215);
                     currentArmState = armState.IDLE;
                     break;
                 case PICKUP_2:
                     arm.runShoulderTo(-25);
-                    arm.runElbowTo(200);
+                    arm.runElbowTo(205);
                     currentArmState = armState.IDLE;
                     break;
                 case ARM_RESET:
