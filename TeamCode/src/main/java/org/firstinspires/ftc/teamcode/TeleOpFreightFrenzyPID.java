@@ -3,6 +3,8 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Gamepad;
 
+import org.firstinspires.ftc.teamcode.util.PIDControl;
+
 @TeleOp(name = "TeleOpFreightFrenzyPID", group = "3311")
 public class TeleOpFreightFrenzyPID extends TeleOpFreightFrenzy {
     // Arm setup
@@ -21,9 +23,9 @@ public class TeleOpFreightFrenzyPID extends TeleOpFreightFrenzy {
     public double[][] ARM_POSITIONS = {
             {0,0}, // position 0: Hard reset
             {30,-30}, // position 1: Carrying state
-            {213,-175}, // position 2: Ground pickup
+            {213,-180}, // position 2: Ground pickup
             {218,-231}, //position 3: Middle tier
-            {125,-100}, // position 4: Top (needs tuning. bit to low)
+            {125,-110}, // position 4: Top (needs tuning. bit to low)
             {79,137} // position 5: Top-er
     };
 
@@ -61,6 +63,7 @@ public class TeleOpFreightFrenzyPID extends TeleOpFreightFrenzy {
         if (Math.abs(gamepad2.left_stick_y) > .05 || Math.abs(gamepad2.right_stick_y) > .05
                 || Math.abs(gamepad2.left_stick_x) > .05 || Math.abs(gamepad2.right_stick_x) > .05) {
         gamepadInput = true;
+
             // If driver moves the stick more than 10% or we're already in run without encoder mode ...
             elbowTargetDegrees += gamepad2.left_stick_y * ELBOW_MANUAL_FACTOR;
             shoulderTargetDegrees += gamepad2.right_stick_y * SHOULDER_MANUAL_FACTOR;
@@ -81,11 +84,9 @@ public class TeleOpFreightFrenzyPID extends TeleOpFreightFrenzy {
 //        telemetry.addData("is busy?", arm.isBusy());
         telemetry.addData("Arm Level", armLevel);
 
-        while (gamepad2.left_bumper && gamepad2.right_bumper) {
-            arm.emergencyStop();
-            gamepad2.rumble(100);
-            PIDEnabled = false;
-        }
+        arm.shoulderPID.chillFactor = -0.5 * Math.max(gamepad2.left_trigger , gamepad2.right_trigger) + 1;
+        arm.elbowPID.chillFactor    = -0.75 * Math.max(gamepad2.left_trigger , gamepad2.right_trigger) + 1;
+
         if (PIDEnabled) {
             arm.update();
             gamepadInput = true;

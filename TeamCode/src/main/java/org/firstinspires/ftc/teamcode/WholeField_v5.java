@@ -327,10 +327,10 @@ public class WholeField_v5 extends LinearOpMode {
                 .lineToLinearHeading(new Pose2d(30, -66, Math.toRadians(180)))
                 .build();
         Trajectory trajectory7 = drive.trajectoryBuilder(trajectory6_3.end()) //going to get freight from warehouse
-                .forward(85)
+                .forward(65)
                 .build();
         Trajectory trajectory8 = drive.trajectoryBuilder(trajectory7.end()) //positioning to drive to shipping hub
-                .back(60)
+                .back(40)
                 .build();
         Trajectory trajectory9 = drive.trajectoryBuilder(trajectory8.end()) //driving to shipping hub
                 .lineToLinearHeading(new Pose2d(-12, 45, Math.toRadians(45)))
@@ -525,12 +525,12 @@ public class WholeField_v5 extends LinearOpMode {
                     break;
                 case PICKUP_1:
                     arm.runShoulderTo(-25);
-                    arm.runElbowTo(205);
+                    arm.runElbowTo(215);
                     currentArmState = armState.IDLE;
                     break;
                 case PICKUP_2:
                     arm.runShoulderTo(-25);
-                    arm.runElbowTo(200);
+                    arm.runElbowTo(210);
                     currentArmState = armState.IDLE;
                     break;
                 case ARM_RESET:

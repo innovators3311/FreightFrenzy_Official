@@ -18,6 +18,7 @@ public class PIDControl {
     public double p;
     public double i;
     public double d;
+    public double chillFactor = 1;
 
     private double lastError = 0;
     private double integratedError = 0.0;
@@ -98,7 +99,7 @@ public class PIDControl {
         lastError = thisError;
 
         double powerCalc = p * angleError() + i * integratedError + d * averagedDerivative + feedForward;
-        motor.setPower( clamp(powerCalc, -maxPower, maxPower) );
+        motor.setPower( clamp(powerCalc, -maxPower * chillFactor, maxPower * chillFactor) );
     }
 
     /**

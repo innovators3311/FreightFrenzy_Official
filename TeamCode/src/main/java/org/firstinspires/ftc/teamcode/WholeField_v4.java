@@ -6,6 +6,7 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -33,6 +34,7 @@ import static org.firstinspires.ftc.robotcore.external.navigation.AxesReference.
 
 import org.firstinspires.ftc.teamcode.source.Arm;
 
+@Disabled
 @Autonomous(name = "Whole Field_v4", group = "Whole Field")
 public class WholeField_v4 extends LinearOpMode {
 

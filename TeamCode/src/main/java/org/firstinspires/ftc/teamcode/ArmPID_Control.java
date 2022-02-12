@@ -30,8 +30,8 @@ public class ArmPID_Control extends Arm2_Control {
         elbow = hwMap.get(DcMotorEx.class, "elbow");
         shoulder = hwMap.get(DcMotorEx.class, "shoulder");
 
-        shoulderPID = new PIDControl(shoulder, -1e-1, -1e-3, -1e-5);
-        elbowPID = new PIDControl(elbow, -2e-2, -1e-3, -1e-5);
+        shoulderPID = new PIDControl(shoulder,  -1e-1, -1e-3, -2e-5);
+        elbowPID = new PIDControl(elbow, -1e-2, -1e-3, -5e-5);
 
         // Set the direction that the motors will turn
         elbow.setDirection(DcMotor.Direction.FORWARD);
@@ -58,7 +58,7 @@ public class ArmPID_Control extends Arm2_Control {
         //shoulder
         switch (armState) {
             case 0: // Drive Shoulder to back
-                shoulder.setPower(0.3);
+                shoulder.setPower(0.4);
                 elbow.setPower(0.05);
 
                 if (shoulderLimitSwitch.isPressed()) {
@@ -75,7 +75,7 @@ public class ArmPID_Control extends Arm2_Control {
                 break;
             case 2: // Move arm to init position.
                 elbowDriveAbsolute(.7, 6);
-                shoulderDriveAbsolute(.7, 39);
+                shoulderDriveAbsolute(.7, 42);
                 armInitalized = true;
                 armState = 3;
                 break;
@@ -141,6 +141,9 @@ public class ArmPID_Control extends Arm2_Control {
      */
     @Override
     public void update() {
+      double chill =  .75 + .25*Math.cos(shoulderPID.getAngle()*(Math.PI/180));
+      chill = PIDControl.clamp(chill, 0, 1);
+        shoulderPID.chillFactor = chill;
         shoulderPID.update(getShoulderGravityVector() * SHOULDER_GRAVITY_FACTOR);
         elbowPID.update(0);
     }
