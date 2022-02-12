@@ -266,7 +266,7 @@ public class WholeField_FINAL extends LinearOpMode {
             }
         }
         if(Duck == 0) { //If it took too long to find the duck then it defaults to spot 3
-            Duck = 3;
+            Duck = 1;
         }
         telemetry.clear();
         telemetry.addData("Duck Spot", Duck);
@@ -319,19 +319,19 @@ public class WholeField_FINAL extends LinearOpMode {
                 .lineToLinearHeading(new Pose2d(30, -33.2, Math.toRadians(180)))
                 .build();
         Trajectory trajectory6_1 = drive.trajectoryBuilder(trajectory5_1.end())
-                .lineToLinearHeading(new Pose2d(30, -45, Math.toRadians(170)))
+                .lineToLinearHeading(new Pose2d(30, -64, Math.toRadians(170)))
                 .build();
         Trajectory trajectory6_2 = drive.trajectoryBuilder(trajectory5_2.end())
-                .lineToLinearHeading(new Pose2d(30, -45, Math.toRadians(170)))
+                .lineToLinearHeading(new Pose2d(30, -64, Math.toRadians(170)))
                 .build();
         Trajectory trajectory6_3 = drive.trajectoryBuilder(trajectory5_3.end())
-                .lineToLinearHeading(new Pose2d(30, -45, Math.toRadians(170)))
+                .lineToLinearHeading(new Pose2d(30, -64, Math.toRadians(170)))
                 .build();
         Trajectory trajectory7 = drive.trajectoryBuilder(trajectory6_3.end()) //going to get freight from warehouse
                 .forward(100)
                 .build();
         telemetry.clear();
-        telemetry.addLine("Done!  Smash that play button!");
+        telemetry.addLine("Fully loaded!  Smash that play button!");
         telemetry.update();
         waitForStart();
 
@@ -578,11 +578,11 @@ public class WholeField_FINAL extends LinearOpMode {
     }
     private int DuckSpot(double DuckX) {
         if(DuckX < 233) {
-            return 1;
+            return 3;
         } else if(DuckX < 467) {
             return 2;
         } else {
-            return 3;
+            return 1;
         }
     }
 }
