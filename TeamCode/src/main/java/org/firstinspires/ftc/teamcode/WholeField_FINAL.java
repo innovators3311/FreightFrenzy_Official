@@ -213,7 +213,7 @@ public class WholeField_FINAL extends LinearOpMode {
 
         // We need to rotate the camera around its long axis to bring the correct camera forward.
         if (CAMERA_CHOICE == BACK) {
-            phoneYRotate = -110;
+            phoneYRotate = -110; //-90 normally but in this case the camera is tilted slightly down
         } else {
             phoneYRotate = 90;
         }
@@ -224,7 +224,7 @@ public class WholeField_FINAL extends LinearOpMode {
         // Next, translate the camera lens to where it is on the robot.
         // In this example, it is centered on the robot (left-to-right and front-to-back), and 6 inches above ground level.
         final float CAMERA_FORWARD_DISPLACEMENT  = -1.625f * mmPerInch;   // eg: Enter the forward distance from the center of the robot to the camera lens
-        final float CAMERA_VERTICAL_DISPLACEMENT = 6.0f * mmPerInch;   // eg: Camera is 6 Inches above ground
+        final float CAMERA_VERTICAL_DISPLACEMENT = 8.5f * mmPerInch;   // eg: Camera is 6 Inches above ground
         final float CAMERA_LEFT_DISPLACEMENT     = 6.375f * mmPerInch;   // eg: Enter the left distance from the center of the robot to the camera lens
 
         OpenGLMatrix robotFromCamera = OpenGLMatrix
@@ -258,7 +258,7 @@ public class WholeField_FINAL extends LinearOpMode {
                 // step through the list of recognitions and display boundary info.
                 int i = 0;
                 for (Recognition recognition : recognitions) {
-                    if(recognition.getLabel() == "Duck") {
+                    if(recognition.getLabel() == "Duck" || recognition.getLabel() == "Cube" || recognition.getLabel() == "Ball") {
                         Duck = DuckSpot(recognition.getRight()-((recognition.getRight()-recognition.getLeft())/2));
                     }
                     i++;
@@ -319,13 +319,13 @@ public class WholeField_FINAL extends LinearOpMode {
                 .lineToLinearHeading(new Pose2d(30, -33.2, Math.toRadians(180)))
                 .build();
         Trajectory trajectory6_1 = drive.trajectoryBuilder(trajectory5_1.end())
-                .lineToLinearHeading(new Pose2d(30, -64, Math.toRadians(170)))
+                .lineToLinearHeading(new Pose2d(30, -58, Math.toRadians(170)))
                 .build();
         Trajectory trajectory6_2 = drive.trajectoryBuilder(trajectory5_2.end())
-                .lineToLinearHeading(new Pose2d(30, -64, Math.toRadians(170)))
+                .lineToLinearHeading(new Pose2d(30, -58, Math.toRadians(170)))
                 .build();
         Trajectory trajectory6_3 = drive.trajectoryBuilder(trajectory5_3.end())
-                .lineToLinearHeading(new Pose2d(30, -64, Math.toRadians(170)))
+                .lineToLinearHeading(new Pose2d(30, -58, Math.toRadians(170)))
                 .build();
         Trajectory trajectory7 = drive.trajectoryBuilder(trajectory6_3.end()) //going to get freight from warehouse
                 .forward(100)
