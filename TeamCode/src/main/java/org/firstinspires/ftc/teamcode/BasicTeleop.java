@@ -52,7 +52,7 @@ import com.qualcomm.robotcore.util.Range;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
-@TeleOp(name="Test OpMode_other", group="Linear Opmode")
+@TeleOp(name="SETUP", group="SETUP")
 public class BasicTeleop extends LinearOpMode {
 
     // Declare OpMode members.
@@ -142,10 +142,10 @@ public class BasicTeleop extends LinearOpMode {
                 claw.setPosition(0);
             }
             if (gamepad2.b) {
-                claw.setPosition(10);
+                claw.setPosition(1);
             }
             if (gamepad2.x) {
-                release.setPosition(10);
+                release.setPosition(1);
             }
             if (gamepad2.y) {
                 release.setPosition(0);

@@ -1,15 +1,13 @@
 package org.firstinspires.ftc.teamcode;
 
-import android.text.Html;
-
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.SwitchableCamera;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
@@ -22,6 +20,7 @@ import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 
 import org.firstinspires.ftc.teamcode.source.Arm;
 
+@Disabled
 @Autonomous(name = "Storage Unit_v6", group = "Storage Unit")
 public class StorageUnit_v6 extends LinearOpMode {
 
@@ -150,7 +149,7 @@ public class StorageUnit_v6 extends LinearOpMode {
                 .lineToLinearHeading(new Pose2d(52, -55, Math.toRadians(-35)))
                 .build();
         Trajectory trajectory3_2 = drive.trajectoryBuilder(trajectory2.end()) //turning front of robot to face shipping hub
-                .lineToLinearHeading(new Pose2d(52, -55, Math.toRadians(145)))
+                .lineToLinearHeading(new Pose2d(52, -55, Math.toRadians(135)))
                 .build();
         Trajectory trajectory4_1 = drive.trajectoryBuilder(trajectory3_1.end()) //*duck spot 1* positions for bottom tier
                 .back(38)
@@ -163,22 +162,20 @@ public class StorageUnit_v6 extends LinearOpMode {
                 .build();
         //*trajectory5* parking in the storage unit
         Trajectory trajectory5_1 = drive.trajectoryBuilder(trajectory4_1.end())
-                .lineToLinearHeading(new Pose2d(54, -25, Math.toRadians(90)))
+                .lineToLinearHeading(new Pose2d(64, -25, Math.toRadians(90)))
                 .build();
         Trajectory trajectory5_2 = drive.trajectoryBuilder(trajectory4_2.end())
-                .lineToLinearHeading(new Pose2d(54, -25, Math.toRadians(90)))
+                .lineToLinearHeading(new Pose2d(64, -25, Math.toRadians(90)))
                 .build();
         Trajectory trajectory5_3 = drive.trajectoryBuilder(trajectory4_3.end())
-                .lineToLinearHeading(new Pose2d(54, -25, Math.toRadians(90)))
+                .lineToLinearHeading(new Pose2d(64, -25, Math.toRadians(90)))
                 .build();
         waitForStart();
 
         if (isStopRequested()) return;
 
         currentState = mainState.TRAJECTORY_1;
-        //drive.followTrajectoryAsync(trajectory1);
-        arm.runShoulderTo(50);
-        arm.runElbowTo(160);
+        drive.followTrajectoryAsync(trajectory1);
 
         while (opModeIsActive() && !isStopRequested()) {
             //You can have multiple switch statements running together for multiple state machines
@@ -187,7 +184,7 @@ public class StorageUnit_v6 extends LinearOpMode {
             //Essentially defining the flow of the state machine through this switch statement
             switch (currentState) {
                 case TRAJECTORY_1: //driving to the duck carousel
-                    if (!drive.isBusy() && false) {
+                    if (!drive.isBusy()) {
                         currentState = mainState.TRAJECTORY_2;
                         drive.followTrajectoryAsync(trajectory2);
                     }
@@ -247,9 +244,9 @@ public class StorageUnit_v6 extends LinearOpMode {
                     }
                     break;
                 case DROP:
-                    arm.openClaw();
-                    arm.retractMagnet();
-                    if(timer.milliseconds() > 1000) {
+                    //arm.runClaw();
+                    //arm.retractMagnet();
+                    if(timer.milliseconds() > 2000) {
                         currentState = mainState.TRAJECTORY_5;
                         switch(Duck) {
                             case 1:
@@ -268,9 +265,7 @@ public class StorageUnit_v6 extends LinearOpMode {
                 case ARM_RESET:
                     arm.runShoulderTo(150);
                     arm.runElbowTo(20);
-                    if(!arm.shoulderIsBusy && !arm.elbowIsBusy) {
-                        currentState = mainState.IDLE;
-                    }
+                    currentState = mainState.IDLE;
                     break;
                 case IDLE:
                     arm.storeArmPose();
