@@ -425,6 +425,7 @@ public class WholeField_FINAL extends LinearOpMode {
                 case WAIT_2:
                     arm.openClaw();
                     if(timer.milliseconds() > 1500) {
+                        arm.openClaw();
                         currentState = mainState.TRAJECTORY_5;
                         switch(Duck) {
                             case 1:
