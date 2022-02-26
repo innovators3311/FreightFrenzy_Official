@@ -6,7 +6,6 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -34,9 +33,8 @@ import static org.firstinspires.ftc.robotcore.external.navigation.AxesReference.
 
 import org.firstinspires.ftc.teamcode.source.Arm;
 
-@Disabled
-@Autonomous(name = "Whole Field_v4", group = "Whole Field")
-public class WholeField_v4 extends LinearOpMode {
+@Autonomous(name = "Whole Field_STATE", group = "Whole Field")
+public class WholeField_STATE extends LinearOpMode {
 
     /* Note: This sample uses the all-objects Tensor Flow model (FreightFrenzy_BCDM.tflite), which contains
      * the following 4 detectable objects
@@ -54,7 +52,7 @@ public class WholeField_v4 extends LinearOpMode {
             "Ball",
             "Cube",
             "Duck",
-            "Marker"
+            "Marker",
     };
 
     private static final String VUFORIA_KEY =
@@ -125,18 +123,13 @@ public class WholeField_v4 extends LinearOpMode {
         SPIN,           // Spin the duck
         TRAJECTORY_3,   // Go to the shipping hub
         TRAJECTORY_4,   // Drive forward slowly a few inches to the hub
-        TRAJECTORY_4_2,
-        WAIT_0,
+        TRAJECTORY_4_2, // Creep up to shipping hub if necessary
+        WAIT_1,         // Pause for robot to decelerate
         DROP_1,         // Drop block
-        WAIT_1,
+        WAIT_2,         // Wait for block to drop
         TRAJECTORY_5,   // Position to get some freight
-        TRAJECTORY_6,
+        TRAJECTORY_6,   // Continuation of trajectory 5
         TRAJECTORY_7,   // Get the freight
-        WAIT_2,
-        TRAJECTORY_8,   // Get out of the warehouse
-        TRAJECTORY_9,   // Go to shipping hub and place the freight
-        DROP_2,         // Dropping freight in shipping hub for second time
-        TRAJECTORY_10,   // Park in warehouse
         IDLE            // Enter IDLE state when complete
     }
     enum armState {
@@ -171,7 +164,8 @@ public class WholeField_v4 extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-
+        telemetry.addLine("Initializing...");
+        telemetry.update();
         VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
 
         parameters.vuforiaLicenseKey = VUFORIA_KEY;
@@ -219,7 +213,7 @@ public class WholeField_v4 extends LinearOpMode {
 
         // We need to rotate the camera around its long axis to bring the correct camera forward.
         if (CAMERA_CHOICE == BACK) {
-            phoneYRotate = -110;
+            phoneYRotate = -110; //-90 normally but in this case the camera is tilted slightly down
         } else {
             phoneYRotate = 90;
         }
@@ -230,7 +224,7 @@ public class WholeField_v4 extends LinearOpMode {
         // Next, translate the camera lens to where it is on the robot.
         // In this example, it is centered on the robot (left-to-right and front-to-back), and 6 inches above ground level.
         final float CAMERA_FORWARD_DISPLACEMENT  = -1.625f * mmPerInch;   // eg: Enter the forward distance from the center of the robot to the camera lens
-        final float CAMERA_VERTICAL_DISPLACEMENT = 6.0f * mmPerInch;   // eg: Camera is 6 Inches above ground
+        final float CAMERA_VERTICAL_DISPLACEMENT = 8.5f * mmPerInch;   // eg: Camera is 6 Inches above ground
         final float CAMERA_LEFT_DISPLACEMENT     = 6.375f * mmPerInch;   // eg: Enter the left distance from the center of the robot to the camera lens
 
         OpenGLMatrix robotFromCamera = OpenGLMatrix
@@ -253,6 +247,9 @@ public class WholeField_v4 extends LinearOpMode {
             tfod.setZoom(1, 16.0/9.0);
         }
 
+        telemetry.clear();
+        telemetry.addLine("Scanning for duck...");
+        telemetry.update();
         int Duck = 0;
         timer.reset();
         while(Duck == 0 && timer.milliseconds() < 3000) {
@@ -261,7 +258,7 @@ public class WholeField_v4 extends LinearOpMode {
                 // step through the list of recognitions and display boundary info.
                 int i = 0;
                 for (Recognition recognition : recognitions) {
-                    if(recognition.getLabel() == "Duck") {
+                    if(recognition.getLabel() == "Cube" || recognition.getLabel() == "TSE") {
                         Duck = DuckSpot(recognition.getRight()-((recognition.getRight()-recognition.getLeft())/2));
                     }
                     i++;
@@ -269,9 +266,11 @@ public class WholeField_v4 extends LinearOpMode {
             }
         }
         if(Duck == 0) { //If it took too long to find the duck then it defaults to spot 3
-            Duck = 3;
+            Duck = 1;
         }
+        telemetry.clear();
         telemetry.addData("Duck Spot", Duck);
+        telemetry.addLine("Building trajectories...");
         telemetry.update();
 
         //Initializing our other robot hardware
@@ -283,28 +282,31 @@ public class WholeField_v4 extends LinearOpMode {
 
         //Defining trajectories
         Trajectory trajectory1 = drive.trajectoryBuilder(startPose)
-                .splineTo(new Vector2d(49, -61), Math.toRadians(10)) //to duck carousel
+                .splineTo(new Vector2d(48, -61), Math.toRadians(10)) //to duck carousel
                 .build();
         Trajectory trajectory2 = drive.trajectoryBuilder(trajectory1.end()) //creeping up to carousel
-                .splineTo(new Vector2d(57, -61), Math.toRadians(10))
+                .splineTo(new Vector2d(52, -61), Math.toRadians(10))
                 .build();
         Trajectory trajectory3_1 = drive.trajectoryBuilder(trajectory2.end()) //turning back of robot to face shipping hub
                 .lineToLinearHeading(new Pose2d(52, -55, Math.toRadians(-35)))
                 .build();
         Trajectory trajectory3_2 = drive.trajectoryBuilder(trajectory2.end()) //turning front of robot to face shipping hub
-                .lineToLinearHeading(new Pose2d(52, -55, Math.toRadians(140)))
+                .lineToLinearHeading(new Pose2d(52, -55, Math.toRadians(136)))
                 .build();
         Trajectory trajectory4_1 = drive.trajectoryBuilder(trajectory3_1.end()) //*duck spot 1* positions for bottom tier
-                .back(38)
+                .back(27)
+                .build();
+        Trajectory trajectory4_1_1 = drive.trajectoryBuilder(trajectory4_1.end()) //*duck spot 3* positions for middle tier
+                .back(8.5)
                 .build();
         Trajectory trajectory4_2 = drive.trajectoryBuilder(trajectory3_1.end()) //*duck spot 2* positions for middle tier
-                .back(28)
+                .lineToLinearHeading(new Pose2d(15, -50, Math.toRadians(-75)))
                 .build();
         Trajectory trajectory4_2_2 = drive.trajectoryBuilder(trajectory4_2.end()) //*duck spot 2* positions for middle tier
-                .back(8)
+                .back(7)
                 .build();
         Trajectory trajectory4_3 = drive.trajectoryBuilder(trajectory3_2.end()) //*duck spot 3* positions for top tier
-                .forward(31)
+                .forward(27)
                 .build();
         //*trajectory5* position to get some freight
         Trajectory trajectory5_1 = drive.trajectoryBuilder(trajectory4_1.end())
@@ -316,28 +318,21 @@ public class WholeField_v4 extends LinearOpMode {
         Trajectory trajectory5_3 = drive.trajectoryBuilder(trajectory4_3.end())
                 .lineToLinearHeading(new Pose2d(30, -33.2, Math.toRadians(180)))
                 .build();
-        Trajectory trajectory6_1 = drive.trajectoryBuilder(trajectory5_3.end())
-                .strafeLeft(37)
+        Trajectory trajectory6_1 = drive.trajectoryBuilder(trajectory5_1.end())
+                .lineToLinearHeading(new Pose2d(30, -64, Math.toRadians(170)))
                 .build();
-        Trajectory trajectory6_2 = drive.trajectoryBuilder(trajectory5_3.end())
-                .strafeLeft(37)
+        Trajectory trajectory6_2 = drive.trajectoryBuilder(trajectory5_2.end())
+                .lineToLinearHeading(new Pose2d(30, -64, Math.toRadians(170)))
                 .build();
         Trajectory trajectory6_3 = drive.trajectoryBuilder(trajectory5_3.end())
-                .lineToLinearHeading(new Pose2d(30, -66, Math.toRadians(180)))
+                .lineToLinearHeading(new Pose2d(30, -64, Math.toRadians(170))) //empty comment so i can push again
                 .build();
         Trajectory trajectory7 = drive.trajectoryBuilder(trajectory6_3.end()) //going to get freight from warehouse
-                .forward(85)
+                .lineToLinearHeading(new Pose2d(-45, -67, Math.toRadians(190)))
                 .build();
-        Trajectory trajectory8 = drive.trajectoryBuilder(trajectory7.end()) //positioning to drive to shipping hub
-                .back(60)
-                .build();
-        Trajectory trajectory9 = drive.trajectoryBuilder(trajectory8.end()) //driving to shipping hub
-                .lineToLinearHeading(new Pose2d(-12, 45, Math.toRadians(45)))
-                .build();
-        Trajectory trajectory10 = drive.trajectoryBuilder(trajectory9.end()) //parking in warehouse
-                .splineTo(new Vector2d(-60, -40), Math.toRadians(180))
-                .build();
-
+        telemetry.clear();
+        telemetry.addLine("Fully loaded!  Smash that play button!");
+        telemetry.update();
         waitForStart();
 
         if (isStopRequested()) return;
@@ -400,25 +395,22 @@ public class WholeField_v4 extends LinearOpMode {
                     if (!drive.isBusy() && !arm.shoulderIsBusy && !arm.elbowIsBusy) {
                         if(Duck < 3) {
                             timer.reset();
-                            currentState = mainState.WAIT_0;
+                            currentState = mainState.WAIT_1;
                         } else {
                             arm.openClaw();
                             arm.retractMagnet();
-                            currentState = mainState.WAIT_1;
+                            currentState = mainState.WAIT_2;
                             timer.reset();
                         }
                     }
                     break;
-                case WAIT_0:
-                    if(timer.milliseconds() > 1000) {
+                case WAIT_1:
+                    if(timer.milliseconds() > 250) {
                         currentState = mainState.TRAJECTORY_4_2;
-                        switch(Duck) {
-                            case 1:
-                                //drive.followTrajectoryAsync(trajectory4_2_2);
-                                break;
-                            case 2:
-                                drive.followTrajectoryAsync(trajectory4_2_2);
-                                break;
+                        if(Duck == 1) {
+                            drive.followTrajectoryAsync(trajectory4_1_1);
+                        } else {
+                            drive.followTrajectoryAsync(trajectory4_2_2);
                         }
                     }
                     break;
@@ -426,12 +418,13 @@ public class WholeField_v4 extends LinearOpMode {
                     if (!drive.isBusy()) {
                         arm.openClaw();
                         arm.retractMagnet();
-                        currentState = mainState.WAIT_1;
+                        currentState = mainState.WAIT_2;
                         timer.reset();
                     }
                     break;
-                case WAIT_1:
-                    if(timer.milliseconds() > 1500) { //if it doesn't stop here something's up; it must be skipping this state somehow
+                case WAIT_2:
+                    arm.openClaw();
+                    if(timer.milliseconds() > 1500) {
                         currentState = mainState.TRAJECTORY_5;
                         switch(Duck) {
                             case 1:
@@ -465,45 +458,10 @@ public class WholeField_v4 extends LinearOpMode {
                     break;
                 case TRAJECTORY_7: //driving forward to get the freight
                     if (!drive.isBusy()) {
-                        arm.pushMagnet();
-                        currentArmState = armState.PICKUP_2;
-                        timer.reset();
-                        currentState = mainState.WAIT_2;
-                    }
-                    break;
-                case WAIT_2:
-                    if(timer.milliseconds() > 1000) {
-                        arm.closeClaw();
-                        currentArmState = armState.PICKUP_1;
-                        currentState = mainState.TRAJECTORY_8;
-                        drive.followTrajectoryAsync(trajectory8);
-                    }
-                    break;
-                case TRAJECTORY_8: //going out of the warehouse
-                    if (!drive.isBusy()) {
-                        currentArmState = armState.TIER_3;
-                        currentState = mainState.TRAJECTORY_9;
-                        drive.followTrajectoryAsync(trajectory9);
-                    }
-                    break;
-                case TRAJECTORY_9: //driving to shipping hub
-                    if(!drive.isBusy() && false) {
-                        timer.reset();
-                        currentState = mainState.DROP_2;
-                    }
-                case DROP_2: //dropping another block
-                    if(timer.milliseconds() > 2000) {
-                        currentArmState = armState.ARM_RESET;
+                        targets.deactivate();
                         currentState = mainState.IDLE;
-                        drive.followTrajectoryAsync(trajectory10);
                     }
                     break;
-                case TRAJECTORY_10: //parking in warehouse
-                    if(!drive.isBusy()) {
-                        currentState = mainState.IDLE;
-                        targets.deactivate(); //deactivating vuforia tracking to save battery
-                        currentTrackerState = imageTrackerState.IDLE;
-                    }
                 case IDLE:
                     arm.storeArmPose();
                     break;
@@ -511,12 +469,12 @@ public class WholeField_v4 extends LinearOpMode {
 
             switch(currentArmState) {
                 case TIER_1:
-                    arm.runShoulderTo(153);
+                    arm.runShoulderTo(155);
                     arm.runElbowTo(270);
                     currentArmState = armState.IDLE;
                     break;
                 case TIER_2:
-                    arm.runShoulderTo(130);
+                    arm.runShoulderTo(128);
                     arm.runElbowTo(285);
                     currentArmState = armState.IDLE;
                     break;
@@ -527,12 +485,12 @@ public class WholeField_v4 extends LinearOpMode {
                     break;
                 case PICKUP_1:
                     arm.runShoulderTo(-25);
-                    arm.runElbowTo(205);
+                    arm.runElbowTo(215);
                     currentArmState = armState.IDLE;
                     break;
                 case PICKUP_2:
                     arm.runShoulderTo(-25);
-                    arm.runElbowTo(200);
+                    arm.runElbowTo(205);
                     currentArmState = armState.IDLE;
                     break;
                 case ARM_RESET:
@@ -610,6 +568,7 @@ public class WholeField_v4 extends LinearOpMode {
         tfodParameters.isModelTensorFlow2 = true;
         tfodParameters.inputSize = 320;
         tfod = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, vuforia);
+        //tfod.loadModelFromFile("/sdcard/FIRST/tflitemodels/model.tflite", "model");
         tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABELS);
     }
     void identifyTarget(int targetIndex, String targetName, float dx, float dy, float dz, float rx, float ry, float rz) {
@@ -620,11 +579,11 @@ public class WholeField_v4 extends LinearOpMode {
     }
     private int DuckSpot(double DuckX) {
         if(DuckX < 233) {
-            return 1;
+            return 3;
         } else if(DuckX < 467) {
             return 2;
         } else {
-            return 3;
+            return 1;
         }
     }
 }
