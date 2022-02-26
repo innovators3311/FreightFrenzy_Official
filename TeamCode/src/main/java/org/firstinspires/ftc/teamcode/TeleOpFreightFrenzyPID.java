@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+
 @TeleOp(name = "TeleOpFreightFrenzyPID", group = "3311")
 public class TeleOpFreightFrenzyPID extends TeleOpFreightFrenzy {
     // Arm setup
@@ -61,7 +63,18 @@ public class TeleOpFreightFrenzyPID extends TeleOpFreightFrenzy {
     protected void handleArm() {
         double elbowTargetDegrees   = 0.0;
         shoulderTargetDegrees = 0.0;
-
+        double distanceFactor = 1;
+        double backup = 0;
+        if(armLevel == 4){
+            if(distanceSensor.getDistance(DistanceUnit.CM) < 2){
+                if(distanceSensor.getDistance(DistanceUnit.CM) < 1){
+                    distanceFactor = 0;
+                    backup = -0.25 * distanceSensor.getDistance(DistanceUnit.CM);
+                }else{
+                    distanceFactor = 0.2;
+                }
+            }
+        }
 
         if (Math.abs(gamepad2.left_stick_y) > .05 || Math.abs(gamepad2.right_stick_y) > .05
                 || Math.abs(gamepad2.left_stick_x) > .05 || Math.abs(gamepad2.right_stick_x) > .05) {

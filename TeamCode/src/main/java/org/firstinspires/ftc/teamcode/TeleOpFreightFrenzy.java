@@ -74,11 +74,9 @@ public class TeleOpFreightFrenzy extends OpMode {
     public double turn            = 0.0;
     public double strafe          = 0.0;
     public double strafeValue     = 0.0;
-    private double distance = distanceSensor.getDistance(DistanceUnit.CM);
-
+    public double backup          = 0;
     //Bring in code to setup arm.
     protected Arm2_Control arm = new Arm2_Control();
-    TeleOpFreightFrenzyPID pos = new TeleOpFreightFrenzyPID();
     // debounce A & X
     protected boolean debounceA = false;
     protected boolean debounceX = false;
@@ -180,18 +178,7 @@ public class TeleOpFreightFrenzy extends OpMode {
        //     spinner.setPower(1);
        // }
         //else spinner.setPower(0);
-                if (gamepad1.x) {
-                    if (!debounceX) {
-                // This code only runs once if x is pressed.
-                        distanceSlow = !distanceSlow;
-            }
-            debounceX = true;
-        } else {
-            debounceX = false;
-        }
-        if (distanceSlow){
-            speedFactor = distance/5;
-        }
+
 
 
 
@@ -237,18 +224,9 @@ public class TeleOpFreightFrenzy extends OpMode {
         if (gamepad1.dpad_right)
             strafe = 1;
 //send power to wheels
-        double distanceFactor = 1;
-        double backup = 0;
-        if(pos.armLevel == 4){
-            if(distanceSensor.getDistance(DistanceUnit.CM) < 2){
-                if(distanceSensor.getDistance(DistanceUnit.CM) < 1){
-                    distanceFactor = 0;
-                    backup = -0.25 * distanceSensor.getDistance(DistanceUnit.CM);
-                }else{
-                    distanceFactor = 0.2;
-                }
-            }
-        }
+
+
+        double distance = distanceSensor.getDistance(DistanceUnit.CM);
         if (gamepad1.x) {
             if (!debounceX) {
                 // This code only runs once if x is pressed.
@@ -261,17 +239,18 @@ public class TeleOpFreightFrenzy extends OpMode {
         if (distanceSlow){
             speedFactor = distance/5;
         }
-        if(distanceSensor.getDistance(DistanceUnit.CM) > 2){
 
+        if(distanceSensor.getDistance(DistanceUnit.CM) > 2){
             speedFactor = (-0.7 *Math.max(gamepad1.left_trigger , gamepad1.right_trigger) + 1) * distance;
         }
         else {
             speedFactor = (-0.7 * Math.max(gamepad1.left_trigger, gamepad1.right_trigger) + 1);
         }
-            leftPowerFront = (drive + turn + strafe) * speedFactor + backup;
-            rightPowerFront = (drive - turn - strafe) * speedFactor + backup;
-            leftPowerBack = (drive + turn - strafe) * speedFactor + backup;
-            rightPowerBack = (drive - turn + strafe) * speedFactor + backup;
+
+        leftPowerFront = (drive + turn + strafe) * speedFactor + backup;
+        rightPowerFront = (drive - turn - strafe) * speedFactor + backup;
+        leftPowerBack = (drive + turn - strafe) * speedFactor + backup;
+        rightPowerBack = (drive - turn + strafe) * speedFactor + backup;
 
         leftDriveFront.setPower(leftPowerFront);
         rightDriveFront.setPower(rightPowerFront);
