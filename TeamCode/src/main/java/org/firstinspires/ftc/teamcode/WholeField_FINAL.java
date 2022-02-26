@@ -282,7 +282,7 @@ public class WholeField_FINAL extends LinearOpMode {
 
         //Defining trajectories
         Trajectory trajectory1 = drive.trajectoryBuilder(startPose)
-                .splineTo(new Vector2d(49, -61), Math.toRadians(10)) //to duck carousel
+                .splineTo(new Vector2d(50, -61), Math.toRadians(10)) //to duck carousel
                 .build();
         Trajectory trajectory2 = drive.trajectoryBuilder(trajectory1.end()) //creeping up to carousel
                 .splineTo(new Vector2d(57, -61), Math.toRadians(10))
@@ -303,7 +303,7 @@ public class WholeField_FINAL extends LinearOpMode {
                 .back(27)
                 .build();
         Trajectory trajectory4_2_2 = drive.trajectoryBuilder(trajectory4_2.end()) //*duck spot 2* positions for middle tier
-                .back(7)
+                .back(8)
                 .build();
         Trajectory trajectory4_3 = drive.trajectoryBuilder(trajectory3_2.end()) //*duck spot 3* positions for top tier
                 .forward(29)

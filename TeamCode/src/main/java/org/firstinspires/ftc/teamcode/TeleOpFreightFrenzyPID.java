@@ -1,9 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.Gamepad;
-
-import org.firstinspires.ftc.teamcode.util.PIDControl;
 
 @TeleOp(name = "TeleOpFreightFrenzyPID", group = "3311")
 public class TeleOpFreightFrenzyPID extends TeleOpFreightFrenzy {
@@ -18,6 +15,7 @@ public class TeleOpFreightFrenzyPID extends TeleOpFreightFrenzy {
     public int armLevel = 1;
     public boolean armLevelDebounceUp = false;
     public boolean armLevelDebounceDown = false;
+    public double shoulderTargetDegrees = 0.0;
 
     // This is a Java Array. It's stored as (shoulder, elbow) values for each position.
     public double[][] ARM_POSITIONS = {
@@ -49,8 +47,8 @@ public class TeleOpFreightFrenzyPID extends TeleOpFreightFrenzy {
         telemetry.addData("shoulderPID target:", arm.shoulderPID.getTargetAngle());
         telemetry.addData("shoulderPID angle:", arm.getShoulderAngle());
         telemetry.addData("elbowPID target:", arm.elbowPID.getTargetAngle());
-        telemetry.addData("shoulder Power:", arm.shoulder.getPower());
-        telemetry.addData("elbow Power:", arm.elbow.getPower());
+//        telemetry.addData("shoulder Power:", arm.shoulder.getPower());
+//        telemetry.addData("elbow Power:", arm.elbow.getPower());
         arm.arm_reset();
         if (arm.armInitalized){
             gamepad1.rumble(1000);
@@ -62,7 +60,7 @@ public class TeleOpFreightFrenzyPID extends TeleOpFreightFrenzy {
     @Override
     protected void handleArm() {
         double elbowTargetDegrees   = 0.0;
-        double shoulderTargetDegrees = 0.0;
+        shoulderTargetDegrees = 0.0;
 
 
         if (Math.abs(gamepad2.left_stick_y) > .05 || Math.abs(gamepad2.right_stick_y) > .05
@@ -88,6 +86,10 @@ public class TeleOpFreightFrenzyPID extends TeleOpFreightFrenzy {
         telemetry.addData("elbow angle target:", arm.getElbowTargetAngle());
 //        telemetry.addData("is busy?", arm.isBusy());
         telemetry.addData("Arm Level", armLevel);
+        telemetry.addData("blue",colorSensor2.blue());
+        telemetry.addData("green",colorSensor2.green());
+        telemetry.addData("red",colorSensor2.red());
+        colorSensor2.enableLed(false);
 
         arm.shoulderPID.chillFactor = -0.75 * Math.max(gamepad2.left_trigger , gamepad2.right_trigger) + 1;
         arm.elbowPID.chillFactor    = -0.9 * Math.max(gamepad2.left_trigger , gamepad2.right_trigger) + 1;
@@ -156,7 +158,7 @@ public class TeleOpFreightFrenzyPID extends TeleOpFreightFrenzy {
     public void loop() {
         gamepadInput = false;
         this.handleArm();
-        this.handleClaw();
+        this.handleIntake();
         this.handleSpinner();
         this.handleDriving();
         this.handleFixedPos();

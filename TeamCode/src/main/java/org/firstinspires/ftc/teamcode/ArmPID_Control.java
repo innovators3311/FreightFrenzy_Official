@@ -146,7 +146,7 @@ public class ArmPID_Control extends Arm2_Control {
     public void update() {
       //   Graph: https://www.desmos.com/calculator/g4xnx2gddv
       //  Graph 2: https://www.desmos.com/calculator/pizueafjgr
-        double chill = Math.pow((shoulderPID.getTargetAngle()-100)/100, 2) +.2; // .75 + .5*Math.cos(2*(shoulderPID.getTargetAngle())*(Math.PI/180));
+        double chill = Math.pow((shoulderPID.getTargetAngle()-100)/190, 2) +.2; // .75 + .5*Math.cos(2*(shoulderPID.getTargetAngle())*(Math.PI/180));
         chill = PIDControl.clamp(chill, 0, 1);
         shoulderPID.pChill = chill;
 
