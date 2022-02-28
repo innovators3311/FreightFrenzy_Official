@@ -10,11 +10,9 @@ public class TeleOpFreightFrenzyPID extends TeleOpFreightFrenzy {
     public boolean PIDEnabled = true;
     protected boolean gamepadInput = false;
 
-
     // These values affect joystick sensitivity of the arm.
     public double ELBOW_MANUAL_FACTOR    =3.0;
     public double SHOULDER_MANUAL_FACTOR =3.0;
-    public int armLevel = 1;
     public boolean armLevelDebounceUp = false;
     public boolean armLevelDebounceDown = false;
     public double shoulderTargetDegrees = 0.0;
@@ -23,10 +21,12 @@ public class TeleOpFreightFrenzyPID extends TeleOpFreightFrenzy {
     public double[][] ARM_POSITIONS = {
             {0,0}, // position 0: Hard reset
             {30,-30}, // position 1: Carrying state
-            {213,-180}, // position 2: Ground pickup
+            {221,-180}, // position 2: Ground pickup
             {218,-231}, //position 3: Middle tier
             {125,-110}, // position 4: Top (needs tuning. bit to low)
-            {79,137} // position 5: Top-er
+            {79,137},// position 5: Top-er
+            {79,-205},//position 7; cap
+            {-114,113}
     };
 
     ArmPID_Control arm = new ArmPID_Control();
@@ -65,9 +65,9 @@ public class TeleOpFreightFrenzyPID extends TeleOpFreightFrenzy {
         shoulderTargetDegrees = 0.0;
         double distanceFactor = 1;
         double backup = 0;
-        if(armLevel == 4){
-            if(distanceSensor.getDistance(DistanceUnit.CM) < 2){
-                if(distanceSensor.getDistance(DistanceUnit.CM) < 1){
+        if(armLevel == 6){
+            if(distanceSensor.getDistance(DistanceUnit.CM) < 4){
+                if(distanceSensor.getDistance(DistanceUnit.CM) < 1.5){
                     distanceFactor = 0;
                     backup = -0.25 * distanceSensor.getDistance(DistanceUnit.CM);
                 }else{
@@ -117,8 +117,11 @@ public class TeleOpFreightFrenzyPID extends TeleOpFreightFrenzy {
         }
     }
     public void handleFixedPos(){
+        if(gamepad2.right_bumper = true) {
+            armLevel = 7;
+        }
         if(gamepad2.y){
-            armLevel = 4;
+            armLevel = 6;
         }
         if(gamepad2.b) {
             armLevel = 2;
@@ -160,7 +163,7 @@ public class TeleOpFreightFrenzyPID extends TeleOpFreightFrenzy {
             armLevel = armPosLen-1;
         }
 
-        if(gamepad2.dpad_down || gamepad2.dpad_up || gamepad2.y || gamepad2.b){
+        if(gamepad2.y || gamepad2.b || gamepad2.right_bumper) {
             arm.shoulderDriveAbsolute(1, ARM_POSITIONS[armLevel][0]);
             arm.elbowDriveAbsolute(1, ARM_POSITIONS[armLevel][1]);
 
@@ -180,6 +183,4 @@ public class TeleOpFreightFrenzyPID extends TeleOpFreightFrenzy {
         telemetry.addData("Status", "Run Time: " + runtime.toString());
 
     }
-
-
 }

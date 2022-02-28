@@ -75,6 +75,7 @@ public class TeleOpFreightFrenzy extends OpMode {
     public double strafe          = 0.0;
     public double strafeValue     = 0.0;
     public double backup          = 0;
+    public int armLevel = 1;
     //Bring in code to setup arm.
     protected Arm2_Control arm = new Arm2_Control();
     // debounce A & X
@@ -196,7 +197,9 @@ public class TeleOpFreightFrenzy extends OpMode {
     }
 
     public void handleSpinner() {
-        // The code below allows you to
+//        double spin = distanceSensor.getDistance(DistanceUnit.CM) / 5 - 0.2;
+//        spinner.setPower(spin);
+//        telemetry.addData("distance", spin * 5)
         if (gamepad1.right_bumper || gamepad1.left_bumper) {
             if (gamepad1.right_bumper) {
                 spinner.setPower(1);
@@ -207,22 +210,24 @@ public class TeleOpFreightFrenzy extends OpMode {
         } else {
             spinner.setPower(0);
         }
-
     }
-
-
 
     public void handleDriving() {
 
 
         // Get the game pad control values for this loop iteration
-        drive = -gamepad1.left_stick_y;
+        drive = -gamepad1.left_stick_y- gamepad1.right_stick_y;
         turn = gamepad1.right_stick_x;
         strafe = 0;
         if (gamepad1.dpad_left)
             strafe = -1;
-        if (gamepad1.dpad_right)
+        else
+            if (gamepad1.dpad_right)
             strafe = 1;
+            else{
+                strafe = gamepad1.left_stick_x;
+            }
+
 //send power to wheels
 
 
@@ -240,7 +245,20 @@ public class TeleOpFreightFrenzy extends OpMode {
             speedFactor = distance/5;
         }
 
-        if(distanceSensor.getDistance(DistanceUnit.CM) > 2){
+        double distanceFactor = 1;
+        double backup = 0;
+        if(armLevel == 4){
+            if(distanceSensor.getDistance(DistanceUnit.CM) < 2){
+                if(distanceSensor.getDistance(DistanceUnit.CM) < 1){
+                    distanceFactor = 0;
+                    backup = -0.25 * distanceSensor.getDistance(DistanceUnit.CM);
+                }else{
+                    distanceFactor = 0.2;
+                }
+            }
+        }
+
+        if(distanceSensor.getDistance(DistanceUnit.CM) < 2){
             speedFactor = (-0.7 *Math.max(gamepad1.left_trigger , gamepad1.right_trigger) + 1) * distance;
         }
         else {

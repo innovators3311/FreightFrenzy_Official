@@ -100,6 +100,12 @@ public class PIDControl {
         lastError = thisError;
 
         double powerCalc = p * pChill * angleError() + i * integratedError + d * averagedDerivative + feedForward;
+
+        /** Calculations for our custom PID control **/
+
+
+
+
         motor.setPower( clamp(powerCalc, -maxPower * chillFactor, maxPower * chillFactor) );
     }
 
