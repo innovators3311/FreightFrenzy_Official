@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.source;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -14,6 +15,8 @@ public class Arm {
     public DcMotor shoulder = null;
     public DcMotor elbow = null;
     public DcMotor spinner = null;
+    public DcMotor intake = null;
+
     public Servo claw = null;
     public Servo magnet = null;
 
@@ -25,8 +28,14 @@ public class Arm {
     private double elbowGravity;
     public boolean elbowIsBusy = false;
 
+    private int intakeTarget = 0;
+    public boolean intakeIsBusy = false;
+    private int intakeMultiplier = -1;
+
     public double shoulderErr;
     public double elbowErr;
+
+    private int i = 0;
 
     //both shoulder and elbow encoders have 8192 ticks per revolution
 
@@ -34,10 +43,6 @@ public class Arm {
     PID elbowPID = new PID();
 
     ElapsedTime timer = new ElapsedTime();
-    double clawTimestamp = 0;
-    private double clawPower = 0;
-    double magnetTimestamp = 0;
-    private double magnetPower = 0;
 
     private int encoderMultiplier = -1;
 
@@ -49,23 +54,28 @@ public class Arm {
         shoulder = hardwareMap.get(DcMotor.class, "shoulder");
         elbow = hardwareMap.get(DcMotor.class, "elbow");
         spinner = hardwareMap.get(DcMotor.class, "spinner");
+        intake = hardwareMap.get(DcMotor.class, "intake");
+
         claw  = hardwareMap.get(Servo.class, "claw");
         magnet = hardwareMap.get(Servo.class, "mag");
 
         shoulder.setDirection(DcMotor.Direction.FORWARD);
         elbow.setDirection(DcMotor.Direction.FORWARD);
+        intake.setDirection(DcMotor.Direction.FORWARD);
 
         shoulder.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         elbow.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         /*
          * Resetting the encoders.  It has to be set to run without encoder mode or else a qualcomm class appears to put a PID controller on the motor velocity, which will
          * mess with any of your own code.
          */
         shoulder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        elbow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        intake.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         shoulder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         elbow.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
     public void updateShoulder() {
@@ -80,7 +90,7 @@ public class Arm {
     public void updateElbow() {
         elbowPID.update(elbowTarget, encoderMultiplier * elbow.getCurrentPosition() / 22.76);
         elbowGravity =  0.02 * Math.cos(
-                Math.toRadians(encoderMultiplier * shoulder.getCurrentPosition() / 22.76 + encoderMultiplier * elbow.getCurrentPosition() / 22.76 + 20 )
+                Math.toRadians(encoderMultiplier * shoulder.getCurrentPosition() / 22.76 + encoderMultiplier * elbow.getCurrentPosition() / 22.76 + 35 )
         );
         elbow.setPower(elbowPID.output + elbowGravity);
         if(Math.abs(elbowPID.Err) < 3) {
@@ -88,23 +98,21 @@ public class Arm {
         }
         elbowErr = elbowPID.Err;
     }
-
-    /**
-     * Since there is no method to grab encoder counts from a servo, it must be done using time (milliseconds).  Unless, of course, you wish
-     * to use the qualcomm setPosition() method, which is terrible (like most qualcomm methods) because it takes forever to even set power to the servos.
-     * I'm getting cynical if you can't tell.
-     */
-    public void openClaw() {
-        claw.setPosition(0);
+    public void updateIntake() {
+        if (timer.milliseconds() > 750) {
+            intake.setPower(0);
+            intakeIsBusy = false;
+        }
     }
-    public void closeClaw() {
-        claw.setPosition(1);
+    public void openIntake() {
+        intakeIsBusy = true;
+        intake.setPower(1);
+        timer.reset();
     }
-    public void retractMagnet() {
-        magnet.setPosition(1);
-    }
-    public void pushMagnet() {
-        magnet.setPosition(0);
+    public void closeIntake() {
+        intakeIsBusy = true;
+        intake.setPower(-1);
+        timer.reset();
     }
     public void runShoulderTo(int shoulderTarget) {
         shoulderIsBusy = true;
@@ -112,7 +120,7 @@ public class Arm {
     }
     public void runElbowTo(int elbowTarget) {
         elbowIsBusy = true;
-        this.elbowTarget = elbowTarget - 20;
+        this.elbowTarget = elbowTarget - 35;
     }
     public void storeArmPose() {
         PoseStorage.shoulderTicks = shoulder.getCurrentPosition();

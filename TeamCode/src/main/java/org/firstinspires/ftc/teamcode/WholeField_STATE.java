@@ -7,6 +7,8 @@ import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.SwitchableCamera;
@@ -128,8 +130,12 @@ public class WholeField_STATE extends LinearOpMode {
         DROP_1,         // Drop block
         WAIT_2,         // Wait for block to drop
         TRAJECTORY_5,   // Position to get some freight
+        DROP_ARM,           //Drop arm
         TRAJECTORY_6,   // Continuation of trajectory 5
         TRAJECTORY_7,   // Get the freight
+        TRAJECTORY_8,
+        TRAJECTORY_9,
+        TRAJECTORY_10,
         IDLE            // Enter IDLE state when complete
     }
     enum armState {
@@ -137,7 +143,7 @@ public class WholeField_STATE extends LinearOpMode {
         TIER_2,
         TIER_3,
         PICKUP_1,
-        PICKUP_2,
+        PLACE_1,
         ARM_RESET,
         IDLE
     }
@@ -160,7 +166,10 @@ public class WholeField_STATE extends LinearOpMode {
 
     //initializing timer
     ElapsedTime timer = new ElapsedTime();
-    int i = 0;
+    DcMotor leftFront = null;
+    DcMotor leftRear = null;
+    DcMotor rightFront = null;
+    DcMotor rightRear = null;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -282,57 +291,67 @@ public class WholeField_STATE extends LinearOpMode {
 
         //Defining trajectories
         Trajectory trajectory1 = drive.trajectoryBuilder(startPose)
-                .splineTo(new Vector2d(48, -61), Math.toRadians(10)) //to duck carousel
+                .lineToLinearHeading(new Pose2d(57.5, -52.5, Math.toRadians(12))) //to duck carousel
                 .build();
         Trajectory trajectory2 = drive.trajectoryBuilder(trajectory1.end()) //creeping up to carousel
-                .splineTo(new Vector2d(52, -61), Math.toRadians(10))
+                .forward(10)
                 .build();
-        Trajectory trajectory3_1 = drive.trajectoryBuilder(trajectory2.end()) //turning back of robot to face shipping hub
-                .lineToLinearHeading(new Pose2d(52, -55, Math.toRadians(-35)))
+        Trajectory trajectory3 = drive.trajectoryBuilder(trajectory2.end()) //turning back of robot to face shipping hub
+                .lineToLinearHeading(new Pose2d(54, -58, Math.toRadians(-35)))
                 .build();
-        Trajectory trajectory3_2 = drive.trajectoryBuilder(trajectory2.end()) //turning front of robot to face shipping hub
-                .lineToLinearHeading(new Pose2d(52, -55, Math.toRadians(136)))
-                .build();
-        Trajectory trajectory4_1 = drive.trajectoryBuilder(trajectory3_1.end()) //*duck spot 1* positions for bottom tier
-                .back(27)
-                .build();
-        Trajectory trajectory4_1_1 = drive.trajectoryBuilder(trajectory4_1.end()) //*duck spot 3* positions for middle tier
-                .back(8.5)
-                .build();
-        Trajectory trajectory4_2 = drive.trajectoryBuilder(trajectory3_1.end()) //*duck spot 2* positions for middle tier
+        Trajectory trajectory4_1 = drive.trajectoryBuilder(trajectory3.end()) //*duck spot 1* positions for bottom tier
                 .lineToLinearHeading(new Pose2d(15, -50, Math.toRadians(-75)))
                 .build();
-        Trajectory trajectory4_2_2 = drive.trajectoryBuilder(trajectory4_2.end()) //*duck spot 2* positions for middle tier
-                .back(7)
+        Trajectory trajectory4_1_1 = drive.trajectoryBuilder(trajectory4_1.end()) //*duck spot 1* creeps forward for accurate placement
+                .back(1)
                 .build();
-        Trajectory trajectory4_3 = drive.trajectoryBuilder(trajectory3_2.end()) //*duck spot 3* positions for top tier
-                .forward(27)
+        Trajectory trajectory4_2 = drive.trajectoryBuilder(trajectory3.end()) //*duck spot 2* positions for middle tier
+                .lineToLinearHeading(new Pose2d(15, -50, Math.toRadians(-75)))
                 .build();
-        //*trajectory5* position to get some freight
-        Trajectory trajectory5_1 = drive.trajectoryBuilder(trajectory4_1.end())
-                .splineTo(new Vector2d(20.87, -67), Math.toRadians(180))
+        Trajectory trajectory4_2_2 = drive.trajectoryBuilder(trajectory4_2.end()) //*duck spot 2* creeps forward for accurate placement
+                .back(5)
                 .build();
-        Trajectory trajectory5_2 = drive.trajectoryBuilder(trajectory4_2.end())
-                .splineTo(new Vector2d(-12, -67), Math.toRadians(180))
+        Trajectory trajectory4_3 = drive.trajectoryBuilder(trajectory3.end()) //*duck spot 3* positions for top tier (no need for second part of trajectory)
+                .lineToLinearHeading(new Pose2d(15, -50, Math.toRadians(-75)))
+                .build();
+        //*trajectory5* positions to get some freight
+        Trajectory trajectory5_1 = drive.trajectoryBuilder(trajectory4_1_1.end())
+                .lineToLinearHeading(new Pose2d(0, -69, Math.toRadians(185)))
+                .build();
+        Trajectory trajectory5_2 = drive.trajectoryBuilder(trajectory4_2_2.end())
+                .lineToLinearHeading(new Pose2d(0, -69, Math.toRadians(185)))
                 .build();
         Trajectory trajectory5_3 = drive.trajectoryBuilder(trajectory4_3.end())
-                .lineToLinearHeading(new Pose2d(30, -33.2, Math.toRadians(180)))
+                .lineToLinearHeading(new Pose2d(0, -69, Math.toRadians(185)))
                 .build();
-        Trajectory trajectory6_1 = drive.trajectoryBuilder(trajectory5_1.end())
-                .lineToLinearHeading(new Pose2d(30, -64, Math.toRadians(170)))
+        Trajectory trajectory6 = drive.trajectoryBuilder(trajectory5_1.end()) //going into warehouse to get some freight
+                .lineToLinearHeading(new Pose2d(-38, -79, Math.toRadians(185)))
                 .build();
-        Trajectory trajectory6_2 = drive.trajectoryBuilder(trajectory5_2.end())
-                .lineToLinearHeading(new Pose2d(30, -64, Math.toRadians(170)))
+        Trajectory trajectory7 = drive.trajectoryBuilder(trajectory5_1.end()) //going out of warehouse
+                .lineToLinearHeading(new Pose2d(15, -79, Math.toRadians(185)))
                 .build();
-        Trajectory trajectory6_3 = drive.trajectoryBuilder(trajectory5_3.end())
-                .lineToLinearHeading(new Pose2d(30, -64, Math.toRadians(170))) //empty comment so i can push again
+        Pose2d newPoseEstimate2 = new Pose2d(15, -64, Math.toRadians(180));
+        Trajectory trajectory8 = drive.trajectoryBuilder(newPoseEstimate2)
+                .lineToLinearHeading(new Pose2d(15, -50, Math.toRadians(110))) //positioning to place block
                 .build();
-        Trajectory trajectory7 = drive.trajectoryBuilder(trajectory6_3.end()) //going to get freight from warehouse
-                .lineToLinearHeading(new Pose2d(-45, -67, Math.toRadians(190)))
+        Trajectory trajectory9 = drive.trajectoryBuilder(trajectory8.end())  //going back against wall
+                .lineToLinearHeading(new Pose2d(15, -70, Math.toRadians(180)))
+                .build();
+        Trajectory trajectory10 = drive.trajectoryBuilder(trajectory9.end()) //go back into warehouse
+                .forward(65)
                 .build();
         telemetry.clear();
         telemetry.addLine("Fully loaded!  Smash that play button!");
         telemetry.update();
+        leftFront = hardwareMap.get(DcMotorEx.class, "lf");
+        leftRear = hardwareMap.get(DcMotorEx.class, "lb");
+        rightRear = hardwareMap.get(DcMotorEx.class, "rb");
+        rightFront = hardwareMap.get(DcMotorEx.class, "rf");
+
+        leftFront.setDirection(DcMotor.Direction.FORWARD);
+        leftRear.setDirection(DcMotor.Direction.FORWARD);
+        rightRear.setDirection(DcMotor.Direction.REVERSE);
+        rightFront.setDirection(DcMotor.Direction.REVERSE);
         waitForStart();
 
         if (isStopRequested()) return;
@@ -348,8 +367,9 @@ public class WholeField_STATE extends LinearOpMode {
             switch (currentState) {
                 case TRAJECTORY_1: //driving to the duck carousel
                     if (!drive.isBusy()) {
-                        currentState = mainState.TRAJECTORY_2;
-                        drive.followTrajectoryAsync(trajectory2);
+                        currentState = mainState.SPIN;
+                        //drive.followTrajectoryAsync(trajectory2);
+                        timer.reset();
                     }
                     break;
                 case TRAJECTORY_2: //going forward a little bit to mash duck wheel against carousel
@@ -363,11 +383,8 @@ public class WholeField_STATE extends LinearOpMode {
                     if (timer.milliseconds() > 3000) {
                         arm.spinner.setPower(0);
                         currentState = mainState.TRAJECTORY_3;
-                        if(Duck == 3) {
-                            drive.followTrajectoryAsync(trajectory3_2);
-                        } else {
-                            drive.followTrajectoryAsync(trajectory3_1);
-                        }
+                        drive.followTrajectoryAsync(trajectory3);
+
                     }
                     break;
                 case TRAJECTORY_3: //turning to go to shipping hub
@@ -397,8 +414,7 @@ public class WholeField_STATE extends LinearOpMode {
                             timer.reset();
                             currentState = mainState.WAIT_1;
                         } else {
-                            arm.openClaw();
-                            arm.retractMagnet();
+                            arm.openIntake();
                             currentState = mainState.WAIT_2;
                             timer.reset();
                         }
@@ -416,14 +432,13 @@ public class WholeField_STATE extends LinearOpMode {
                     break;
                 case TRAJECTORY_4_2: //going to the shipping hub and dropping freight
                     if (!drive.isBusy()) {
-                        arm.openClaw();
-                        arm.retractMagnet();
+                        arm.openIntake();
                         currentState = mainState.WAIT_2;
                         timer.reset();
                     }
                     break;
                 case WAIT_2:
-                    arm.openClaw();
+                    arm.openIntake();
                     if(timer.milliseconds() > 1500) {
                         currentState = mainState.TRAJECTORY_5;
                         switch(Duck) {
@@ -434,63 +449,96 @@ public class WholeField_STATE extends LinearOpMode {
                             case 3:
                                 drive.followTrajectoryAsync(trajectory5_3);
                         }
+                        timer.reset();
                     }
                     break;
-                case TRAJECTORY_5: //turning to strafe to wall
+                case TRAJECTORY_5: //going to wall
                     if (!drive.isBusy()) {
-                        currentState = mainState.TRAJECTORY_6;
-                        switch(Duck) {
-                            case 1:
-                                drive.followTrajectoryAsync(trajectory6_1);
-                            case 2:
-                                drive.followTrajectoryAsync(trajectory6_2);
-                            case 3:
-                                drive.followTrajectoryAsync(trajectory6_3);
-                        }
+                        timer.reset();
+                        currentState = mainState.DROP_ARM;
                     }
                     break;
-                case TRAJECTORY_6: //strafing to wall and lowering arm
-                    if (!drive.isBusy() && !arm.shoulderIsBusy && !arm.elbowIsBusy) {
+                case DROP_ARM:
+                    currentArmState = armState.PICKUP_1;
+                    if(timer.milliseconds() > 350) {
+                        currentState = mainState.TRAJECTORY_6;
+                        drive.followTrajectoryAsync(trajectory6);
+                    }
+                    break;
+                case TRAJECTORY_6: //going to get some freight
+                    if (!drive.isBusy()) {
+                        arm.closeIntake();
+                        targets.deactivate();
                         currentState = mainState.TRAJECTORY_7;
                         drive.followTrajectoryAsync(trajectory7);
+                        timer.reset();
+                    }
+                    break;
+                case TRAJECTORY_7: //out of warehouse
+                    if(timer.milliseconds() > 250) {
+                        currentArmState = armState.PLACE_1;
+                    }
+                    if (!drive.isBusy()) {
+                        targets.deactivate();
+                        currentState = mainState.TRAJECTORY_8;
+                        drive.setPoseEstimate(newPoseEstimate2);
+                        drive.followTrajectoryAsync(trajectory8);
+                    }
+                    break;
+                case TRAJECTORY_8: //going to of shipping hub
+                    if (!drive.isBusy()) {
+                        arm.openIntake();
+                        currentState = mainState.TRAJECTORY_9;
+                        drive.followTrajectoryAsync(trajectory9);
+                    }
+                    break;
+                case TRAJECTORY_9: //going back against wall
+                    if (!drive.isBusy()) {
+                        arm.openIntake();
+                        currentState = mainState.TRAJECTORY_10;
+                        drive.followTrajectoryAsync(trajectory10);
                         currentArmState = armState.PICKUP_1;
                     }
                     break;
-                case TRAJECTORY_7: //driving forward to get the freight
+                case TRAJECTORY_10: //going into warehoused and getting another block for driver control
                     if (!drive.isBusy()) {
-                        targets.deactivate();
+                        arm.closeIntake();
                         currentState = mainState.IDLE;
+                        timer.reset();
                     }
                     break;
                 case IDLE:
+                    if(timer.milliseconds() > 500) {
+                        currentArmState = armState.ARM_RESET;
+                    }
                     arm.storeArmPose();
                     break;
             }
 
             switch(currentArmState) {
                 case TIER_1:
-                    arm.runShoulderTo(155);
-                    arm.runElbowTo(270);
+                    arm.runShoulderTo(175);
+                    arm.runElbowTo(240);
                     currentArmState = armState.IDLE;
                     break;
                 case TIER_2:
-                    arm.runShoulderTo(128);
+                    arm.runShoulderTo(133);
                     arm.runElbowTo(285);
                     currentArmState = armState.IDLE;
                     break;
                 case TIER_3:
-                    arm.runShoulderTo(50);
-                    arm.runElbowTo(175);
+                    arm.runShoulderTo(145);
+                    arm.runElbowTo(185);
                     currentArmState = armState.IDLE;
                     break;
                 case PICKUP_1:
                     arm.runShoulderTo(-25);
-                    arm.runElbowTo(215);
+                    arm.runElbowTo(216);
                     currentArmState = armState.IDLE;
                     break;
-                case PICKUP_2:
-                    arm.runShoulderTo(-25);
-                    arm.runElbowTo(205);
+                case PLACE_1:
+                    arm.runShoulderTo(60);
+                    arm.runElbowTo(180);
                     currentArmState = armState.IDLE;
                     break;
                 case ARM_RESET:
@@ -540,6 +588,7 @@ public class WholeField_STATE extends LinearOpMode {
             //Updating all arm components continuously in the background, regardless of state
             arm.updateShoulder();
             arm.updateElbow();
+            arm.updateIntake();
 
             //Updating drive continuously in the background, regardless of state
             drive.update();
