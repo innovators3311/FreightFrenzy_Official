@@ -99,7 +99,7 @@ public class Arm {
         elbowErr = elbowPID.Err;
     }
     public void updateIntake() {
-        if (timer.milliseconds() > 750) {
+        if (timer.milliseconds() > 1250) {
             intake.setPower(0);
             intakeIsBusy = false;
         }
