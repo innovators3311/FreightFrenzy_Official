@@ -294,7 +294,7 @@ public class WholeField_STATE extends LinearOpMode {
                 .lineToLinearHeading(new Pose2d(57.5, -52.5, Math.toRadians(12))) //to duck carousel
                 .build();
         Trajectory trajectory2 = drive.trajectoryBuilder(trajectory1.end()) //creeping up to carousel
-                .forward(10)
+                .forward(1.5)
                 .build();
         Trajectory trajectory3 = drive.trajectoryBuilder(trajectory2.end()) //turning back of robot to face shipping hub
                 .lineToLinearHeading(new Pose2d(54, -58, Math.toRadians(-35)))
@@ -316,13 +316,13 @@ public class WholeField_STATE extends LinearOpMode {
                 .build();
         //*trajectory5* positions to get some freight
         Trajectory trajectory5_1 = drive.trajectoryBuilder(trajectory4_1_1.end())
-                .lineToLinearHeading(new Pose2d(0, -69, Math.toRadians(185)))
+                .lineToLinearHeading(new Pose2d(0, -72, Math.toRadians(185)))
                 .build();
         Trajectory trajectory5_2 = drive.trajectoryBuilder(trajectory4_2_2.end())
-                .lineToLinearHeading(new Pose2d(0, -69, Math.toRadians(185)))
+                .lineToLinearHeading(new Pose2d(0, -72, Math.toRadians(185)))
                 .build();
         Trajectory trajectory5_3 = drive.trajectoryBuilder(trajectory4_3.end())
-                .lineToLinearHeading(new Pose2d(0, -69, Math.toRadians(185)))
+                .lineToLinearHeading(new Pose2d(0, -72, Math.toRadians(185)))
                 .build();
         Trajectory trajectory6 = drive.trajectoryBuilder(trajectory5_1.end()) //going into warehouse to get some freight
                 .lineToLinearHeading(new Pose2d(-38, -79, Math.toRadians(185)))
@@ -367,9 +367,8 @@ public class WholeField_STATE extends LinearOpMode {
             switch (currentState) {
                 case TRAJECTORY_1: //driving to the duck carousel
                     if (!drive.isBusy()) {
-                        currentState = mainState.SPIN;
-                        //drive.followTrajectoryAsync(trajectory2);
-                        timer.reset();
+                        currentState = mainState.TRAJECTORY_2;
+                        drive.followTrajectoryAsync(trajectory2);
                     }
                     break;
                 case TRAJECTORY_2: //going forward a little bit to mash duck wheel against carousel
@@ -439,7 +438,7 @@ public class WholeField_STATE extends LinearOpMode {
                     break;
                 case WAIT_2:
                     arm.openIntake();
-                    if(timer.milliseconds() > 1500) {
+                    if(timer.milliseconds() > 500) {
                         currentState = mainState.TRAJECTORY_5;
                         switch(Duck) {
                             case 1:
