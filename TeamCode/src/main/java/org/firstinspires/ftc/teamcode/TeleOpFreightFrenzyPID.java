@@ -26,7 +26,7 @@ public class TeleOpFreightFrenzyPID extends TeleOpFreightFrenzy {
             {125,-110}, // position 4: Top (needs tuning. bit to low)
             {79,137},// position 5: Top-er
             {79,-205},//position 7; cap
-            {-114,113}
+            {113, -114}
     };
 
     ArmPID_Control arm = new ArmPID_Control();
@@ -91,6 +91,7 @@ public class TeleOpFreightFrenzyPID extends TeleOpFreightFrenzy {
             PIDEnabled = true;
         }
 
+        telemetry.addData("level", armLevel);
         telemetry.addData("shoulder current angle:", arm.getShoulderAngle());
         telemetry.addData("shoulder angle target:", arm.getShoulderTargetAngle());
         telemetry.addData("gravity vector", arm.getShoulderGravityVector());
@@ -117,7 +118,7 @@ public class TeleOpFreightFrenzyPID extends TeleOpFreightFrenzy {
         }
     }
     public void handleFixedPos(){
-        if(gamepad2.right_bumper = true) {
+        if(gamepad2.right_bumper) {
             armLevel = 7;
         }
         if(gamepad2.y){
@@ -154,8 +155,8 @@ public class TeleOpFreightFrenzyPID extends TeleOpFreightFrenzy {
         if(armLevel < 0){
             armLevel = 0;
         }
-        if(armLevel > 6){
-            armLevel = 6;
+        if(armLevel > 7){
+            armLevel = 7;
         }
 
         int armPosLen = ARM_POSITIONS.length;
@@ -181,6 +182,5 @@ public class TeleOpFreightFrenzyPID extends TeleOpFreightFrenzy {
 
         // Show the elapsed game time and wheel power.
         telemetry.addData("Status", "Run Time: " + runtime.toString());
-
     }
 }
