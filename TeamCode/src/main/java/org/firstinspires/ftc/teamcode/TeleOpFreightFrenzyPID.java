@@ -26,7 +26,8 @@ public class TeleOpFreightFrenzyPID extends TeleOpFreightFrenzy {
             {125, -110}, // position 4: Top (needs tuning. bit to low)
             {79, 137},// position 5: Top-er
             {79, -205},//position 7; cap
-            {113, -114}
+            {113, -114},
+            {221, -173}
     };
 
     ArmPID_Control arm = new ArmPID_Control();
@@ -122,6 +123,9 @@ public class TeleOpFreightFrenzyPID extends TeleOpFreightFrenzy {
         if (gamepad2.right_bumper) {
             armLevel = 7;
         }
+        if (gamepad2.left_bumper) {
+            armLevel = 8;
+        }
         if (gamepad2.y) {
             armLevel = 6;
         }
@@ -156,8 +160,8 @@ public class TeleOpFreightFrenzyPID extends TeleOpFreightFrenzy {
         if (armLevel < 0) {
             armLevel = 0;
         }
-        if (armLevel > 7) {
-            armLevel = 7;
+        if (armLevel > 8) {
+            armLevel = 8;
         }
 
         int armPosLen = ARM_POSITIONS.length;
@@ -165,7 +169,7 @@ public class TeleOpFreightFrenzyPID extends TeleOpFreightFrenzy {
             armLevel = armPosLen - 1;
         }
 
-        if (gamepad2.y || gamepad2.b || gamepad2.right_bumper) { //empty commment for pushing
+        if (gamepad2.y || gamepad2.b || gamepad2.right_bumper || gamepad2.left_bumper) { //empty commment for pushing
             arm.shoulderDriveAbsolute(1, ARM_POSITIONS[armLevel][0]);
             arm.elbowDriveAbsolute(1, ARM_POSITIONS[armLevel][1]);
 
