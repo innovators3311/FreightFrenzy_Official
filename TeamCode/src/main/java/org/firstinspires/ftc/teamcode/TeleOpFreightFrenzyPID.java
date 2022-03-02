@@ -25,9 +25,9 @@ public class TeleOpFreightFrenzyPID extends TeleOpFreightFrenzy {
             {218, -231}, //position 3: Middle tier
             {125, -110}, // position 4: Top (needs tuning. bit to low)
             {79, 137},// position 5: Top-er
-            {79, -205},//position 7; cap
-            {113, -114},
-            {221, -173}
+            {79, -205},//position 6: back dropoff
+            {113, -114},// position 8: cap
+            {221, -173} // position 9: cap pickup
     };
 
     ArmPID_Control arm = new ArmPID_Control();
@@ -59,7 +59,7 @@ public class TeleOpFreightFrenzyPID extends TeleOpFreightFrenzy {
         }
 
     }
-
+// the cooler Daniel
     @Override
     protected void handleArm() {
         double elbowTargetDegrees = 0.0;
