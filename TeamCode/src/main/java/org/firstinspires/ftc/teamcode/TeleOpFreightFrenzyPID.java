@@ -76,7 +76,7 @@ public class TeleOpFreightFrenzyPID extends TeleOpFreightFrenzy {
                 }
             }
         }
-
+//
         if (Math.abs(gamepad2.left_stick_y) > .05 || Math.abs(gamepad2.right_stick_y) > .05
                 || Math.abs(gamepad2.left_stick_x) > .05 || Math.abs(gamepad2.right_stick_x) > .05) {
             gamepadInput = true;
