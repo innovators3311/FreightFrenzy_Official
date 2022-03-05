@@ -2,28 +2,32 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+
 @TeleOp(name = "TeleOpFreightFrenzyPID", group = "3311")
 public class TeleOpFreightFrenzyPID extends TeleOpFreightFrenzy {
     // Arm setup
     public boolean PIDEnabled = true;
-    public boolean inUse = false;
-
+    protected boolean gamepadInput = false;
 
     // These values affect joystick sensitivity of the arm.
-    public double ELBOW_MANUAL_FACTOR    =2.0;
-    public double SHOULDER_MANUAL_FACTOR =2.0;
-    public int armLevel = 1;
+    public double ELBOW_MANUAL_FACTOR = 3.0;
+    public double SHOULDER_MANUAL_FACTOR = 3.0;
     public boolean armLevelDebounceUp = false;
     public boolean armLevelDebounceDown = false;
+    public double shoulderTargetDegrees = 0.0;
 
     // This is a Java Array. It's stored as (shoulder, elbow) values for each position.
     public double[][] ARM_POSITIONS = {
-            {0,0}, // position 0: Hard reset
-            {30,-30}, // position 1: Carrying state
-            {221,-180}, // poSitIon 2: Ground pickup
-            {78,-135}, //position 3: Middle tier
-            {87,-58}, // position 4: Top (needs tuning)
-            {79,137} // POSITION 5: Top-er
+            {0, 0}, // position 0: Hard reset
+            {30, -30}, // position 1: Carrying state
+            {221, -180}, // position 2: Ground pickup
+            {218, -231}, //position 3: Middle tier
+            {125, -110}, // position 4: Top (needs tuning. bit to low)
+            {79, 137},// position 5: Top-er
+            {79, -205},//position 6: back dropoff
+            {113, -114},// position 8: cap
+            {221, -173} // position 9: cap pickup
     };
 
     ArmPID_Control arm = new ArmPID_Control();
@@ -35,42 +39,48 @@ public class TeleOpFreightFrenzyPID extends TeleOpFreightFrenzy {
     public void init() {
         super.init();
         this.arm.init(hardwareMap);
-        arm.arm_reset();
 
-   }
-
-    @Override
-    public void init_loop(){
-        telemetry.addData("Shoulder Button Pressed", arm.shoulderLimitSwitch.isPressed());
-        telemetry.addData("Shoulder Initialized", arm.armInitalized);
-        telemetry.addData("shoulderPID target:", arm.shoulderPID.getTargetAngle());
-        telemetry.addData("shoulderPID angle:", arm.getShoulderAngle());
-        arm.mag.setPosition(1);
-        arm.cl.setPosition(1);
     }
 
     @Override
+    public void init_loop() {
+        telemetry.addData("Shoulder Button Pressed", arm.shoulderLimitSwitch.isPressed());
+        telemetry.addData("Arm Initialized", arm.armInitalized);
+        telemetry.addData("Arm State", arm.armState);
+        telemetry.addData("shoulderPID target:", arm.shoulderPID.getTargetAngle());
+        telemetry.addData("shoulderPID angle:", arm.getShoulderAngle());
+        telemetry.addData("elbowPID target:", arm.elbowPID.getTargetAngle());
+//        telemetry.addData("shoulder Power:", arm.shoulder.getPower());
+//        telemetry.addData("elbow Power:", arm.elbow.getPower());
+        arm.arm_reset();
+        if (arm.armInitalized) {
+            gamepad1.rumble(1000);
+            gamepad2.rumble(1000);
+        }
+
+    }
+// the cooler Daniel
+    @Override
     protected void handleArm() {
-        double elbowTargetDegrees   = 0.0;
-        double shoulderTargetDegrees = 0.0;
-//        if (gamepad2.y){
-//            arm.shoulder.setPower(0);
-//            arm.elbow.setPower(0);
-//            PIDenabled = false;
-//        }
-//        else{
-//            PIDenabled = true;
-//        }
-        if(arm.getShoulderAngle() < 5 && arm.getElbowAngle() < 5 && !inUse) {
-            arm.shoulder.setPower(0);
-            arm.elbow.setPower(0);
+        double elbowTargetDegrees = 0.0;
+        shoulderTargetDegrees = 0.0;
+        double distanceFactor = 1;
+        double backup = 0;
+        if (armLevel == 6) {
+            if (distanceSensor.getDistance(DistanceUnit.CM) < 4) {
+                if (distanceSensor.getDistance(DistanceUnit.CM) < 1.5) {
+                    distanceFactor = 0;
+                    backup = -0.25 * distanceSensor.getDistance(DistanceUnit.CM);
+                } else {
+                    distanceFactor = 0.2;
+                }
+            }
         }
-        else {
-            inUse = true;
-        }
+//
         if (Math.abs(gamepad2.left_stick_y) > .05 || Math.abs(gamepad2.right_stick_y) > .05
                 || Math.abs(gamepad2.left_stick_x) > .05 || Math.abs(gamepad2.right_stick_x) > .05) {
-        inUse = true;
+            gamepadInput = true;
+
             // If driver moves the stick more than 10% or we're already in run without encoder mode ...
             elbowTargetDegrees += gamepad2.left_stick_y * ELBOW_MANUAL_FACTOR;
             shoulderTargetDegrees += gamepad2.right_stick_y * SHOULDER_MANUAL_FACTOR;
@@ -82,15 +92,7 @@ public class TeleOpFreightFrenzyPID extends TeleOpFreightFrenzy {
             PIDEnabled = true;
         }
 
-        //set arm to shared hub level
-//        if (gamepad2.dpad_right || gamepad2.dpad_left) {
-//            arm.shoulderDriveAbsolute(0.7, 162.8);
-//            arm.elbowDriveAbsolute(0.7, -144.3);
-//            PIDenabled = true;
-//            inUse = true;
-//        }
-        //
-
+        telemetry.addData("level", armLevel);
         telemetry.addData("shoulder current angle:", arm.getShoulderAngle());
         telemetry.addData("shoulder angle target:", arm.getShoulderTargetAngle());
         telemetry.addData("gravity vector", arm.getShoulderGravityVector());
@@ -99,73 +101,92 @@ public class TeleOpFreightFrenzyPID extends TeleOpFreightFrenzy {
         telemetry.addData("elbow angle target:", arm.getElbowTargetAngle());
 //        telemetry.addData("is busy?", arm.isBusy());
         telemetry.addData("Arm Level", armLevel);
+        telemetry.addData("blue", colorSensor2.blue());
+        telemetry.addData("green", colorSensor2.green());
+        telemetry.addData("red", colorSensor2.red());
+        colorSensor2.enableLed(false);
 
-        while (gamepad2.left_bumper || gamepad2.right_bumper) {
-            arm.emergencyStop();
-            gamepad2.rumble(100);
-            PIDEnabled = false;
-        }
+        arm.shoulderPID.chillFactor = -0.75 * Math.max(gamepad2.left_trigger, gamepad2.right_trigger) + 1;
+        arm.elbowPID.chillFactor = -0.9 * Math.max(gamepad2.left_trigger, gamepad2.right_trigger) + 1;
+
         if (PIDEnabled) {
             arm.update();
+            gamepadInput = true;
+        }
+        if (arm.getShoulderAngle() < 5 && arm.getElbowAngle() < 5 && !gamepadInput) {
+            arm.shoulder.setPower(0);
+            arm.elbow.setPower(0);
         }
     }
-    public void handleFixedPos(){
+
+    public void handleFixedPos() {
+        if (gamepad2.right_bumper) {
+            armLevel = 7;
+        }
+        if (gamepad2.left_bumper) {
+            armLevel = 8;
+        }
+        if (gamepad2.y) {
+            armLevel = 6;
+        }
+        if (gamepad2.b) {
+            armLevel = 2;
+        }
         if (gamepad2.dpad_up) {
 
             if (!armLevelDebounceUp) {
                 armLevel = armLevel + 1;
-                inUse = true;
+                gamepadInput = true;
             }
             armLevelDebounceUp = true;
 
-        }    else{
+        } else {
             armLevelDebounceUp = false;
-            inUse = false;
+            gamepadInput = false;
         }
         if (gamepad2.dpad_down) {
             if (!armLevelDebounceDown) {
                 armLevel = armLevel - 1;
-                inUse = true;
+                gamepadInput = true;
             }
             armLevelDebounceDown = true;
-            inUse = true;
+            gamepadInput = true;
 
-        }    else{
-            inUse = false;
+        } else {
+            gamepadInput = false;
             armLevelDebounceDown = false;
         }
 
-        if(armLevel < 0){
+        if (armLevel < 0) {
             armLevel = 0;
         }
-        if(armLevel > 6){
-            armLevel = 6;
+        if (armLevel > 8) {
+            armLevel = 8;
         }
 
         int armPosLen = ARM_POSITIONS.length;
-        if(armLevel > armPosLen-1){
-            armLevel = armPosLen-1;
+        if (armLevel > armPosLen - 1) {
+            armLevel = armPosLen - 1;
         }
 
-        if(gamepad2.dpad_down || gamepad2.dpad_up){
+        if (gamepad2.y || gamepad2.b || gamepad2.right_bumper || gamepad2.left_bumper) { //empty commment for pushing
             arm.shoulderDriveAbsolute(1, ARM_POSITIONS[armLevel][0]);
             arm.elbowDriveAbsolute(1, ARM_POSITIONS[armLevel][1]);
 
         }
     }
-      // Code to run REPEATEDLY after the driver hits PLAY but before they hit STOP
+
+    // Code to run REPEATEDLY after the driver hits PLAY but before they hit STOP
     @Override
     public void loop() {
-        inUse = false;
+        gamepadInput = false;
         this.handleArm();
-        this.handleClaw();
+        this.handleIntake();
         this.handleSpinner();
         this.handleDriving();
         this.handleFixedPos();
+
         // Show the elapsed game time and wheel power.
         telemetry.addData("Status", "Run Time: " + runtime.toString());
-
     }
-
-
 }

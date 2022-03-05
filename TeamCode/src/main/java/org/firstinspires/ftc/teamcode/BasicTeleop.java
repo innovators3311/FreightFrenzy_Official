@@ -52,7 +52,7 @@ import com.qualcomm.robotcore.util.Range;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
-@TeleOp(name="Test OpMode_other", group="Linear Opmode")
+@TeleOp(name="SETUP", group="SETUP")
 public class BasicTeleop extends LinearOpMode {
 
     // Declare OpMode members.
@@ -64,8 +64,7 @@ public class BasicTeleop extends LinearOpMode {
     private DcMotor mainArm = null;
     private DcMotor secondaryArm = null;
     private DcMotor spinner = null;
-    private Servo claw = null;
-    private Servo release = null;
+    private DcMotor intake = null;
 
     double max;
 
@@ -86,8 +85,7 @@ public class BasicTeleop extends LinearOpMode {
         secondaryArm = hardwareMap.get(DcMotor.class, "elbow");
         spinner = hardwareMap.get(DcMotor.class, "spinner");
 
-        claw  = hardwareMap.get(Servo.class, "claw");
-        release = hardwareMap.get(Servo.class, "mag");
+
 
         // Most robots need the motor on one side to be reversed to org.firstinspires.ftc.teamcode.drive forward
         // Reverse the motor that runs backwards when connected directly to the battery
@@ -137,24 +135,7 @@ public class BasicTeleop extends LinearOpMode {
                 secondaryArmPower = 0;
             }
 
-            //claw code
-            if (gamepad2.a) {
-                claw.setPosition(0);
-            }
-            if (gamepad2.b) {
-                claw.setPosition(10);
-            }
-            if (gamepad2.x) {
-                release.setPosition(10);
-            }
-            if (gamepad2.y) {
-                release.setPosition(0);
-            }
-            if (gamepad2.right_bumper) {
-                spinner.setPower(1);
-            } else {
-                spinner.setPower(0);
-            }
+
 
             leftPower = drive + turn + strafe;
             rightPower = drive - turn - strafe;
