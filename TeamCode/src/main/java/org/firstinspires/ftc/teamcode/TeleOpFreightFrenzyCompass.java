@@ -1,11 +1,13 @@
 package org.firstinspires.ftc.teamcode;
 
+
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.CompassSensor;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
-@TeleOp(name = "TeleOpFreightFrenzyPID", group = "3311")
-public class TeleOpFreightFrenzyPID extends TeleOpFreightFrenzy {
+@TeleOp(name = "TeleOpFreightFrenzyCompass", group = "3311")
+public class TeleOpFreightFrenzyCompass extends TeleOpFreightFrenzy {
     // Arm setup
     public boolean PIDEnabled = true;
     protected boolean gamepadInput = false;
@@ -16,6 +18,7 @@ public class TeleOpFreightFrenzyPID extends TeleOpFreightFrenzy {
     public boolean armLevelDebounceUp = false;
     public boolean armLevelDebounceDown = false;
     public double shoulderTargetDegrees = 0.0;
+    private CompassSensor compass = null;
 
     // This is a Java Array. It's stored as (shoulder, elbow) values for each position.
     public double[][] ARM_POSITIONS = {
@@ -39,7 +42,8 @@ public class TeleOpFreightFrenzyPID extends TeleOpFreightFrenzy {
     public void init() {
         super.init();
         this.arm.init(hardwareMap);
-
+        compass = hardwareMap.get(CompassSensor.class,"compass");
+        compass.setMode(CompassSensor.CompassMode.CALIBRATION_MODE);
     }
 
     @Override
@@ -170,7 +174,7 @@ public class TeleOpFreightFrenzyPID extends TeleOpFreightFrenzy {
             armLevel = armPosLen - 1;
         }
 
-        if (gamepad2.y || gamepad2.b || gamepad2.right_bumper || gamepad2.left_bumper) { //empty commment for pushing
+        if (gamepad2.y || gamepad2.b || gamepad2.right_bumper || gamepad2.left_bumper)   { //empty commment for pushing
             arm.shoulderDriveAbsolute(1, ARM_POSITIONS[armLevel][0]);
             arm.elbowDriveAbsolute(1, ARM_POSITIONS[armLevel][1]);
 
@@ -189,5 +193,8 @@ public class TeleOpFreightFrenzyPID extends TeleOpFreightFrenzy {
 
         // Show the elapsed game time and wheel power.
         telemetry.addData("Status", "Run Time: " + runtime.toString());
+        compass.setMode(CompassSensor.CompassMode.MEASUREMENT_MODE);
+        telemetry.addData("compassy thingy", compass.getDirection());
+        telemetry.addData("working compass?", compass.status());
     }
 }
