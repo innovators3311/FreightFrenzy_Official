@@ -61,7 +61,7 @@ public class TeleOpFreightFrenzyCompass extends TeleOpFreightFrenzy {
             gamepad1.rumble(1000);
             gamepad2.rumble(1000);
         }
-
+        telemetry.addData("succesfulCompassing?", compass.calibrationFailed());
     }
 // the cooler Daniel
     @Override
