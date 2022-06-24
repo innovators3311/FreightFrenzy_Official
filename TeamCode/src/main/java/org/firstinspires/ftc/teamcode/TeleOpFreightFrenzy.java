@@ -36,7 +36,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-
+import org.firstinspires.ftc.teamcode.util.DriveDirection;
 
 /**
  * This file contains an example of an iterative (Non-Linear) "OpMode".
@@ -64,7 +64,8 @@ public class TeleOpFreightFrenzy extends OpMode {
     public DcMotor intake                = null;
     public ColorSensor colorSensor2      = null;
     public DistanceSensor distanceSensor = null;
-    public double speedFactor = 1.0;
+    public double speedFactor            = 1.0;
+    public double driveAngleOffset       = 0.0;
     /* Setup a variable for each drive wheel to save power level for telemetry */
     public double leftPowerFront  = 1.0;
     public double rightPowerFront = 1.0;
@@ -222,53 +223,21 @@ public class TeleOpFreightFrenzy extends OpMode {
         if (gamepad1.dpad_left)
             strafe = -1;
         else
-            if (gamepad1.dpad_right)
+        if (gamepad1.dpad_right)
             strafe = 1;
-            else{
-                strafe = gamepad1.left_stick_x;
-            }
-
+        else{
+            strafe = gamepad1.left_stick_x;
+        }
+        speedFactor = 1.0 - (gamepad1.left_trigger*.5);
 //send power to wheels
+        DriveDirection dd = new DriveDirection(drive, strafe);
+        dd.rotate(driveAngleOffset);
 
 
-        double distance = distanceSensor.getDistance(DistanceUnit.CM);
-        if (gamepad1.x) {
-            if (!debounceX) {
-                // This code only runs once if x is pressed.
-                distanceSlow = !distanceSlow;
-            }
-            debounceX = true;
-        } else {
-            debounceX = false;
-        }
-        if (distanceSlow){
-            speedFactor = distance/5;
-        }
-
-        double distanceFactor = 1;
-        double backup = 0;
-        if(armLevel == 4){
-            if(distanceSensor.getDistance(DistanceUnit.CM) < 2){
-                if(distanceSensor.getDistance(DistanceUnit.CM) < 1){
-                    distanceFactor = 0;
-                    backup = -0.25 * distanceSensor.getDistance(DistanceUnit.CM);
-                }else{
-                    distanceFactor = 0.2;
-                }
-            }
-        }
-
-        if(distanceSensor.getDistance(DistanceUnit.CM) < 2){
-            speedFactor = (-0.7 *Math.max(gamepad1.left_trigger , gamepad1.right_trigger) + 1) * distance;
-        }
-        else {
-            speedFactor = (-0.7 * Math.max(gamepad1.left_trigger, gamepad1.right_trigger) + 1);
-        }
-
-        leftPowerFront = (drive + turn + strafe) * speedFactor + backup;
-        rightPowerFront = (drive - turn - strafe) * speedFactor + backup;
-        leftPowerBack = (drive + turn - strafe) * speedFactor + backup;
-        rightPowerBack = (drive - turn + strafe) * speedFactor + backup;
+        leftPowerFront = (dd.drive + turn + dd.strafe) * speedFactor;
+        rightPowerFront = (dd.drive - turn - dd.strafe) * speedFactor;
+        leftPowerBack = (dd.drive + turn - dd.strafe) * speedFactor;
+        rightPowerBack = (dd.drive - turn + dd.strafe) * speedFactor;
 
         leftDriveFront.setPower(leftPowerFront);
         rightDriveFront.setPower(rightPowerFront);

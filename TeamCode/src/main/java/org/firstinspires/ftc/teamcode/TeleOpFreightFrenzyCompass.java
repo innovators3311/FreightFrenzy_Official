@@ -3,7 +3,10 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CompassSensor;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
+
+import org.firstinspires.ftc.robotcontroller.external.samples.HardwarePushbot;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 @TeleOp(name = "TeleOpFreightFrenzyCompass", group = "3311")
@@ -18,7 +21,11 @@ public class TeleOpFreightFrenzyCompass extends TeleOpFreightFrenzy {
     public boolean armLevelDebounceUp = false;
     public boolean armLevelDebounceDown = false;
     public double shoulderTargetDegrees = 0.0;
+    final static double     MOTOR_POWER   = 1;
+    static final long       HOLD_TIME_MS  = 3000;
+    static final double     CAL_TIME_SEC  = 20;
     private CompassSensor compass = null;
+    private ElapsedTime runtime = new ElapsedTime();
 
     // This is a Java Array. It's stored as (shoulder, elbow) values for each position.
     public double[][] ARM_POSITIONS = {
@@ -43,7 +50,7 @@ public class TeleOpFreightFrenzyCompass extends TeleOpFreightFrenzy {
         super.init();
         this.arm.init(hardwareMap);
         compass = hardwareMap.get(CompassSensor.class,"compass");
-        compass.setMode(CompassSensor.CompassMode.CALIBRATION_MODE);
+
     }
 
     @Override
@@ -61,7 +68,7 @@ public class TeleOpFreightFrenzyCompass extends TeleOpFreightFrenzy {
             gamepad1.rumble(1000);
             gamepad2.rumble(1000);
         }
-        telemetry.addData("succesfulCompassing?", compass.calibrationFailed());
+
     }
 // the cooler Daniel
     @Override
@@ -122,6 +129,11 @@ public class TeleOpFreightFrenzyCompass extends TeleOpFreightFrenzy {
             arm.elbow.setPower(0);
         }
     }
+    public void handleCompass() {
+            driveAngleOffset = compass.getDirection();
+        }
+
+
 
     public void handleFixedPos() {
         // Setting the arm to pre set positions for the convenience of the drivers
@@ -190,11 +202,11 @@ public class TeleOpFreightFrenzyCompass extends TeleOpFreightFrenzy {
         this.handleSpinner();
         this.handleDriving();
         this.handleFixedPos();
+        this.handleCompass();
 
         // Show the elapsed game time and wheel power.
         telemetry.addData("Status", "Run Time: " + runtime.toString());
         compass.setMode(CompassSensor.CompassMode.MEASUREMENT_MODE);
-        telemetry.addData("compassy thingy", compass.getDirection());
-        telemetry.addData("working compass?", compass.status());
+        telemetry.addData("heading, me mateys", compass.getDirection());
     }
 }

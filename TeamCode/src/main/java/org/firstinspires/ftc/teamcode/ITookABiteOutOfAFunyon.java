@@ -140,10 +140,7 @@ public class ITookABiteOutOfAFunyon extends LinearOpMode {
                 trigger.setPosition(0);
             }
         // Setup a variable for each org.firstinspires.ftc.teamcode.drive wheel to save power level for telemetry
-            double leftPower;
-            double rightPower;
-            double leftBackPower;
-            double rightBackPower;
+
 
 //            double armPower = gamepad2.left_stick_y;
 //            double secondaryArmPower = gamepad2.right_stick_y;
@@ -154,9 +151,7 @@ public class ITookABiteOutOfAFunyon extends LinearOpMode {
             // POV Mode uses left stick to go forward, and right stick to turn.
             // - This uses basic math to combine motions and is easier to org.firstinspires.ftc.teamcode.drive straight.
 
-            double turn = gamepad1.left_stick_x;
-            double drive = -gamepad1.left_stick_y;
-            double strafe = gamepad1.right_stick_x;
+
 
 //            if (Math.abs(armPower) < 0.05) {
 //                armPower = 0;
@@ -164,7 +159,14 @@ public class ITookABiteOutOfAFunyon extends LinearOpMode {
 //            if (Math.abs(secondaryArmPower) < 0.05) {
 //                secondaryArmPower = 0;
 //            }
+            double leftPower;
+            double rightPower;
+            double leftBackPower;
+            double rightBackPower;
 
+            double turn = gamepad1.left_stick_x;
+            double drive = -gamepad1.left_stick_y;
+            double strafe = gamepad1.right_stick_x;
 
 
             leftPower = drive + turn + strafe;
