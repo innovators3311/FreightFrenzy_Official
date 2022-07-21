@@ -12,7 +12,7 @@ public class DriveDirection {
 
     }
     public void rotate(double angle){
-        double rads = angle * Math.PI / 180.0 * angle;
+        double rads = -angle * Math.PI / 180.0;
         double od = this.drive;
         double os = this.strafe;
         this.drive  = Math.cos(rads) * od  +-Math.sin(rads) * os;

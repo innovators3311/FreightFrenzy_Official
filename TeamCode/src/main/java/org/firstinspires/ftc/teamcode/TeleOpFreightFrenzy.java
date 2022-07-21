@@ -172,9 +172,6 @@ public class TeleOpFreightFrenzy extends OpMode {
         // Publish Elbow values
         telemetry.addData("elbow Current angle:", arm.getElbowAngle());
         telemetry.addData("elbow angle target:", arm.getElbowTargetAngle());
-        telemetry.addData("blue",colorSensor2.blue());
-        telemetry.addData("green",colorSensor2.green());
-        telemetry.addData("red",colorSensor2.red());
         telemetry.addData("distance",distanceSensor.getDistance(DistanceUnit.CM));
         //if(distanceSensor.getDistance(DistanceUnit.CM) < 2){
        //     spinner.setPower(1);
@@ -214,26 +211,26 @@ public class TeleOpFreightFrenzy extends OpMode {
     }
 
     public void handleDriving() {
+        handleDriveControls();
+        handleDriveMotors();
+    }
 
-
+    public void handleDriveControls() {
         // Get the game pad control values for this loop iteration
-        drive = -gamepad1.left_stick_y- gamepad1.right_stick_y;
+        drive = -gamepad1.left_stick_y - gamepad1.right_stick_y;
         turn = gamepad1.right_stick_x;
         strafe = 0;
         if (gamepad1.dpad_left)
             strafe = -1;
-        else
-        if (gamepad1.dpad_right)
+        else if (gamepad1.dpad_right)
             strafe = 1;
-        else{
+        else {
             strafe = gamepad1.left_stick_x;
         }
-        speedFactor = 1.0 - (gamepad1.left_trigger*.5);
-//send power to wheels
-        DriveDirection dd = new DriveDirection(drive, strafe);
-        dd.rotate(driveAngleOffset);
+        speedFactor = 1.0 - (gamepad1.left_trigger * .5);
+    }
 
-
+    public void handleDriveMotors() {
         leftPowerFront = (dd.drive + turn + dd.strafe) * speedFactor;
         rightPowerFront = (dd.drive - turn - dd.strafe) * speedFactor;
         leftPowerBack = (dd.drive + turn - dd.strafe) * speedFactor;

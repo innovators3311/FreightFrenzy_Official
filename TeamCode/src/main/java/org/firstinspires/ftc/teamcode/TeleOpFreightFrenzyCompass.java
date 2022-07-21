@@ -200,13 +200,19 @@ public class TeleOpFreightFrenzyCompass extends TeleOpFreightFrenzy {
         this.handleArm();
         this.handleIntake();
         this.handleSpinner();
-        this.handleDriving();
         this.handleFixedPos();
         this.handleCompass();
+        this.handleDriveControls();
+        double od = this.drive;
+        double os = this.strafe;
+        double rads = driveAngleOffset * Math.PI / 180.0;
+        this.drive  = Math.cos(rads) * od  +-Math.sin(rads) * os;
+        this.strafe =  Math.sin(rads) * od + Math.cos(rads) * os ;
+        this.handleDriveMotors();
 
         // Show the elapsed game time and wheel power.
         telemetry.addData("Status", "Run Time: " + runtime.toString());
         compass.setMode(CompassSensor.CompassMode.MEASUREMENT_MODE);
         telemetry.addData("heading, me mateys", compass.getDirection());
     }
-}
+}`
