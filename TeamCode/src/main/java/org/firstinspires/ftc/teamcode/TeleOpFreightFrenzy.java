@@ -231,10 +231,10 @@ public class TeleOpFreightFrenzy extends OpMode {
     }
 
     public void handleDriveMotors() {
-        leftPowerFront = (dd.drive + turn + dd.strafe) * speedFactor;
-        rightPowerFront = (dd.drive - turn - dd.strafe) * speedFactor;
-        leftPowerBack = (dd.drive + turn - dd.strafe) * speedFactor;
-        rightPowerBack = (dd.drive - turn + dd.strafe) * speedFactor;
+        leftPowerFront = (drive + turn + strafe) * speedFactor;
+        rightPowerFront = (drive - turn - strafe) * speedFactor;
+        leftPowerBack = (drive + turn - strafe) * speedFactor;
+        rightPowerBack = (drive - turn +strafe) * speedFactor;
 
         leftDriveFront.setPower(leftPowerFront);
         rightDriveFront.setPower(rightPowerFront);

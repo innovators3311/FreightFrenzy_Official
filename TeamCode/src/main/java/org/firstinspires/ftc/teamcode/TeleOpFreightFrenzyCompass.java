@@ -50,7 +50,7 @@ public class TeleOpFreightFrenzyCompass extends TeleOpFreightFrenzy {
         super.init();
         this.arm.init(hardwareMap);
         compass = hardwareMap.get(CompassSensor.class,"compass");
-
+        compass.setMode(CompassSensor.CompassMode.MEASUREMENT_MODE);
     }
 
     @Override
@@ -112,10 +112,6 @@ public class TeleOpFreightFrenzyCompass extends TeleOpFreightFrenzy {
         telemetry.addData("elbow angle target:", arm.getElbowTargetAngle());
 //        telemetry.addData("is busy?", arm.isBusy());
         telemetry.addData("Arm Level", armLevel);
-        telemetry.addData("blue", colorSensor2.blue());
-        telemetry.addData("green", colorSensor2.green());
-        telemetry.addData("red", colorSensor2.red());
-        colorSensor2.enableLed(false);
 
         arm.shoulderPID.chillFactor = -0.75 * Math.max(gamepad2.left_trigger, gamepad2.right_trigger) + 1;
         arm.elbowPID.chillFactor = -0.9 * Math.max(gamepad2.left_trigger, gamepad2.right_trigger) + 1;
@@ -203,16 +199,22 @@ public class TeleOpFreightFrenzyCompass extends TeleOpFreightFrenzy {
         this.handleFixedPos();
         this.handleCompass();
         this.handleDriveControls();
+
         double od = this.drive;
         double os = this.strafe;
-        double rads = driveAngleOffset * Math.PI / 180.0;
-        this.drive  = Math.cos(rads) * od  +-Math.sin(rads) * os;
-        this.strafe =  Math.sin(rads) * od + Math.cos(rads) * os ;
+
+        double sin = Math.sin(driveAngleOffset * (Math.PI / 180.0));
+        double cos = Math.cos(driveAngleOffset * (Math.PI / 180.0));
+
+        this.drive  = cos * od  + sin * os;
+        this.strafe =  -sin * od + cos * os ;
+
         this.handleDriveMotors();
 
         // Show the elapsed game time and wheel power.
         telemetry.addData("Status", "Run Time: " + runtime.toString());
-        compass.setMode(CompassSensor.CompassMode.MEASUREMENT_MODE);
-        telemetry.addData("heading, me mateys", compass.getDirection());
+        telemetry.addData("sin", sin);
+        telemetry.addData("cos", cos);
+        telemetry.addData("heading, me mateys", driveAngleOffset);
     }
-}`
+}
