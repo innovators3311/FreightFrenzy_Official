@@ -6,7 +6,6 @@ import com.qualcomm.robotcore.hardware.CompassSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 
-import org.firstinspires.ftc.robotcontroller.external.samples.HardwarePushbot;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 @TeleOp(name = "TeleOpFreightFrenzyCompass", group = "3311")
@@ -16,14 +15,15 @@ public class TeleOpFreightFrenzyCompass extends TeleOpFreightFrenzy {
     protected boolean gamepadInput = false;
 
     // These values affect joystick sensitivity of the arm.
-    public double ELBOW_MANUAL_FACTOR = 3.0;
+    public double onward                 = 0;
+    public double ELBOW_MANUAL_FACTOR    = 3.0;
     public double SHOULDER_MANUAL_FACTOR = 3.0;
-    public boolean armLevelDebounceUp = false;
-    public boolean armLevelDebounceDown = false;
-    public double shoulderTargetDegrees = 0.0;
-    final static double     MOTOR_POWER   = 1;
-    static final long       HOLD_TIME_MS  = 3000;
-    static final double     CAL_TIME_SEC  = 20;
+    public boolean armLevelDebounceUp    = false;
+    public boolean armLevelDebounceDown  = false;
+    public double shoulderTargetDegrees  = 0.0;
+    final static double     MOTOR_POWER  = 1;
+    static final long       HOLD_TIME_MS = 3000;
+    static final double     CAL_TIME_SEC = 20;
     private CompassSensor compass = null;
     private ElapsedTime runtime = new ElapsedTime();
 
@@ -126,7 +126,11 @@ public class TeleOpFreightFrenzyCompass extends TeleOpFreightFrenzy {
         }
     }
     public void handleCompass() {
-            driveAngleOffset = compass.getDirection();
+            if(gamepad1.a && gamepad1.y){
+                onward = compass.getDirection();
+            }
+            driveAngleOffSet = compass.getDirection() - onward;
+
         }
 
 
@@ -203,8 +207,8 @@ public class TeleOpFreightFrenzyCompass extends TeleOpFreightFrenzy {
         double od = this.drive;
         double os = this.strafe;
 
-        double sin = Math.sin(driveAngleOffset * (Math.PI / 180.0));
-        double cos = Math.cos(driveAngleOffset * (Math.PI / 180.0));
+        double sin = Math.sin(driveAngleOffSet * (Math.PI / 180.0));
+        double cos = Math.cos(driveAngleOffSet * (Math.PI / 180.0));
 
         this.drive  = cos * od  + sin * os;
         this.strafe =  -sin * od + cos * os ;
@@ -215,6 +219,6 @@ public class TeleOpFreightFrenzyCompass extends TeleOpFreightFrenzy {
         telemetry.addData("Status", "Run Time: " + runtime.toString());
         telemetry.addData("sin", sin);
         telemetry.addData("cos", cos);
-        telemetry.addData("heading, me mateys", driveAngleOffset);
+        telemetry.addData("heading, me mateys", driveAngleOffSet);
     }
 }

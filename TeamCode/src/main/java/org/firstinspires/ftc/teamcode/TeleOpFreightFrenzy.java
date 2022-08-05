@@ -65,7 +65,7 @@ public class TeleOpFreightFrenzy extends OpMode {
     public ColorSensor colorSensor2      = null;
     public DistanceSensor distanceSensor = null;
     public double speedFactor            = 1.0;
-    public double driveAngleOffset       = 0.0;
+    public double driveAngleOffSet = 0.0;
     /* Setup a variable for each drive wheel to save power level for telemetry */
     public double leftPowerFront  = 1.0;
     public double rightPowerFront = 1.0;

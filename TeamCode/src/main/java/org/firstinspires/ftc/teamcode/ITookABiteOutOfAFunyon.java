@@ -187,10 +187,10 @@ public class ITookABiteOutOfAFunyon extends LinearOpMode {
             }
 
             // Send calculated power to wheels
-            leftDrive.setPower(leftPower);
-            rightDrive.setPower(rightPower);
-            leftDriveBack.setPower(leftBackPower);
-            rightDriveBack.setPower(rightBackPower);
+            leftDrive.setPower(.25 * leftPower);
+            rightDrive.setPower(.25 * rightPower);
+            leftDriveBack.setPower(.25 * leftBackPower);
+            rightDriveBack.setPower(.25 * rightBackPower);
 //            mainArm.setPower(armPower);
 //            secondaryArm.setPower(secondaryArmPower);
 
