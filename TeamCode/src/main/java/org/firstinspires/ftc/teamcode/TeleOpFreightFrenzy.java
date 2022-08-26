@@ -217,7 +217,7 @@ public class TeleOpFreightFrenzy extends OpMode {
 
     public void handleDriveControls() {
         // Get the game pad control values for this loop iteration
-        drive = -gamepad1.left_stick_y - gamepad1.right_stick_y;
+        drive = -gamepad1.left_stick_y - gamepad1.left_stick_y;
         turn = gamepad1.right_stick_x;
         strafe = 0;
         if (gamepad1.dpad_left)

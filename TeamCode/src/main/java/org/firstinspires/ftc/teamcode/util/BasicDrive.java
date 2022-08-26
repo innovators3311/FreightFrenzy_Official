@@ -11,7 +11,6 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 public class BasicDrive extends LinearOpMode
 
 {
-    private BNO055IMU imu;
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotor leftFront = null;
     private DcMotor leftBack = null;
@@ -25,14 +24,6 @@ public class BasicDrive extends LinearOpMode
         telemetry.addData("Status", "Initialized");
         telemetry.update();
 
-        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-        parameters.mode                = BNO055IMU.SensorMode.IMU;
-        parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
-        parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
-        imu = hardwareMap.get(BNO055IMU.class, "imu");
-        imu.initialize(parameters);
-
-        parameters.loggingEnabled      = false;
         leftFront = hardwareMap.get(DcMotor.class, "lf");
         leftBack = hardwareMap.get(DcMotor.class, "lb");
         rightFront = hardwareMap.get(DcMotor.class, "rf");
@@ -48,26 +39,13 @@ public class BasicDrive extends LinearOpMode
         rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        telemetry.addData("Mode", "calibrating...");
-        telemetry.update();
-
-        while (!isStopRequested() && !imu.isGyroCalibrated())
-        {
-            sleep(50);
-            idle();
-        }
-
-
-
-        waitForStart();
-        runtime.reset();
+//        waitForStart();
+//        runtime.reset();
 
         sleep(1000);
 
         while (opModeIsActive())
         {
-
-
 
             double leftPower;
             double rightPower;
@@ -101,9 +79,6 @@ public class BasicDrive extends LinearOpMode
             leftBack.setPower(leftBackPower);
             rightFront.setPower(rightPower);
             rightBack.setPower(rightBackPower);
-
-            telemetry.addData("pos", imu.getPosition());
-            telemetry.update();
         }
     }
 }

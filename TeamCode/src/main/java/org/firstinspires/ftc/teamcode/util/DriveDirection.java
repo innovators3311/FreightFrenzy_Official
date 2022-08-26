@@ -16,7 +16,7 @@ public class DriveDirection {
         double od = this.drive;
         double os = this.strafe;
         this.drive  = Math.cos(rads) * od  +-Math.sin(rads) * os;
-        this.strafe =  Math.sin(rads) * od + Math.cos(rads) * os ;
+        this.strafe =  Math.sin(rads) * od - Math.cos(rads) * os ;
     }
 }
 

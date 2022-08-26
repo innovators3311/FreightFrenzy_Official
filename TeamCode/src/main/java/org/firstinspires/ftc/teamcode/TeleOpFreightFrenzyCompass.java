@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CompassSensor;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 
@@ -50,7 +51,7 @@ public class TeleOpFreightFrenzyCompass extends TeleOpFreightFrenzy {
         super.init();
         this.arm.init(hardwareMap);
         compass = hardwareMap.get(CompassSensor.class,"compass");
-        compass.setMode(CompassSensor.CompassMode.MEASUREMENT_MODE);
+
     }
 
     @Override
