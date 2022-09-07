@@ -10,7 +10,7 @@ import com.qualcomm.robotcore.hardware.HardwareDevice;
 import com.qualcomm.robotcore.hardware.IntegratingGyroscope;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-@TeleOp(name="Compass Driving",group="73")
+@TeleOp(name="IMUDrive",group="73")
 public class IMUDrive extends OpMode {
 
 
@@ -30,6 +30,8 @@ public class IMUDrive extends OpMode {
     public double strafe                 = 0.0;
     public double driveAngleOffSet       = 0.0;
     public double speedFactor            = 1.0;
+    private CompassSensor compass        = null;
+
     private ElapsedTime runtime = new ElapsedTime();
 
 
@@ -41,6 +43,8 @@ public class IMUDrive extends OpMode {
     public void init() {
 
         gyro = hardwareMap.get(ModernRoboticsI2cGyro.class, "gyro");
+        compass = hardwareMap.get(CompassSensor.class,"compass");
+        compass.setMode(CompassSensor.CompassMode.MEASUREMENT_MODE);
         leftDriveFront = hardwareMap.get(DcMotor.class, "lf");
         rightDriveFront = hardwareMap.get(DcMotor.class, "rf");
         leftDriveBack = hardwareMap.get(DcMotor.class, "lb");
@@ -115,7 +119,7 @@ public class IMUDrive extends OpMode {
     // Code to run REPEATEDLY after the driver hits PLAY but before they hit STOP
     @Override
     public void loop() {
-
+        double compassDegrees        = compass.getDirection();
         this.handleCompass();
         this.handleDriveControls();
 
@@ -135,6 +139,8 @@ public class IMUDrive extends OpMode {
         telemetry.addData("sin", sin);
         telemetry.addData("cos", cos);
         telemetry.addData("heading, me mateys", driveAngleOffSet);
+        telemetry.addData("compass", compass.getDirection());
+        telemetry.addData("comparison C vs I", compassDegrees- driveAngleOffSet);
     }
 }
 
